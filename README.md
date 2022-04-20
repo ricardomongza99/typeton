@@ -1,5 +1,5 @@
 # 🦭 TYPETON
-An object oriented language developed by two undergrads at Tec de Monterrey.
+An object oriented language developed by two undergrads from Tec de Monterrey.
 
 ## ⭐️ FEATURES
 - Local and global variables
