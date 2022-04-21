@@ -1,0 +1,50 @@
+class Animal {
+    var name: String
+    var age: Int
+
+    func sleep() {
+        print("\(name) is sleeping")
+    }
+}
+
+class Dog: Animal {
+    var isBig: Bool
+
+    func bark() {
+        if (isBig) {
+            print("Wooff!")
+        } else {
+            print("wuf wuf")
+        }
+    }
+}
+
+class Cat: Animal {
+    
+    func meow() {
+        print("Meow")
+    }
+}
+
+ 
+func main() {
+    var dog1 = Dog("Harold", 12, True)
+    var dog2 = Dog("Pinky", 5, False)
+    var cat = Cat("Tom", 6)
+
+    var animals: [Animal] = [dog1, dog2, cat]
+
+    for animal in animals {
+        animal.sleep()
+    }
+    
+    var existed: String = ""
+    if (dog1.age < dog2.age) {
+        existed = "younger"
+    } else {
+        existed = "older"
+    }
+    
+    print("\(dog1.name) is \(existed) than \(dog2.name)")
+
+}
