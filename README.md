@@ -26,7 +26,7 @@ func main() {
 ```
 var myString: String = "Hello world!"
 var myNumber: Int = 5
-var myDog: Dog = Dog(name: "Hello", age: 32)
+var myDog: Dog = Dog("Draco", 8)
 ```
 
 **Implicit variables** (only for primitive types)
