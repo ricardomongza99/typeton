@@ -22,7 +22,7 @@ reserved = {
     'INPUT' : 'input',
     'RETURN': 'return'
 }
-tokens = (
+tokens = [
 # SYMBOLS
     'NLINE',
     'COLON',
@@ -57,7 +57,7 @@ tokens = (
     'NUMBER',
     'DECIMAL',
     'CHARS'
-)
+] + list(reserved.values())
 
 # Symbol rules
 t_NLINE     = r'\n'
