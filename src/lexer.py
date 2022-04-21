@@ -57,7 +57,7 @@ tokens = [
     'ID',
     'NUMBER',
     'DECIMAL',
-    'CHARS'
+    'STRINGLIT'
 ] + list(reserved.values())
 
 # Symbol rules
@@ -106,11 +106,10 @@ def t_DECIMAL(t):
     t.value = float(t.value)
     return t
 
-def t_CHARS(t):
-    # Every character except " and \
-    #r'[^"\]'
-    # TODO: FIX
-    r'aaa'
+def t_STRINGLIT(t):
+    # [^"] = Every character except "
+    r'\"[^"]*\"'
+    t.value = t.value[1:-1]     # remove quotes
     return t
 
 
@@ -123,8 +122,6 @@ def t_error(t):
     t.lexer.skip(1)
 
 lexer = lex()
-
-# TEST
 
 lexer.input(data)
 
