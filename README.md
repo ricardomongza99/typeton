@@ -3,45 +3,109 @@ An object oriented language developed by two undergrads from Tec de Monterrey.
 
 ## ⭐️ FEATURES
 - Local and global variables
-- Classes
-- Functions
-- Conditionals
-- Loops
-- Inheritance (one level)
-- Input / Output
-- String Interpolation
-- Arrays (with primitives)
 - Implicit types (detects primitives)
 - Shorthand assign operators (+=, -=, *=, /=)
+- String Interpolation
+- Arrays (with primitives)
+- Conditionals
+- Loops
+- Functions
+- Classes
+- Inheritance (one level)
+- Input/Output
+
+## 🚗 GETTING STARTED
+**Start**
+```
+func main() {
+    // Program starts here
+}
+```
+
+**Variables**
+```
+var myString: String = "Hello world!"
+var myNumber: Int = 5
+var myDog: Dog = Dog("Draco", 8)
+```
+
+**Implicit variables** (only for primitive types)
+```
+var myDecimal = 5.23
+```
+
+**Arrays**
+```
+var items: [Int] = [1, 2, 3, 4, 5]
+```
+
+**Conditionals**
+```
+if ( 4 + 1 < 5 && true) {
+    print("First")
+} else if (2 == 3) {
+    print("Second")
+} else {
+    print("Third")
+}
+```
+
+**Loops**
+```
+var counter = 4
+
+while (counter < 10) {
+    print(counter)
+    counter += 1
+}
+```
+
+
+**Functions** 
+func *name* (*param_name: type*, ...) -> *return type*
+```
+func sum(num1: Int, num2: Int) -> Int {
+    return num1 + num2
+}
+
+func main() {
+    var sum = sum(5, 2)
+}
+```
+
+**Classes**
+```
+class Animal {
+    // Declare properties
+    var name: String
+    var age: Int
+    
+    // Declare methods
+    func sleep() {
+        print("\(name) is sleeping")
+    }
+}
+```
+
+**Input**
+```
+var userAge: Int = input()
+```
+
+**Output**
+```
+print(userAge)
+```
+
+**String Interpolation**
+```
+print("You are \(userAge) years old!")
+```
 
 ## 📝 CODE EXAMPLES
-**Program 1**: Compare two numbers
-```
-func main() {
-    var number1 = 20
-    var number2 = 30
 
-    if (number1 < number2) {
-        print("Number 1 is less than number 2")
-    } else {
-        print("Number 2 is less than number 1")
-    }
-}
-```
 
-**Program 2**: While loop count from 4 to 10
-```
-func main() {
-    var counter = 4
-
-    while (counter < 10) {
-        print(counter)
-        counter += 1
-    }
-}
-```
-
-**Program 3**: Iterate over an array of integers
+**Program 1**: Iterate over an array of integers
 ```
 func main() {
     var items: [Int] = [1, 2, 3, 4, 5]
@@ -53,19 +117,8 @@ func main() {
     }
 }
 ```
-**Program 4**: Add function
-```
-func add(num1: Int, num2: Int) -> Int {
-    return num1 + num2
-}
 
-func main() {
-    var sum = add(2, 5)
-    print(sum)
-
-}
-```
-**Program 5**: Class inheritance
+**Program 2**: Class inheritance
 ```
 class Animal {
     var name: String
@@ -106,6 +159,24 @@ func main() {
     for animal in animals {
         animal.sleep()
     }
+    
+    var existed: String = ""
+    if (dog1.age < dog2.age) {
+        existed = "younger"
+    } else {
+        existed = "older"
+    }
+    
+    print("\(dog1.name) is \(existed) than \(dog2.name)")
+
 }
 ```
 
+## 🔍 SYNTAX DIAGRAM
+![Program](/syntax_diagram/program.png)
+![Top level](/syntax_diagram/top_level.png)
+![Params](/syntax_diagram/params.png)
+![Blocks](/syntax_diagram/blocks.png)
+![Statements](/syntax_diagram/statements.png)
+![Expressions](/syntax_diagram/expressions.png)
+![Variables](/syntax_diagram/variables.png)
