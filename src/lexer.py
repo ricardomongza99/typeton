@@ -6,22 +6,23 @@ with open('programs/' + FILENAME, 'r') as file:
     data = file.read()
 
 reserved = {
-    'CLASS' : 'class',
-    'FUNC'  : 'func',
-    'VAR'   : 'var',
-    'INT'   : 'Int',
-    'FLOAT' : 'Float',
-    'STRING': 'String',
-    'BOOL'  : 'Bool',
-    'TRUE'  : 'True',
-    'FALSE' : 'False',
-    'PRINT' : 'print',
-    'IF'    : 'if',
-    'ELSE'  : 'else',
-    'WHILE' : 'while',
-    'INPUT' : 'input',
-    'RETURN': 'return'
+    'class' : 'CLASS',
+    'func'  : 'FUNC',
+    'var'   : 'VAR',
+    'Int'   : 'INT',
+    'Float' : 'FLOAT',
+    'String': 'STRING',
+    'Bool'  : 'BOOL',
+    'True'  : 'TRUE',
+    'False' : 'FALSE',
+    'print' : 'PRINT',
+    'if'    : 'IF',
+    'else'  : 'ELSE',
+    'while' : 'WHILE',
+    'input' : 'INPUT',
+    'return': 'RETURN'
 }
+
 tokens = [
 # SYMBOLS
     'NLINE',
@@ -91,8 +92,8 @@ t_ASSIGN    = '='
 
 # Regex rules
 def t_ID(t):
-    r'[a-zA-Z0-9_]+'
-    t.type = reserved.get(t.value,'ID')     # Check for reserved words
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reserved.get(t.value, 'ID')     # Check for reserved words
     return t
 
 def t_NUMBER(t):
@@ -108,7 +109,7 @@ def t_DECIMAL(t):
 def t_CHARS(t):
     # Every character except " and \
     #r'[^"\]'
-    # TODO
+    # TODO: FIX
     r'aaa'
     return t
 
