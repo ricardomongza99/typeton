@@ -164,6 +164,32 @@ def p_right_id(p):
 
 #expressions --------------------------------------------------
 
+#statements --------------------------------------------------
+
+def p_statement(p):
+    ''' statement : display | if | while | for | input | call | return '''
+
+def p_while(p):
+    ''' while : WHILE LPAREN bool_expr RPAREN block'''
+
+def p_input(p):
+    ''' input : variable ASSIGN INPUT LPAREN string RPAREN '''
+
+def p_display(p):
+    ''' display : PRINT LPAREN expression RPAREN '''
+
+def p_return(p):
+    ''' return : RETURN | RETURN bool_expr | RETURN expression '''
+
+def p_assign(p):
+    ''' assign : ID some_op expression '''
+
+def p_some_op(p):
+    ''' some_op : ASSIGN | PASSIGN | LASSIGN | MASSIGN | DASSIGN'''
+
+#statements --------------------------------------------------
+
+
 
 
 parser = yacc.yacc(debug=True)
