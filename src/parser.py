@@ -7,21 +7,21 @@ from lexer import lexer, tokens
 
 #base block: allows statements
 def p_block(p):
-    ''' block : LCURLY repeat_block NLINE RCURLY'''
+    ''' block : LCURLY repeat_block RCURLY'''
 
 def p_repeat_block(p):
-    ''' repeat_block : block_content repeat_block'''
+    ''' repeat_block : block_content NLINE repeat_block'''
 
 def p_block_content(p):
-    '''block_content : statement | '''
+    ''' block_content : statement | '''
 
 #init block: allows statements and declarations
 
 def p_init_block(p):
-    ''' init_block : LCURLY repeat_init_block NLINE RCURLY'''
+    ''' init_block : LCURLY repeat_init_block RCURLY'''
 
 def p_repeat_init_block(p):
-    ''' repeat_init_block : init_block_content repeat_init_block'''
+    ''' repeat_init_block : init_block_content NLINE repeat_init_block'''
 
 def p_init_block_content(p):
     ''' init_block_content : statement | declaration | '''
@@ -29,10 +29,10 @@ def p_init_block_content(p):
 #class block: allows functions and declarations
 
 def p_class_block(p):
-    ''' class_block : LCURLY repeat_class_block NLINE RCURLY'''
+    ''' class_block : LCURLY repeat_class_block RCURLY'''
 
 def p_repeat_class_block(p):
-    ''' repeat_class_block : class_block_content repeat_class_block'''
+    ''' repeat_class_block : class_block_content NLINE repeat_class_block'''
 
 def p_class_block_content(p):
     ''' class_block_content : function | declaration | '''
@@ -55,6 +55,18 @@ def p_param(p):
 
 
 #params --------------------------------------------------
+
+
+def p_program(p):
+    ''' program : repeat_program '''
+
+def p_repeat_program(p):
+        ''' repeat_program : program_options NLINE repeat_program'''
+
+def p_program_options(p):
+    ''' program_options : class | function | declaration | '''
+
+
 
 
 parser = yacc.yacc(debug=True)
