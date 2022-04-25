@@ -41,4 +41,20 @@ def p_class_block_content(p):
 
 
 
+#params --------------------------------------------------
+
+
+def p_params(p):
+    ''' params : LPAREN params_content RPAREN '''
+
+def p_params_content(p):
+    ''' params_content : param | param COMMA params_content | '''
+
+def p_param(p):
+    ''' param : ID COLON type'''
+
+
+#params --------------------------------------------------
+
+
 parser = yacc.yacc(debug=True)
