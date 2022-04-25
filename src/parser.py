@@ -4,7 +4,6 @@ from lexer import lexer, tokens
 
 #blocks --------------------------------------------------
 
-
 #base block: allows statements
 def p_block(p):
     ''' block : LCURLY repeat_block RCURLY'''
@@ -94,5 +93,30 @@ def p_string_expr(p):
     ''' string_expr : string | BSLASH LPAREN expression RPAREN '''
 
 #variables --------------------------------------------------
+
+#top_level --------------------------------------------------
+
+def p_class(p):
+    ''' class : class ID class_content class_block'''
+
+def p_class_content(p):
+    ''' class_content : COLON ID | '''
+
+def p_function(p):
+    ''' function : func ID params function_content init_block'''
+
+def p_function_content(p):
+    ''' function_content : ARROW primitive | '''
+
+def p_declaration(p):
+    ''' declaration : variable ASSIGN expression | variable ASSIGN array '''
+
+def p_array(p):
+    ''' array : LBRACK repeat_array RBRACK'''
+
+def p_repeat_array(p):
+    ''' repeat_array : expression | expression COMMA repeat_array '''
+#top_level --------------------------------------------------
+
 
 parser = yacc.yacc(debug=True)
