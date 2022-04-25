@@ -118,5 +118,52 @@ def p_repeat_array(p):
     ''' repeat_array : expression | expression COMMA repeat_array '''
 #top_level --------------------------------------------------
 
+#expressions --------------------------------------------------
+
+def p_bool_exp(p):
+    ''' bool_exp : relational_exp
+        | relational_exp AND bool_exp
+        | relational_exp OR bool_exp '''
+
+def p_relational_exp(p):
+    ''' relational_exp : expression comp expression
+        | BOOLEAN'''
+
+def p_comp(p):
+    ''' comp : LESS | MORE | EQUALS | NEQUALS | LEQUALS | MEQUALS '''
+
+def p_expression(p):
+    ''' expression : term
+        | term PLUS expression
+        | term MINUS expression '''
+
+def p_term(p):
+    ''' term : factor
+        | factor TIMES term
+        | factor DIVIDE term '''
+
+def p_factor(p):
+    ''' factor : constant : LPAREN expression RPAREN '''
+
+def p_call_array(p):
+    ''' call_array : ID LBRACK expression RBRACK '''
+
+def p_constant(p):
+    ''' constant : dots | DECIMAL | BOOLEAN | NUMBER | string | call | call_array '''
+
+# we might need this kind of syntax for easier semantic eval
+def p_dots(p):
+    ''' dots : ID | repeat_dots'''
+
+def p_repeat_dots(p):
+    ''' repeat_dots : ID DOT right_id'''
+
+def p_right_id(p):
+    ''' right_id : ID | repeat_dots '''
+
+
+#expressions --------------------------------------------------
+
+
 
 parser = yacc.yacc(debug=True)
