@@ -1,0 +1,3167 @@
+Created by PLY (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> program
+Rule 1     program -> repeat_program
+Rule 2     repeat_program -> program_options NLINE repeat_program
+Rule 3     repeat_program -> <empty>
+Rule 4     program_options -> class
+Rule 5     program_options -> function
+Rule 6     program_options -> declaration
+Rule 7     program_options -> <empty>
+Rule 8     block -> LCURLY repeat_block RCURLY
+Rule 9     repeat_block -> statement NLINE repeat_block
+Rule 10    repeat_block -> statement NLINE
+Rule 11    repeat_block -> NLINE
+Rule 12    init_block -> LCURLY repeat_init_block RCURLY
+Rule 13    repeat_init_block -> init_block_content NLINE repeat_init_block
+Rule 14    repeat_init_block -> init_block_content NLINE
+Rule 15    repeat_init_block -> NLINE
+Rule 16    init_block_content -> statement
+Rule 17    init_block_content -> declaration
+Rule 18    class_block -> LCURLY repeat_class_block RCURLY
+Rule 19    repeat_class_block -> class_block_content NLINE repeat_class_block
+Rule 20    repeat_class_block -> class_block_content NLINE
+Rule 21    repeat_class_block -> NLINE
+Rule 22    class_block_content -> function
+Rule 23    class_block_content -> declaration
+Rule 24    params -> LPAREN params_content RPAREN
+Rule 25    params_content -> param
+Rule 26    params_content -> param COMMA params_content
+Rule 27    params_content -> <empty>
+Rule 28    param -> ID COLON type
+Rule 29    variable -> VAR ID variable_content
+Rule 30    variable_content -> COLON type
+Rule 31    variable_content -> <empty>
+Rule 32    type -> ID
+Rule 33    type -> primitive
+Rule 34    type -> LBRACK primitive RBRACK
+Rule 35    primitive -> INT
+Rule 36    primitive -> FLOAT
+Rule 37    primitive -> STRING
+Rule 38    primitive -> BOOL
+Rule 39    string -> QUOTE repeat_string QUOTE
+Rule 40    repeat_string -> string_expr
+Rule 41    repeat_string -> string_expr repeat_string
+Rule 42    string_expr -> STRINGLIT
+Rule 43    string_expr -> BSLASH LPAREN expression RPAREN
+Rule 44    class -> CLASS ID class_content class_block
+Rule 45    class_content -> COLON ID
+Rule 46    class_content -> <empty>
+Rule 47    function -> FUNC ID params function_content init_block
+Rule 48    function_content -> ARROW primitive
+Rule 49    function_content -> <empty>
+Rule 50    declaration -> variable ASSIGN expression
+Rule 51    declaration -> variable ASSIGN array
+Rule 52    array -> LBRACK repeat_array RBRACK
+Rule 53    repeat_array -> expression
+Rule 54    repeat_array -> expression COMMA repeat_array
+Rule 55    bool_expr -> relational_exp
+Rule 56    bool_expr -> relational_exp AND bool_expr
+Rule 57    bool_expr -> relational_exp OR bool_expr
+Rule 58    relational_exp -> expression comp expression
+Rule 59    relational_exp -> TRUE
+Rule 60    relational_exp -> FALSE
+Rule 61    comp -> LESS
+Rule 62    comp -> MORE
+Rule 63    comp -> EQUALS
+Rule 64    comp -> NEQUALS
+Rule 65    comp -> LEQUALS
+Rule 66    comp -> MEQUALS
+Rule 67    expression -> term
+Rule 68    expression -> term PLUS term
+Rule 69    expression -> term MINUS term
+Rule 70    term -> factor
+Rule 71    term -> factor DIVIDE factor
+Rule 72    term -> factor TIMES factor
+Rule 73    factor -> constant
+Rule 74    factor -> COLON LPAREN expression RPAREN
+Rule 75    call_array -> ID LBRACK expression RBRACK
+Rule 76    constant -> dots
+Rule 77    constant -> DECIMAL
+Rule 78    constant -> BOOL
+Rule 79    constant -> NUMBER
+Rule 80    constant -> string
+Rule 81    constant -> call
+Rule 82    constant -> call_array
+Rule 83    dots -> ID
+Rule 84    dots -> repeat_dots
+Rule 85    repeat_dots -> ID DOT right_id
+Rule 86    right_id -> ID
+Rule 87    right_id -> repeat_dots
+Rule 88    statement -> display
+Rule 89    statement -> if
+Rule 90    statement -> while
+Rule 91    statement -> input
+Rule 92    statement -> assign
+Rule 93    statement -> call
+Rule 94    statement -> return
+Rule 95    while -> WHILE LPAREN bool_expr RPAREN block
+Rule 96    input -> variable ASSIGN INPUT LPAREN string RPAREN
+Rule 97    display -> PRINT LPAREN expression RPAREN
+Rule 98    return -> RETURN
+Rule 99    return -> RETURN bool_expr
+Rule 100   return -> RETURN expression
+Rule 101   assign -> ID some_op expression
+Rule 102   some_op -> ASSIGN
+Rule 103   some_op -> PASSIGN
+Rule 104   some_op -> LASSIGN
+Rule 105   some_op -> MASSIGN
+Rule 106   some_op -> DASSIGN
+Rule 107   call -> ID LPAREN repeat_call RPAREN
+Rule 108   repeat_call -> expression
+Rule 109   repeat_call -> expression COMMA repeat_call
+Rule 110   repeat_call -> <empty>
+Rule 111   if -> IF LPAREN bool_expr RPAREN block if_content
+Rule 112   if_content -> ELSE IF
+Rule 113   if_content -> ELSE block
+Rule 114   if_content -> <empty>
+
+Terminals, with rules where they appear
+
+AND                  : 56
+ARROW                : 48
+ASSIGN               : 50 51 96 102
+BOOL                 : 38 78
+BSLASH               : 43
+CLASS                : 44
+COLON                : 28 30 45 74
+COMMA                : 26 54 109
+DASSIGN              : 106
+DECIMAL              : 77
+DIVIDE               : 71
+DOT                  : 85
+ELSE                 : 112 113
+EQUALS               : 63
+FALSE                : 60
+FLOAT                : 36
+FUNC                 : 47
+ID                   : 28 29 32 44 45 47 75 83 85 86 101 107
+IF                   : 111 112
+INPUT                : 96
+INT                  : 35
+LASSIGN              : 104
+LBRACK               : 34 52 75
+LCURLY               : 8 12 18
+LEQUALS              : 65
+LESS                 : 61
+LPAREN               : 24 43 74 95 96 97 107 111
+MASSIGN              : 105
+MEQUALS              : 66
+MINUS                : 69
+MORE                 : 62
+NEQUALS              : 64
+NLINE                : 2 9 10 11 13 14 15 19 20 21
+NUMBER               : 79
+OR                   : 57
+PASSIGN              : 103
+PLUS                 : 68
+PRINT                : 97
+QUOTE                : 39 39
+RBRACK               : 34 52 75
+RCURLY               : 8 12 18
+RETURN               : 98 99 100
+RPAREN               : 24 43 74 95 96 97 107 111
+STRING               : 37
+STRINGLIT            : 42
+TIMES                : 72
+TRUE                 : 59
+VAR                  : 29
+WHILE                : 95
+error                : 
+
+Nonterminals, with rules where they appear
+
+array                : 51
+assign               : 92
+block                : 95 111 113
+bool_expr            : 56 57 95 99 111
+call                 : 81 93
+call_array           : 82
+class                : 4
+class_block          : 44
+class_block_content  : 19 20
+class_content        : 44
+comp                 : 58
+constant             : 73
+declaration          : 6 17 23
+display              : 88
+dots                 : 76
+expression           : 43 50 53 54 58 58 74 75 97 100 101 108 109
+factor               : 70 71 71 72 72
+function             : 5 22
+function_content     : 47
+if                   : 89
+if_content           : 111
+init_block           : 47
+init_block_content   : 13 14
+input                : 91
+param                : 25 26
+params               : 47
+params_content       : 24 26
+primitive            : 33 34 48
+program              : 0
+program_options      : 2
+relational_exp       : 55 56 57
+repeat_array         : 52 54
+repeat_block         : 8 9
+repeat_call          : 107 109
+repeat_class_block   : 18 19
+repeat_dots          : 84 87
+repeat_init_block    : 12 13
+repeat_program       : 1 2
+repeat_string        : 39 41
+return               : 94
+right_id             : 85
+some_op              : 101
+statement            : 9 10 16
+string               : 80 96
+string_expr          : 40 41
+term                 : 67 68 68 69 69
+type                 : 28 30
+variable             : 50 51 96
+variable_content     : 29
+while                : 90
+
+
+state 0
+
+    (0) S' -> . program
+    (1) program -> . repeat_program
+    (2) repeat_program -> . program_options NLINE repeat_program
+    (3) repeat_program -> .
+    (4) program_options -> . class
+    (5) program_options -> . function
+    (6) program_options -> . declaration
+    (7) program_options -> .
+    (44) class -> . CLASS ID class_content class_block
+    (47) function -> . FUNC ID params function_content init_block
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (29) variable -> . VAR ID variable_content
+
+    $end            reduce using rule 3 (repeat_program -> .)
+    NLINE           reduce using rule 7 (program_options -> .)
+    CLASS           shift and go to state 7
+    FUNC            shift and go to state 8
+    VAR             shift and go to state 10
+
+    program                        shift and go to state 1
+    repeat_program                 shift and go to state 2
+    program_options                shift and go to state 3
+    class                          shift and go to state 4
+    function                       shift and go to state 5
+    declaration                    shift and go to state 6
+    variable                       shift and go to state 9
+
+state 1
+
+    (0) S' -> program .
+
+
+
+state 2
+
+    (1) program -> repeat_program .
+
+    $end            reduce using rule 1 (program -> repeat_program .)
+
+
+state 3
+
+    (2) repeat_program -> program_options . NLINE repeat_program
+
+    NLINE           shift and go to state 11
+
+
+state 4
+
+    (4) program_options -> class .
+
+    NLINE           reduce using rule 4 (program_options -> class .)
+
+
+state 5
+
+    (5) program_options -> function .
+
+    NLINE           reduce using rule 5 (program_options -> function .)
+
+
+state 6
+
+    (6) program_options -> declaration .
+
+    NLINE           reduce using rule 6 (program_options -> declaration .)
+
+
+state 7
+
+    (44) class -> CLASS . ID class_content class_block
+
+    ID              shift and go to state 12
+
+
+state 8
+
+    (47) function -> FUNC . ID params function_content init_block
+
+    ID              shift and go to state 13
+
+
+state 9
+
+    (50) declaration -> variable . ASSIGN expression
+    (51) declaration -> variable . ASSIGN array
+
+    ASSIGN          shift and go to state 14
+
+
+state 10
+
+    (29) variable -> VAR . ID variable_content
+
+    ID              shift and go to state 15
+
+
+state 11
+
+    (2) repeat_program -> program_options NLINE . repeat_program
+    (2) repeat_program -> . program_options NLINE repeat_program
+    (3) repeat_program -> .
+    (4) program_options -> . class
+    (5) program_options -> . function
+    (6) program_options -> . declaration
+    (7) program_options -> .
+    (44) class -> . CLASS ID class_content class_block
+    (47) function -> . FUNC ID params function_content init_block
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (29) variable -> . VAR ID variable_content
+
+    $end            reduce using rule 3 (repeat_program -> .)
+    NLINE           reduce using rule 7 (program_options -> .)
+    CLASS           shift and go to state 7
+    FUNC            shift and go to state 8
+    VAR             shift and go to state 10
+
+    program_options                shift and go to state 3
+    repeat_program                 shift and go to state 16
+    class                          shift and go to state 4
+    function                       shift and go to state 5
+    declaration                    shift and go to state 6
+    variable                       shift and go to state 9
+
+state 12
+
+    (44) class -> CLASS ID . class_content class_block
+    (45) class_content -> . COLON ID
+    (46) class_content -> .
+
+    COLON           shift and go to state 18
+    LCURLY          reduce using rule 46 (class_content -> .)
+
+    class_content                  shift and go to state 17
+
+state 13
+
+    (47) function -> FUNC ID . params function_content init_block
+    (24) params -> . LPAREN params_content RPAREN
+
+    LPAREN          shift and go to state 20
+
+    params                         shift and go to state 19
+
+state 14
+
+    (50) declaration -> variable ASSIGN . expression
+    (51) declaration -> variable ASSIGN . array
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (52) array -> . LBRACK repeat_array RBRACK
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    LBRACK          shift and go to state 24
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 21
+    array                          shift and go to state 22
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 15
+
+    (29) variable -> VAR ID . variable_content
+    (30) variable_content -> . COLON type
+    (31) variable_content -> .
+
+    COLON           shift and go to state 39
+    ASSIGN          reduce using rule 31 (variable_content -> .)
+
+    variable_content               shift and go to state 38
+
+state 16
+
+    (2) repeat_program -> program_options NLINE repeat_program .
+
+    $end            reduce using rule 2 (repeat_program -> program_options NLINE repeat_program .)
+
+
+state 17
+
+    (44) class -> CLASS ID class_content . class_block
+    (18) class_block -> . LCURLY repeat_class_block RCURLY
+
+    LCURLY          shift and go to state 41
+
+    class_block                    shift and go to state 40
+
+state 18
+
+    (45) class_content -> COLON . ID
+
+    ID              shift and go to state 42
+
+
+state 19
+
+    (47) function -> FUNC ID params . function_content init_block
+    (48) function_content -> . ARROW primitive
+    (49) function_content -> .
+
+    ARROW           shift and go to state 44
+    LCURLY          reduce using rule 49 (function_content -> .)
+
+    function_content               shift and go to state 43
+
+state 20
+
+    (24) params -> LPAREN . params_content RPAREN
+    (25) params_content -> . param
+    (26) params_content -> . param COMMA params_content
+    (27) params_content -> .
+    (28) param -> . ID COLON type
+
+    RPAREN          reduce using rule 27 (params_content -> .)
+    ID              shift and go to state 47
+
+    params_content                 shift and go to state 45
+    param                          shift and go to state 46
+
+state 21
+
+    (50) declaration -> variable ASSIGN expression .
+
+    NLINE           reduce using rule 50 (declaration -> variable ASSIGN expression .)
+
+
+state 22
+
+    (51) declaration -> variable ASSIGN array .
+
+    NLINE           reduce using rule 51 (declaration -> variable ASSIGN array .)
+
+
+state 23
+
+    (67) expression -> term .
+    (68) expression -> term . PLUS term
+    (69) expression -> term . MINUS term
+
+    NLINE           reduce using rule 67 (expression -> term .)
+    COMMA           reduce using rule 67 (expression -> term .)
+    RBRACK          reduce using rule 67 (expression -> term .)
+    RPAREN          reduce using rule 67 (expression -> term .)
+    LESS            reduce using rule 67 (expression -> term .)
+    MORE            reduce using rule 67 (expression -> term .)
+    EQUALS          reduce using rule 67 (expression -> term .)
+    NEQUALS         reduce using rule 67 (expression -> term .)
+    LEQUALS         reduce using rule 67 (expression -> term .)
+    MEQUALS         reduce using rule 67 (expression -> term .)
+    AND             reduce using rule 67 (expression -> term .)
+    OR              reduce using rule 67 (expression -> term .)
+    PLUS            shift and go to state 48
+    MINUS           shift and go to state 49
+
+
+state 24
+
+    (52) array -> LBRACK . repeat_array RBRACK
+    (53) repeat_array -> . expression
+    (54) repeat_array -> . expression COMMA repeat_array
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    repeat_array                   shift and go to state 50
+    expression                     shift and go to state 51
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 25
+
+    (70) term -> factor .
+    (71) term -> factor . DIVIDE factor
+    (72) term -> factor . TIMES factor
+
+    PLUS            reduce using rule 70 (term -> factor .)
+    MINUS           reduce using rule 70 (term -> factor .)
+    NLINE           reduce using rule 70 (term -> factor .)
+    COMMA           reduce using rule 70 (term -> factor .)
+    RBRACK          reduce using rule 70 (term -> factor .)
+    RPAREN          reduce using rule 70 (term -> factor .)
+    LESS            reduce using rule 70 (term -> factor .)
+    MORE            reduce using rule 70 (term -> factor .)
+    EQUALS          reduce using rule 70 (term -> factor .)
+    NEQUALS         reduce using rule 70 (term -> factor .)
+    LEQUALS         reduce using rule 70 (term -> factor .)
+    MEQUALS         reduce using rule 70 (term -> factor .)
+    AND             reduce using rule 70 (term -> factor .)
+    OR              reduce using rule 70 (term -> factor .)
+    DIVIDE          shift and go to state 52
+    TIMES           shift and go to state 53
+
+
+state 26
+
+    (73) factor -> constant .
+
+    DIVIDE          reduce using rule 73 (factor -> constant .)
+    TIMES           reduce using rule 73 (factor -> constant .)
+    PLUS            reduce using rule 73 (factor -> constant .)
+    MINUS           reduce using rule 73 (factor -> constant .)
+    NLINE           reduce using rule 73 (factor -> constant .)
+    COMMA           reduce using rule 73 (factor -> constant .)
+    RBRACK          reduce using rule 73 (factor -> constant .)
+    RPAREN          reduce using rule 73 (factor -> constant .)
+    LESS            reduce using rule 73 (factor -> constant .)
+    MORE            reduce using rule 73 (factor -> constant .)
+    EQUALS          reduce using rule 73 (factor -> constant .)
+    NEQUALS         reduce using rule 73 (factor -> constant .)
+    LEQUALS         reduce using rule 73 (factor -> constant .)
+    MEQUALS         reduce using rule 73 (factor -> constant .)
+    AND             reduce using rule 73 (factor -> constant .)
+    OR              reduce using rule 73 (factor -> constant .)
+
+
+state 27
+
+    (74) factor -> COLON . LPAREN expression RPAREN
+
+    LPAREN          shift and go to state 54
+
+
+state 28
+
+    (76) constant -> dots .
+
+    DIVIDE          reduce using rule 76 (constant -> dots .)
+    TIMES           reduce using rule 76 (constant -> dots .)
+    PLUS            reduce using rule 76 (constant -> dots .)
+    MINUS           reduce using rule 76 (constant -> dots .)
+    NLINE           reduce using rule 76 (constant -> dots .)
+    COMMA           reduce using rule 76 (constant -> dots .)
+    RBRACK          reduce using rule 76 (constant -> dots .)
+    RPAREN          reduce using rule 76 (constant -> dots .)
+    LESS            reduce using rule 76 (constant -> dots .)
+    MORE            reduce using rule 76 (constant -> dots .)
+    EQUALS          reduce using rule 76 (constant -> dots .)
+    NEQUALS         reduce using rule 76 (constant -> dots .)
+    LEQUALS         reduce using rule 76 (constant -> dots .)
+    MEQUALS         reduce using rule 76 (constant -> dots .)
+    AND             reduce using rule 76 (constant -> dots .)
+    OR              reduce using rule 76 (constant -> dots .)
+
+
+state 29
+
+    (77) constant -> DECIMAL .
+
+    DIVIDE          reduce using rule 77 (constant -> DECIMAL .)
+    TIMES           reduce using rule 77 (constant -> DECIMAL .)
+    PLUS            reduce using rule 77 (constant -> DECIMAL .)
+    MINUS           reduce using rule 77 (constant -> DECIMAL .)
+    NLINE           reduce using rule 77 (constant -> DECIMAL .)
+    COMMA           reduce using rule 77 (constant -> DECIMAL .)
+    RBRACK          reduce using rule 77 (constant -> DECIMAL .)
+    RPAREN          reduce using rule 77 (constant -> DECIMAL .)
+    LESS            reduce using rule 77 (constant -> DECIMAL .)
+    MORE            reduce using rule 77 (constant -> DECIMAL .)
+    EQUALS          reduce using rule 77 (constant -> DECIMAL .)
+    NEQUALS         reduce using rule 77 (constant -> DECIMAL .)
+    LEQUALS         reduce using rule 77 (constant -> DECIMAL .)
+    MEQUALS         reduce using rule 77 (constant -> DECIMAL .)
+    AND             reduce using rule 77 (constant -> DECIMAL .)
+    OR              reduce using rule 77 (constant -> DECIMAL .)
+
+
+state 30
+
+    (78) constant -> BOOL .
+
+    DIVIDE          reduce using rule 78 (constant -> BOOL .)
+    TIMES           reduce using rule 78 (constant -> BOOL .)
+    PLUS            reduce using rule 78 (constant -> BOOL .)
+    MINUS           reduce using rule 78 (constant -> BOOL .)
+    NLINE           reduce using rule 78 (constant -> BOOL .)
+    COMMA           reduce using rule 78 (constant -> BOOL .)
+    RBRACK          reduce using rule 78 (constant -> BOOL .)
+    RPAREN          reduce using rule 78 (constant -> BOOL .)
+    LESS            reduce using rule 78 (constant -> BOOL .)
+    MORE            reduce using rule 78 (constant -> BOOL .)
+    EQUALS          reduce using rule 78 (constant -> BOOL .)
+    NEQUALS         reduce using rule 78 (constant -> BOOL .)
+    LEQUALS         reduce using rule 78 (constant -> BOOL .)
+    MEQUALS         reduce using rule 78 (constant -> BOOL .)
+    AND             reduce using rule 78 (constant -> BOOL .)
+    OR              reduce using rule 78 (constant -> BOOL .)
+
+
+state 31
+
+    (79) constant -> NUMBER .
+
+    DIVIDE          reduce using rule 79 (constant -> NUMBER .)
+    TIMES           reduce using rule 79 (constant -> NUMBER .)
+    PLUS            reduce using rule 79 (constant -> NUMBER .)
+    MINUS           reduce using rule 79 (constant -> NUMBER .)
+    NLINE           reduce using rule 79 (constant -> NUMBER .)
+    COMMA           reduce using rule 79 (constant -> NUMBER .)
+    RBRACK          reduce using rule 79 (constant -> NUMBER .)
+    RPAREN          reduce using rule 79 (constant -> NUMBER .)
+    LESS            reduce using rule 79 (constant -> NUMBER .)
+    MORE            reduce using rule 79 (constant -> NUMBER .)
+    EQUALS          reduce using rule 79 (constant -> NUMBER .)
+    NEQUALS         reduce using rule 79 (constant -> NUMBER .)
+    LEQUALS         reduce using rule 79 (constant -> NUMBER .)
+    MEQUALS         reduce using rule 79 (constant -> NUMBER .)
+    AND             reduce using rule 79 (constant -> NUMBER .)
+    OR              reduce using rule 79 (constant -> NUMBER .)
+
+
+state 32
+
+    (80) constant -> string .
+
+    DIVIDE          reduce using rule 80 (constant -> string .)
+    TIMES           reduce using rule 80 (constant -> string .)
+    PLUS            reduce using rule 80 (constant -> string .)
+    MINUS           reduce using rule 80 (constant -> string .)
+    NLINE           reduce using rule 80 (constant -> string .)
+    COMMA           reduce using rule 80 (constant -> string .)
+    RBRACK          reduce using rule 80 (constant -> string .)
+    RPAREN          reduce using rule 80 (constant -> string .)
+    LESS            reduce using rule 80 (constant -> string .)
+    MORE            reduce using rule 80 (constant -> string .)
+    EQUALS          reduce using rule 80 (constant -> string .)
+    NEQUALS         reduce using rule 80 (constant -> string .)
+    LEQUALS         reduce using rule 80 (constant -> string .)
+    MEQUALS         reduce using rule 80 (constant -> string .)
+    AND             reduce using rule 80 (constant -> string .)
+    OR              reduce using rule 80 (constant -> string .)
+
+
+state 33
+
+    (81) constant -> call .
+
+    DIVIDE          reduce using rule 81 (constant -> call .)
+    TIMES           reduce using rule 81 (constant -> call .)
+    PLUS            reduce using rule 81 (constant -> call .)
+    MINUS           reduce using rule 81 (constant -> call .)
+    NLINE           reduce using rule 81 (constant -> call .)
+    COMMA           reduce using rule 81 (constant -> call .)
+    RBRACK          reduce using rule 81 (constant -> call .)
+    RPAREN          reduce using rule 81 (constant -> call .)
+    LESS            reduce using rule 81 (constant -> call .)
+    MORE            reduce using rule 81 (constant -> call .)
+    EQUALS          reduce using rule 81 (constant -> call .)
+    NEQUALS         reduce using rule 81 (constant -> call .)
+    LEQUALS         reduce using rule 81 (constant -> call .)
+    MEQUALS         reduce using rule 81 (constant -> call .)
+    AND             reduce using rule 81 (constant -> call .)
+    OR              reduce using rule 81 (constant -> call .)
+
+
+state 34
+
+    (82) constant -> call_array .
+
+    DIVIDE          reduce using rule 82 (constant -> call_array .)
+    TIMES           reduce using rule 82 (constant -> call_array .)
+    PLUS            reduce using rule 82 (constant -> call_array .)
+    MINUS           reduce using rule 82 (constant -> call_array .)
+    NLINE           reduce using rule 82 (constant -> call_array .)
+    COMMA           reduce using rule 82 (constant -> call_array .)
+    RBRACK          reduce using rule 82 (constant -> call_array .)
+    RPAREN          reduce using rule 82 (constant -> call_array .)
+    LESS            reduce using rule 82 (constant -> call_array .)
+    MORE            reduce using rule 82 (constant -> call_array .)
+    EQUALS          reduce using rule 82 (constant -> call_array .)
+    NEQUALS         reduce using rule 82 (constant -> call_array .)
+    LEQUALS         reduce using rule 82 (constant -> call_array .)
+    MEQUALS         reduce using rule 82 (constant -> call_array .)
+    AND             reduce using rule 82 (constant -> call_array .)
+    OR              reduce using rule 82 (constant -> call_array .)
+
+
+state 35
+
+    (83) dots -> ID .
+    (107) call -> ID . LPAREN repeat_call RPAREN
+    (75) call_array -> ID . LBRACK expression RBRACK
+    (85) repeat_dots -> ID . DOT right_id
+
+    DIVIDE          reduce using rule 83 (dots -> ID .)
+    TIMES           reduce using rule 83 (dots -> ID .)
+    PLUS            reduce using rule 83 (dots -> ID .)
+    MINUS           reduce using rule 83 (dots -> ID .)
+    NLINE           reduce using rule 83 (dots -> ID .)
+    COMMA           reduce using rule 83 (dots -> ID .)
+    RBRACK          reduce using rule 83 (dots -> ID .)
+    RPAREN          reduce using rule 83 (dots -> ID .)
+    LESS            reduce using rule 83 (dots -> ID .)
+    MORE            reduce using rule 83 (dots -> ID .)
+    EQUALS          reduce using rule 83 (dots -> ID .)
+    NEQUALS         reduce using rule 83 (dots -> ID .)
+    LEQUALS         reduce using rule 83 (dots -> ID .)
+    MEQUALS         reduce using rule 83 (dots -> ID .)
+    AND             reduce using rule 83 (dots -> ID .)
+    OR              reduce using rule 83 (dots -> ID .)
+    LPAREN          shift and go to state 55
+    LBRACK          shift and go to state 56
+    DOT             shift and go to state 57
+
+
+state 36
+
+    (84) dots -> repeat_dots .
+
+    DIVIDE          reduce using rule 84 (dots -> repeat_dots .)
+    TIMES           reduce using rule 84 (dots -> repeat_dots .)
+    PLUS            reduce using rule 84 (dots -> repeat_dots .)
+    MINUS           reduce using rule 84 (dots -> repeat_dots .)
+    NLINE           reduce using rule 84 (dots -> repeat_dots .)
+    COMMA           reduce using rule 84 (dots -> repeat_dots .)
+    RBRACK          reduce using rule 84 (dots -> repeat_dots .)
+    RPAREN          reduce using rule 84 (dots -> repeat_dots .)
+    LESS            reduce using rule 84 (dots -> repeat_dots .)
+    MORE            reduce using rule 84 (dots -> repeat_dots .)
+    EQUALS          reduce using rule 84 (dots -> repeat_dots .)
+    NEQUALS         reduce using rule 84 (dots -> repeat_dots .)
+    LEQUALS         reduce using rule 84 (dots -> repeat_dots .)
+    MEQUALS         reduce using rule 84 (dots -> repeat_dots .)
+    AND             reduce using rule 84 (dots -> repeat_dots .)
+    OR              reduce using rule 84 (dots -> repeat_dots .)
+
+
+state 37
+
+    (39) string -> QUOTE . repeat_string QUOTE
+    (40) repeat_string -> . string_expr
+    (41) repeat_string -> . string_expr repeat_string
+    (42) string_expr -> . STRINGLIT
+    (43) string_expr -> . BSLASH LPAREN expression RPAREN
+
+    STRINGLIT       shift and go to state 60
+    BSLASH          shift and go to state 61
+
+    repeat_string                  shift and go to state 58
+    string_expr                    shift and go to state 59
+
+state 38
+
+    (29) variable -> VAR ID variable_content .
+
+    ASSIGN          reduce using rule 29 (variable -> VAR ID variable_content .)
+
+
+state 39
+
+    (30) variable_content -> COLON . type
+    (32) type -> . ID
+    (33) type -> . primitive
+    (34) type -> . LBRACK primitive RBRACK
+    (35) primitive -> . INT
+    (36) primitive -> . FLOAT
+    (37) primitive -> . STRING
+    (38) primitive -> . BOOL
+
+    ID              shift and go to state 63
+    LBRACK          shift and go to state 65
+    INT             shift and go to state 66
+    FLOAT           shift and go to state 67
+    STRING          shift and go to state 68
+    BOOL            shift and go to state 69
+
+    type                           shift and go to state 62
+    primitive                      shift and go to state 64
+
+state 40
+
+    (44) class -> CLASS ID class_content class_block .
+
+    NLINE           reduce using rule 44 (class -> CLASS ID class_content class_block .)
+
+
+state 41
+
+    (18) class_block -> LCURLY . repeat_class_block RCURLY
+    (19) repeat_class_block -> . class_block_content NLINE repeat_class_block
+    (20) repeat_class_block -> . class_block_content NLINE
+    (21) repeat_class_block -> . NLINE
+    (22) class_block_content -> . function
+    (23) class_block_content -> . declaration
+    (47) function -> . FUNC ID params function_content init_block
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (29) variable -> . VAR ID variable_content
+
+    NLINE           shift and go to state 72
+    FUNC            shift and go to state 8
+    VAR             shift and go to state 10
+
+    repeat_class_block             shift and go to state 70
+    class_block_content            shift and go to state 71
+    function                       shift and go to state 73
+    declaration                    shift and go to state 74
+    variable                       shift and go to state 9
+
+state 42
+
+    (45) class_content -> COLON ID .
+
+    LCURLY          reduce using rule 45 (class_content -> COLON ID .)
+
+
+state 43
+
+    (47) function -> FUNC ID params function_content . init_block
+    (12) init_block -> . LCURLY repeat_init_block RCURLY
+
+    LCURLY          shift and go to state 76
+
+    init_block                     shift and go to state 75
+
+state 44
+
+    (48) function_content -> ARROW . primitive
+    (35) primitive -> . INT
+    (36) primitive -> . FLOAT
+    (37) primitive -> . STRING
+    (38) primitive -> . BOOL
+
+    INT             shift and go to state 66
+    FLOAT           shift and go to state 67
+    STRING          shift and go to state 68
+    BOOL            shift and go to state 69
+
+    primitive                      shift and go to state 77
+
+state 45
+
+    (24) params -> LPAREN params_content . RPAREN
+
+    RPAREN          shift and go to state 78
+
+
+state 46
+
+    (25) params_content -> param .
+    (26) params_content -> param . COMMA params_content
+
+    RPAREN          reduce using rule 25 (params_content -> param .)
+    COMMA           shift and go to state 79
+
+
+state 47
+
+    (28) param -> ID . COLON type
+
+    COLON           shift and go to state 80
+
+
+state 48
+
+    (68) expression -> term PLUS . term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    term                           shift and go to state 81
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 49
+
+    (69) expression -> term MINUS . term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    term                           shift and go to state 82
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 50
+
+    (52) array -> LBRACK repeat_array . RBRACK
+
+    RBRACK          shift and go to state 83
+
+
+state 51
+
+    (53) repeat_array -> expression .
+    (54) repeat_array -> expression . COMMA repeat_array
+
+    RBRACK          reduce using rule 53 (repeat_array -> expression .)
+    COMMA           shift and go to state 84
+
+
+state 52
+
+    (71) term -> factor DIVIDE . factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    factor                         shift and go to state 85
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 53
+
+    (72) term -> factor TIMES . factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    factor                         shift and go to state 86
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 54
+
+    (74) factor -> COLON LPAREN . expression RPAREN
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 87
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 55
+
+    (107) call -> ID LPAREN . repeat_call RPAREN
+    (108) repeat_call -> . expression
+    (109) repeat_call -> . expression COMMA repeat_call
+    (110) repeat_call -> .
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    RPAREN          reduce using rule 110 (repeat_call -> .)
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    repeat_call                    shift and go to state 88
+    expression                     shift and go to state 89
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 56
+
+    (75) call_array -> ID LBRACK . expression RBRACK
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 90
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 57
+
+    (85) repeat_dots -> ID DOT . right_id
+    (86) right_id -> . ID
+    (87) right_id -> . repeat_dots
+    (85) repeat_dots -> . ID DOT right_id
+
+    ID              shift and go to state 91
+
+    right_id                       shift and go to state 92
+    repeat_dots                    shift and go to state 93
+
+state 58
+
+    (39) string -> QUOTE repeat_string . QUOTE
+
+    QUOTE           shift and go to state 94
+
+
+state 59
+
+    (40) repeat_string -> string_expr .
+    (41) repeat_string -> string_expr . repeat_string
+    (40) repeat_string -> . string_expr
+    (41) repeat_string -> . string_expr repeat_string
+    (42) string_expr -> . STRINGLIT
+    (43) string_expr -> . BSLASH LPAREN expression RPAREN
+
+    QUOTE           reduce using rule 40 (repeat_string -> string_expr .)
+    STRINGLIT       shift and go to state 60
+    BSLASH          shift and go to state 61
+
+    string_expr                    shift and go to state 59
+    repeat_string                  shift and go to state 95
+
+state 60
+
+    (42) string_expr -> STRINGLIT .
+
+    STRINGLIT       reduce using rule 42 (string_expr -> STRINGLIT .)
+    BSLASH          reduce using rule 42 (string_expr -> STRINGLIT .)
+    QUOTE           reduce using rule 42 (string_expr -> STRINGLIT .)
+
+
+state 61
+
+    (43) string_expr -> BSLASH . LPAREN expression RPAREN
+
+    LPAREN          shift and go to state 96
+
+
+state 62
+
+    (30) variable_content -> COLON type .
+
+    ASSIGN          reduce using rule 30 (variable_content -> COLON type .)
+
+
+state 63
+
+    (32) type -> ID .
+
+    ASSIGN          reduce using rule 32 (type -> ID .)
+    COMMA           reduce using rule 32 (type -> ID .)
+    RPAREN          reduce using rule 32 (type -> ID .)
+
+
+state 64
+
+    (33) type -> primitive .
+
+    ASSIGN          reduce using rule 33 (type -> primitive .)
+    COMMA           reduce using rule 33 (type -> primitive .)
+    RPAREN          reduce using rule 33 (type -> primitive .)
+
+
+state 65
+
+    (34) type -> LBRACK . primitive RBRACK
+    (35) primitive -> . INT
+    (36) primitive -> . FLOAT
+    (37) primitive -> . STRING
+    (38) primitive -> . BOOL
+
+    INT             shift and go to state 66
+    FLOAT           shift and go to state 67
+    STRING          shift and go to state 68
+    BOOL            shift and go to state 69
+
+    primitive                      shift and go to state 97
+
+state 66
+
+    (35) primitive -> INT .
+
+    ASSIGN          reduce using rule 35 (primitive -> INT .)
+    LCURLY          reduce using rule 35 (primitive -> INT .)
+    RBRACK          reduce using rule 35 (primitive -> INT .)
+    COMMA           reduce using rule 35 (primitive -> INT .)
+    RPAREN          reduce using rule 35 (primitive -> INT .)
+
+
+state 67
+
+    (36) primitive -> FLOAT .
+
+    ASSIGN          reduce using rule 36 (primitive -> FLOAT .)
+    LCURLY          reduce using rule 36 (primitive -> FLOAT .)
+    RBRACK          reduce using rule 36 (primitive -> FLOAT .)
+    COMMA           reduce using rule 36 (primitive -> FLOAT .)
+    RPAREN          reduce using rule 36 (primitive -> FLOAT .)
+
+
+state 68
+
+    (37) primitive -> STRING .
+
+    ASSIGN          reduce using rule 37 (primitive -> STRING .)
+    LCURLY          reduce using rule 37 (primitive -> STRING .)
+    RBRACK          reduce using rule 37 (primitive -> STRING .)
+    COMMA           reduce using rule 37 (primitive -> STRING .)
+    RPAREN          reduce using rule 37 (primitive -> STRING .)
+
+
+state 69
+
+    (38) primitive -> BOOL .
+
+    ASSIGN          reduce using rule 38 (primitive -> BOOL .)
+    LCURLY          reduce using rule 38 (primitive -> BOOL .)
+    RBRACK          reduce using rule 38 (primitive -> BOOL .)
+    COMMA           reduce using rule 38 (primitive -> BOOL .)
+    RPAREN          reduce using rule 38 (primitive -> BOOL .)
+
+
+state 70
+
+    (18) class_block -> LCURLY repeat_class_block . RCURLY
+
+    RCURLY          shift and go to state 98
+
+
+state 71
+
+    (19) repeat_class_block -> class_block_content . NLINE repeat_class_block
+    (20) repeat_class_block -> class_block_content . NLINE
+
+    NLINE           shift and go to state 99
+
+
+state 72
+
+    (21) repeat_class_block -> NLINE .
+
+    RCURLY          reduce using rule 21 (repeat_class_block -> NLINE .)
+
+
+state 73
+
+    (22) class_block_content -> function .
+
+    NLINE           reduce using rule 22 (class_block_content -> function .)
+
+
+state 74
+
+    (23) class_block_content -> declaration .
+
+    NLINE           reduce using rule 23 (class_block_content -> declaration .)
+
+
+state 75
+
+    (47) function -> FUNC ID params function_content init_block .
+
+    NLINE           reduce using rule 47 (function -> FUNC ID params function_content init_block .)
+
+
+state 76
+
+    (12) init_block -> LCURLY . repeat_init_block RCURLY
+    (13) repeat_init_block -> . init_block_content NLINE repeat_init_block
+    (14) repeat_init_block -> . init_block_content NLINE
+    (15) repeat_init_block -> . NLINE
+    (16) init_block_content -> . statement
+    (17) init_block_content -> . declaration
+    (88) statement -> . display
+    (89) statement -> . if
+    (90) statement -> . while
+    (91) statement -> . input
+    (92) statement -> . assign
+    (93) statement -> . call
+    (94) statement -> . return
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (97) display -> . PRINT LPAREN expression RPAREN
+    (111) if -> . IF LPAREN bool_expr RPAREN block if_content
+    (95) while -> . WHILE LPAREN bool_expr RPAREN block
+    (96) input -> . variable ASSIGN INPUT LPAREN string RPAREN
+    (101) assign -> . ID some_op expression
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (98) return -> . RETURN
+    (99) return -> . RETURN bool_expr
+    (100) return -> . RETURN expression
+    (29) variable -> . VAR ID variable_content
+
+    NLINE           shift and go to state 102
+    PRINT           shift and go to state 113
+    IF              shift and go to state 114
+    WHILE           shift and go to state 115
+    ID              shift and go to state 116
+    RETURN          shift and go to state 117
+    VAR             shift and go to state 10
+
+    repeat_init_block              shift and go to state 100
+    init_block_content             shift and go to state 101
+    statement                      shift and go to state 103
+    declaration                    shift and go to state 104
+    display                        shift and go to state 105
+    if                             shift and go to state 106
+    while                          shift and go to state 107
+    input                          shift and go to state 108
+    assign                         shift and go to state 109
+    call                           shift and go to state 110
+    return                         shift and go to state 111
+    variable                       shift and go to state 112
+
+state 77
+
+    (48) function_content -> ARROW primitive .
+
+    LCURLY          reduce using rule 48 (function_content -> ARROW primitive .)
+
+
+state 78
+
+    (24) params -> LPAREN params_content RPAREN .
+
+    ARROW           reduce using rule 24 (params -> LPAREN params_content RPAREN .)
+    LCURLY          reduce using rule 24 (params -> LPAREN params_content RPAREN .)
+
+
+state 79
+
+    (26) params_content -> param COMMA . params_content
+    (25) params_content -> . param
+    (26) params_content -> . param COMMA params_content
+    (27) params_content -> .
+    (28) param -> . ID COLON type
+
+    RPAREN          reduce using rule 27 (params_content -> .)
+    ID              shift and go to state 47
+
+    param                          shift and go to state 46
+    params_content                 shift and go to state 118
+
+state 80
+
+    (28) param -> ID COLON . type
+    (32) type -> . ID
+    (33) type -> . primitive
+    (34) type -> . LBRACK primitive RBRACK
+    (35) primitive -> . INT
+    (36) primitive -> . FLOAT
+    (37) primitive -> . STRING
+    (38) primitive -> . BOOL
+
+    ID              shift and go to state 63
+    LBRACK          shift and go to state 65
+    INT             shift and go to state 66
+    FLOAT           shift and go to state 67
+    STRING          shift and go to state 68
+    BOOL            shift and go to state 69
+
+    type                           shift and go to state 119
+    primitive                      shift and go to state 64
+
+state 81
+
+    (68) expression -> term PLUS term .
+
+    NLINE           reduce using rule 68 (expression -> term PLUS term .)
+    COMMA           reduce using rule 68 (expression -> term PLUS term .)
+    RBRACK          reduce using rule 68 (expression -> term PLUS term .)
+    RPAREN          reduce using rule 68 (expression -> term PLUS term .)
+    LESS            reduce using rule 68 (expression -> term PLUS term .)
+    MORE            reduce using rule 68 (expression -> term PLUS term .)
+    EQUALS          reduce using rule 68 (expression -> term PLUS term .)
+    NEQUALS         reduce using rule 68 (expression -> term PLUS term .)
+    LEQUALS         reduce using rule 68 (expression -> term PLUS term .)
+    MEQUALS         reduce using rule 68 (expression -> term PLUS term .)
+    AND             reduce using rule 68 (expression -> term PLUS term .)
+    OR              reduce using rule 68 (expression -> term PLUS term .)
+
+
+state 82
+
+    (69) expression -> term MINUS term .
+
+    NLINE           reduce using rule 69 (expression -> term MINUS term .)
+    COMMA           reduce using rule 69 (expression -> term MINUS term .)
+    RBRACK          reduce using rule 69 (expression -> term MINUS term .)
+    RPAREN          reduce using rule 69 (expression -> term MINUS term .)
+    LESS            reduce using rule 69 (expression -> term MINUS term .)
+    MORE            reduce using rule 69 (expression -> term MINUS term .)
+    EQUALS          reduce using rule 69 (expression -> term MINUS term .)
+    NEQUALS         reduce using rule 69 (expression -> term MINUS term .)
+    LEQUALS         reduce using rule 69 (expression -> term MINUS term .)
+    MEQUALS         reduce using rule 69 (expression -> term MINUS term .)
+    AND             reduce using rule 69 (expression -> term MINUS term .)
+    OR              reduce using rule 69 (expression -> term MINUS term .)
+
+
+state 83
+
+    (52) array -> LBRACK repeat_array RBRACK .
+
+    NLINE           reduce using rule 52 (array -> LBRACK repeat_array RBRACK .)
+
+
+state 84
+
+    (54) repeat_array -> expression COMMA . repeat_array
+    (53) repeat_array -> . expression
+    (54) repeat_array -> . expression COMMA repeat_array
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 51
+    repeat_array                   shift and go to state 120
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 85
+
+    (71) term -> factor DIVIDE factor .
+
+    PLUS            reduce using rule 71 (term -> factor DIVIDE factor .)
+    MINUS           reduce using rule 71 (term -> factor DIVIDE factor .)
+    NLINE           reduce using rule 71 (term -> factor DIVIDE factor .)
+    COMMA           reduce using rule 71 (term -> factor DIVIDE factor .)
+    RBRACK          reduce using rule 71 (term -> factor DIVIDE factor .)
+    RPAREN          reduce using rule 71 (term -> factor DIVIDE factor .)
+    LESS            reduce using rule 71 (term -> factor DIVIDE factor .)
+    MORE            reduce using rule 71 (term -> factor DIVIDE factor .)
+    EQUALS          reduce using rule 71 (term -> factor DIVIDE factor .)
+    NEQUALS         reduce using rule 71 (term -> factor DIVIDE factor .)
+    LEQUALS         reduce using rule 71 (term -> factor DIVIDE factor .)
+    MEQUALS         reduce using rule 71 (term -> factor DIVIDE factor .)
+    AND             reduce using rule 71 (term -> factor DIVIDE factor .)
+    OR              reduce using rule 71 (term -> factor DIVIDE factor .)
+
+
+state 86
+
+    (72) term -> factor TIMES factor .
+
+    PLUS            reduce using rule 72 (term -> factor TIMES factor .)
+    MINUS           reduce using rule 72 (term -> factor TIMES factor .)
+    NLINE           reduce using rule 72 (term -> factor TIMES factor .)
+    COMMA           reduce using rule 72 (term -> factor TIMES factor .)
+    RBRACK          reduce using rule 72 (term -> factor TIMES factor .)
+    RPAREN          reduce using rule 72 (term -> factor TIMES factor .)
+    LESS            reduce using rule 72 (term -> factor TIMES factor .)
+    MORE            reduce using rule 72 (term -> factor TIMES factor .)
+    EQUALS          reduce using rule 72 (term -> factor TIMES factor .)
+    NEQUALS         reduce using rule 72 (term -> factor TIMES factor .)
+    LEQUALS         reduce using rule 72 (term -> factor TIMES factor .)
+    MEQUALS         reduce using rule 72 (term -> factor TIMES factor .)
+    AND             reduce using rule 72 (term -> factor TIMES factor .)
+    OR              reduce using rule 72 (term -> factor TIMES factor .)
+
+
+state 87
+
+    (74) factor -> COLON LPAREN expression . RPAREN
+
+    RPAREN          shift and go to state 121
+
+
+state 88
+
+    (107) call -> ID LPAREN repeat_call . RPAREN
+
+    RPAREN          shift and go to state 122
+
+
+state 89
+
+    (108) repeat_call -> expression .
+    (109) repeat_call -> expression . COMMA repeat_call
+
+    RPAREN          reduce using rule 108 (repeat_call -> expression .)
+    COMMA           shift and go to state 123
+
+
+state 90
+
+    (75) call_array -> ID LBRACK expression . RBRACK
+
+    RBRACK          shift and go to state 124
+
+
+state 91
+
+    (86) right_id -> ID .
+    (85) repeat_dots -> ID . DOT right_id
+
+    DIVIDE          reduce using rule 86 (right_id -> ID .)
+    TIMES           reduce using rule 86 (right_id -> ID .)
+    PLUS            reduce using rule 86 (right_id -> ID .)
+    MINUS           reduce using rule 86 (right_id -> ID .)
+    NLINE           reduce using rule 86 (right_id -> ID .)
+    COMMA           reduce using rule 86 (right_id -> ID .)
+    RBRACK          reduce using rule 86 (right_id -> ID .)
+    RPAREN          reduce using rule 86 (right_id -> ID .)
+    LESS            reduce using rule 86 (right_id -> ID .)
+    MORE            reduce using rule 86 (right_id -> ID .)
+    EQUALS          reduce using rule 86 (right_id -> ID .)
+    NEQUALS         reduce using rule 86 (right_id -> ID .)
+    LEQUALS         reduce using rule 86 (right_id -> ID .)
+    MEQUALS         reduce using rule 86 (right_id -> ID .)
+    AND             reduce using rule 86 (right_id -> ID .)
+    OR              reduce using rule 86 (right_id -> ID .)
+    DOT             shift and go to state 57
+
+
+state 92
+
+    (85) repeat_dots -> ID DOT right_id .
+
+    DIVIDE          reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    TIMES           reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    PLUS            reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    MINUS           reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    NLINE           reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    COMMA           reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    RBRACK          reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    RPAREN          reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    LESS            reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    MORE            reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    EQUALS          reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    NEQUALS         reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    LEQUALS         reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    MEQUALS         reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    AND             reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+    OR              reduce using rule 85 (repeat_dots -> ID DOT right_id .)
+
+
+state 93
+
+    (87) right_id -> repeat_dots .
+
+    DIVIDE          reduce using rule 87 (right_id -> repeat_dots .)
+    TIMES           reduce using rule 87 (right_id -> repeat_dots .)
+    PLUS            reduce using rule 87 (right_id -> repeat_dots .)
+    MINUS           reduce using rule 87 (right_id -> repeat_dots .)
+    NLINE           reduce using rule 87 (right_id -> repeat_dots .)
+    COMMA           reduce using rule 87 (right_id -> repeat_dots .)
+    RBRACK          reduce using rule 87 (right_id -> repeat_dots .)
+    RPAREN          reduce using rule 87 (right_id -> repeat_dots .)
+    LESS            reduce using rule 87 (right_id -> repeat_dots .)
+    MORE            reduce using rule 87 (right_id -> repeat_dots .)
+    EQUALS          reduce using rule 87 (right_id -> repeat_dots .)
+    NEQUALS         reduce using rule 87 (right_id -> repeat_dots .)
+    LEQUALS         reduce using rule 87 (right_id -> repeat_dots .)
+    MEQUALS         reduce using rule 87 (right_id -> repeat_dots .)
+    AND             reduce using rule 87 (right_id -> repeat_dots .)
+    OR              reduce using rule 87 (right_id -> repeat_dots .)
+
+
+state 94
+
+    (39) string -> QUOTE repeat_string QUOTE .
+
+    DIVIDE          reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    TIMES           reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    PLUS            reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    MINUS           reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    NLINE           reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    COMMA           reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    RBRACK          reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    RPAREN          reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    LESS            reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    MORE            reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    EQUALS          reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    NEQUALS         reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    LEQUALS         reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    MEQUALS         reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    AND             reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+    OR              reduce using rule 39 (string -> QUOTE repeat_string QUOTE .)
+
+
+state 95
+
+    (41) repeat_string -> string_expr repeat_string .
+
+    QUOTE           reduce using rule 41 (repeat_string -> string_expr repeat_string .)
+
+
+state 96
+
+    (43) string_expr -> BSLASH LPAREN . expression RPAREN
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 125
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 97
+
+    (34) type -> LBRACK primitive . RBRACK
+
+    RBRACK          shift and go to state 126
+
+
+state 98
+
+    (18) class_block -> LCURLY repeat_class_block RCURLY .
+
+    NLINE           reduce using rule 18 (class_block -> LCURLY repeat_class_block RCURLY .)
+
+
+state 99
+
+    (19) repeat_class_block -> class_block_content NLINE . repeat_class_block
+    (20) repeat_class_block -> class_block_content NLINE .
+    (19) repeat_class_block -> . class_block_content NLINE repeat_class_block
+    (20) repeat_class_block -> . class_block_content NLINE
+    (21) repeat_class_block -> . NLINE
+    (22) class_block_content -> . function
+    (23) class_block_content -> . declaration
+    (47) function -> . FUNC ID params function_content init_block
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (29) variable -> . VAR ID variable_content
+
+    RCURLY          reduce using rule 20 (repeat_class_block -> class_block_content NLINE .)
+    NLINE           shift and go to state 72
+    FUNC            shift and go to state 8
+    VAR             shift and go to state 10
+
+    class_block_content            shift and go to state 71
+    repeat_class_block             shift and go to state 127
+    function                       shift and go to state 73
+    declaration                    shift and go to state 74
+    variable                       shift and go to state 9
+
+state 100
+
+    (12) init_block -> LCURLY repeat_init_block . RCURLY
+
+    RCURLY          shift and go to state 128
+
+
+state 101
+
+    (13) repeat_init_block -> init_block_content . NLINE repeat_init_block
+    (14) repeat_init_block -> init_block_content . NLINE
+
+    NLINE           shift and go to state 129
+
+
+state 102
+
+    (15) repeat_init_block -> NLINE .
+
+    RCURLY          reduce using rule 15 (repeat_init_block -> NLINE .)
+
+
+state 103
+
+    (16) init_block_content -> statement .
+
+    NLINE           reduce using rule 16 (init_block_content -> statement .)
+
+
+state 104
+
+    (17) init_block_content -> declaration .
+
+    NLINE           reduce using rule 17 (init_block_content -> declaration .)
+
+
+state 105
+
+    (88) statement -> display .
+
+    NLINE           reduce using rule 88 (statement -> display .)
+
+
+state 106
+
+    (89) statement -> if .
+
+    NLINE           reduce using rule 89 (statement -> if .)
+
+
+state 107
+
+    (90) statement -> while .
+
+    NLINE           reduce using rule 90 (statement -> while .)
+
+
+state 108
+
+    (91) statement -> input .
+
+    NLINE           reduce using rule 91 (statement -> input .)
+
+
+state 109
+
+    (92) statement -> assign .
+
+    NLINE           reduce using rule 92 (statement -> assign .)
+
+
+state 110
+
+    (93) statement -> call .
+
+    NLINE           reduce using rule 93 (statement -> call .)
+
+
+state 111
+
+    (94) statement -> return .
+
+    NLINE           reduce using rule 94 (statement -> return .)
+
+
+state 112
+
+    (50) declaration -> variable . ASSIGN expression
+    (51) declaration -> variable . ASSIGN array
+    (96) input -> variable . ASSIGN INPUT LPAREN string RPAREN
+
+    ASSIGN          shift and go to state 130
+
+
+state 113
+
+    (97) display -> PRINT . LPAREN expression RPAREN
+
+    LPAREN          shift and go to state 131
+
+
+state 114
+
+    (111) if -> IF . LPAREN bool_expr RPAREN block if_content
+
+    LPAREN          shift and go to state 132
+
+
+state 115
+
+    (95) while -> WHILE . LPAREN bool_expr RPAREN block
+
+    LPAREN          shift and go to state 133
+
+
+state 116
+
+    (101) assign -> ID . some_op expression
+    (107) call -> ID . LPAREN repeat_call RPAREN
+    (102) some_op -> . ASSIGN
+    (103) some_op -> . PASSIGN
+    (104) some_op -> . LASSIGN
+    (105) some_op -> . MASSIGN
+    (106) some_op -> . DASSIGN
+
+    LPAREN          shift and go to state 55
+    ASSIGN          shift and go to state 135
+    PASSIGN         shift and go to state 136
+    LASSIGN         shift and go to state 137
+    MASSIGN         shift and go to state 138
+    DASSIGN         shift and go to state 139
+
+    some_op                        shift and go to state 134
+
+state 117
+
+    (98) return -> RETURN .
+    (99) return -> RETURN . bool_expr
+    (100) return -> RETURN . expression
+    (55) bool_expr -> . relational_exp
+    (56) bool_expr -> . relational_exp AND bool_expr
+    (57) bool_expr -> . relational_exp OR bool_expr
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (58) relational_exp -> . expression comp expression
+    (59) relational_exp -> . TRUE
+    (60) relational_exp -> . FALSE
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    NLINE           reduce using rule 98 (return -> RETURN .)
+    TRUE            shift and go to state 143
+    FALSE           shift and go to state 144
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    bool_expr                      shift and go to state 140
+    expression                     shift and go to state 141
+    relational_exp                 shift and go to state 142
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 118
+
+    (26) params_content -> param COMMA params_content .
+
+    RPAREN          reduce using rule 26 (params_content -> param COMMA params_content .)
+
+
+state 119
+
+    (28) param -> ID COLON type .
+
+    COMMA           reduce using rule 28 (param -> ID COLON type .)
+    RPAREN          reduce using rule 28 (param -> ID COLON type .)
+
+
+state 120
+
+    (54) repeat_array -> expression COMMA repeat_array .
+
+    RBRACK          reduce using rule 54 (repeat_array -> expression COMMA repeat_array .)
+
+
+state 121
+
+    (74) factor -> COLON LPAREN expression RPAREN .
+
+    DIVIDE          reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    TIMES           reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    PLUS            reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    MINUS           reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    NLINE           reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    COMMA           reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    RBRACK          reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    LESS            reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    MORE            reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    EQUALS          reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    NEQUALS         reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    LEQUALS         reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    MEQUALS         reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    AND             reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+    OR              reduce using rule 74 (factor -> COLON LPAREN expression RPAREN .)
+
+
+state 122
+
+    (107) call -> ID LPAREN repeat_call RPAREN .
+
+    DIVIDE          reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    TIMES           reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    PLUS            reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    MINUS           reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    NLINE           reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    COMMA           reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    RBRACK          reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    RPAREN          reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    LESS            reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    MORE            reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    EQUALS          reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    NEQUALS         reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    LEQUALS         reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    MEQUALS         reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    AND             reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+    OR              reduce using rule 107 (call -> ID LPAREN repeat_call RPAREN .)
+
+
+state 123
+
+    (109) repeat_call -> expression COMMA . repeat_call
+    (108) repeat_call -> . expression
+    (109) repeat_call -> . expression COMMA repeat_call
+    (110) repeat_call -> .
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    RPAREN          reduce using rule 110 (repeat_call -> .)
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 89
+    repeat_call                    shift and go to state 145
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 124
+
+    (75) call_array -> ID LBRACK expression RBRACK .
+
+    DIVIDE          reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    TIMES           reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    PLUS            reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    MINUS           reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    NLINE           reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    COMMA           reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    RBRACK          reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    RPAREN          reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    LESS            reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    MORE            reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    EQUALS          reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    NEQUALS         reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    LEQUALS         reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    MEQUALS         reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    AND             reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+    OR              reduce using rule 75 (call_array -> ID LBRACK expression RBRACK .)
+
+
+state 125
+
+    (43) string_expr -> BSLASH LPAREN expression . RPAREN
+
+    RPAREN          shift and go to state 146
+
+
+state 126
+
+    (34) type -> LBRACK primitive RBRACK .
+
+    ASSIGN          reduce using rule 34 (type -> LBRACK primitive RBRACK .)
+    COMMA           reduce using rule 34 (type -> LBRACK primitive RBRACK .)
+    RPAREN          reduce using rule 34 (type -> LBRACK primitive RBRACK .)
+
+
+state 127
+
+    (19) repeat_class_block -> class_block_content NLINE repeat_class_block .
+
+    RCURLY          reduce using rule 19 (repeat_class_block -> class_block_content NLINE repeat_class_block .)
+
+
+state 128
+
+    (12) init_block -> LCURLY repeat_init_block RCURLY .
+
+    NLINE           reduce using rule 12 (init_block -> LCURLY repeat_init_block RCURLY .)
+
+
+state 129
+
+    (13) repeat_init_block -> init_block_content NLINE . repeat_init_block
+    (14) repeat_init_block -> init_block_content NLINE .
+    (13) repeat_init_block -> . init_block_content NLINE repeat_init_block
+    (14) repeat_init_block -> . init_block_content NLINE
+    (15) repeat_init_block -> . NLINE
+    (16) init_block_content -> . statement
+    (17) init_block_content -> . declaration
+    (88) statement -> . display
+    (89) statement -> . if
+    (90) statement -> . while
+    (91) statement -> . input
+    (92) statement -> . assign
+    (93) statement -> . call
+    (94) statement -> . return
+    (50) declaration -> . variable ASSIGN expression
+    (51) declaration -> . variable ASSIGN array
+    (97) display -> . PRINT LPAREN expression RPAREN
+    (111) if -> . IF LPAREN bool_expr RPAREN block if_content
+    (95) while -> . WHILE LPAREN bool_expr RPAREN block
+    (96) input -> . variable ASSIGN INPUT LPAREN string RPAREN
+    (101) assign -> . ID some_op expression
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (98) return -> . RETURN
+    (99) return -> . RETURN bool_expr
+    (100) return -> . RETURN expression
+    (29) variable -> . VAR ID variable_content
+
+    RCURLY          reduce using rule 14 (repeat_init_block -> init_block_content NLINE .)
+    NLINE           shift and go to state 102
+    PRINT           shift and go to state 113
+    IF              shift and go to state 114
+    WHILE           shift and go to state 115
+    ID              shift and go to state 116
+    RETURN          shift and go to state 117
+    VAR             shift and go to state 10
+
+    init_block_content             shift and go to state 101
+    repeat_init_block              shift and go to state 147
+    statement                      shift and go to state 103
+    declaration                    shift and go to state 104
+    display                        shift and go to state 105
+    if                             shift and go to state 106
+    while                          shift and go to state 107
+    input                          shift and go to state 108
+    assign                         shift and go to state 109
+    call                           shift and go to state 110
+    return                         shift and go to state 111
+    variable                       shift and go to state 112
+
+state 130
+
+    (50) declaration -> variable ASSIGN . expression
+    (51) declaration -> variable ASSIGN . array
+    (96) input -> variable ASSIGN . INPUT LPAREN string RPAREN
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (52) array -> . LBRACK repeat_array RBRACK
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    INPUT           shift and go to state 148
+    LBRACK          shift and go to state 24
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 21
+    array                          shift and go to state 22
+    string                         shift and go to state 32
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 131
+
+    (97) display -> PRINT LPAREN . expression RPAREN
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 149
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 132
+
+    (111) if -> IF LPAREN . bool_expr RPAREN block if_content
+    (55) bool_expr -> . relational_exp
+    (56) bool_expr -> . relational_exp AND bool_expr
+    (57) bool_expr -> . relational_exp OR bool_expr
+    (58) relational_exp -> . expression comp expression
+    (59) relational_exp -> . TRUE
+    (60) relational_exp -> . FALSE
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    TRUE            shift and go to state 143
+    FALSE           shift and go to state 144
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    bool_expr                      shift and go to state 150
+    relational_exp                 shift and go to state 142
+    expression                     shift and go to state 151
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 133
+
+    (95) while -> WHILE LPAREN . bool_expr RPAREN block
+    (55) bool_expr -> . relational_exp
+    (56) bool_expr -> . relational_exp AND bool_expr
+    (57) bool_expr -> . relational_exp OR bool_expr
+    (58) relational_exp -> . expression comp expression
+    (59) relational_exp -> . TRUE
+    (60) relational_exp -> . FALSE
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    TRUE            shift and go to state 143
+    FALSE           shift and go to state 144
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    bool_expr                      shift and go to state 152
+    relational_exp                 shift and go to state 142
+    expression                     shift and go to state 151
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 134
+
+    (101) assign -> ID some_op . expression
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 153
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 135
+
+    (102) some_op -> ASSIGN .
+
+    COLON           reduce using rule 102 (some_op -> ASSIGN .)
+    DECIMAL         reduce using rule 102 (some_op -> ASSIGN .)
+    BOOL            reduce using rule 102 (some_op -> ASSIGN .)
+    NUMBER          reduce using rule 102 (some_op -> ASSIGN .)
+    ID              reduce using rule 102 (some_op -> ASSIGN .)
+    QUOTE           reduce using rule 102 (some_op -> ASSIGN .)
+
+
+state 136
+
+    (103) some_op -> PASSIGN .
+
+    COLON           reduce using rule 103 (some_op -> PASSIGN .)
+    DECIMAL         reduce using rule 103 (some_op -> PASSIGN .)
+    BOOL            reduce using rule 103 (some_op -> PASSIGN .)
+    NUMBER          reduce using rule 103 (some_op -> PASSIGN .)
+    ID              reduce using rule 103 (some_op -> PASSIGN .)
+    QUOTE           reduce using rule 103 (some_op -> PASSIGN .)
+
+
+state 137
+
+    (104) some_op -> LASSIGN .
+
+    COLON           reduce using rule 104 (some_op -> LASSIGN .)
+    DECIMAL         reduce using rule 104 (some_op -> LASSIGN .)
+    BOOL            reduce using rule 104 (some_op -> LASSIGN .)
+    NUMBER          reduce using rule 104 (some_op -> LASSIGN .)
+    ID              reduce using rule 104 (some_op -> LASSIGN .)
+    QUOTE           reduce using rule 104 (some_op -> LASSIGN .)
+
+
+state 138
+
+    (105) some_op -> MASSIGN .
+
+    COLON           reduce using rule 105 (some_op -> MASSIGN .)
+    DECIMAL         reduce using rule 105 (some_op -> MASSIGN .)
+    BOOL            reduce using rule 105 (some_op -> MASSIGN .)
+    NUMBER          reduce using rule 105 (some_op -> MASSIGN .)
+    ID              reduce using rule 105 (some_op -> MASSIGN .)
+    QUOTE           reduce using rule 105 (some_op -> MASSIGN .)
+
+
+state 139
+
+    (106) some_op -> DASSIGN .
+
+    COLON           reduce using rule 106 (some_op -> DASSIGN .)
+    DECIMAL         reduce using rule 106 (some_op -> DASSIGN .)
+    BOOL            reduce using rule 106 (some_op -> DASSIGN .)
+    NUMBER          reduce using rule 106 (some_op -> DASSIGN .)
+    ID              reduce using rule 106 (some_op -> DASSIGN .)
+    QUOTE           reduce using rule 106 (some_op -> DASSIGN .)
+
+
+state 140
+
+    (99) return -> RETURN bool_expr .
+
+    NLINE           reduce using rule 99 (return -> RETURN bool_expr .)
+
+
+state 141
+
+    (100) return -> RETURN expression .
+    (58) relational_exp -> expression . comp expression
+    (61) comp -> . LESS
+    (62) comp -> . MORE
+    (63) comp -> . EQUALS
+    (64) comp -> . NEQUALS
+    (65) comp -> . LEQUALS
+    (66) comp -> . MEQUALS
+
+    NLINE           reduce using rule 100 (return -> RETURN expression .)
+    LESS            shift and go to state 155
+    MORE            shift and go to state 156
+    EQUALS          shift and go to state 157
+    NEQUALS         shift and go to state 158
+    LEQUALS         shift and go to state 159
+    MEQUALS         shift and go to state 160
+
+    comp                           shift and go to state 154
+
+state 142
+
+    (55) bool_expr -> relational_exp .
+    (56) bool_expr -> relational_exp . AND bool_expr
+    (57) bool_expr -> relational_exp . OR bool_expr
+
+    NLINE           reduce using rule 55 (bool_expr -> relational_exp .)
+    RPAREN          reduce using rule 55 (bool_expr -> relational_exp .)
+    AND             shift and go to state 161
+    OR              shift and go to state 162
+
+
+state 143
+
+    (59) relational_exp -> TRUE .
+
+    AND             reduce using rule 59 (relational_exp -> TRUE .)
+    OR              reduce using rule 59 (relational_exp -> TRUE .)
+    NLINE           reduce using rule 59 (relational_exp -> TRUE .)
+    RPAREN          reduce using rule 59 (relational_exp -> TRUE .)
+
+
+state 144
+
+    (60) relational_exp -> FALSE .
+
+    AND             reduce using rule 60 (relational_exp -> FALSE .)
+    OR              reduce using rule 60 (relational_exp -> FALSE .)
+    NLINE           reduce using rule 60 (relational_exp -> FALSE .)
+    RPAREN          reduce using rule 60 (relational_exp -> FALSE .)
+
+
+state 145
+
+    (109) repeat_call -> expression COMMA repeat_call .
+
+    RPAREN          reduce using rule 109 (repeat_call -> expression COMMA repeat_call .)
+
+
+state 146
+
+    (43) string_expr -> BSLASH LPAREN expression RPAREN .
+
+    STRINGLIT       reduce using rule 43 (string_expr -> BSLASH LPAREN expression RPAREN .)
+    BSLASH          reduce using rule 43 (string_expr -> BSLASH LPAREN expression RPAREN .)
+    QUOTE           reduce using rule 43 (string_expr -> BSLASH LPAREN expression RPAREN .)
+
+
+state 147
+
+    (13) repeat_init_block -> init_block_content NLINE repeat_init_block .
+
+    RCURLY          reduce using rule 13 (repeat_init_block -> init_block_content NLINE repeat_init_block .)
+
+
+state 148
+
+    (96) input -> variable ASSIGN INPUT . LPAREN string RPAREN
+
+    LPAREN          shift and go to state 163
+
+
+state 149
+
+    (97) display -> PRINT LPAREN expression . RPAREN
+
+    RPAREN          shift and go to state 164
+
+
+state 150
+
+    (111) if -> IF LPAREN bool_expr . RPAREN block if_content
+
+    RPAREN          shift and go to state 165
+
+
+state 151
+
+    (58) relational_exp -> expression . comp expression
+    (61) comp -> . LESS
+    (62) comp -> . MORE
+    (63) comp -> . EQUALS
+    (64) comp -> . NEQUALS
+    (65) comp -> . LEQUALS
+    (66) comp -> . MEQUALS
+
+    LESS            shift and go to state 155
+    MORE            shift and go to state 156
+    EQUALS          shift and go to state 157
+    NEQUALS         shift and go to state 158
+    LEQUALS         shift and go to state 159
+    MEQUALS         shift and go to state 160
+
+    comp                           shift and go to state 154
+
+state 152
+
+    (95) while -> WHILE LPAREN bool_expr . RPAREN block
+
+    RPAREN          shift and go to state 166
+
+
+state 153
+
+    (101) assign -> ID some_op expression .
+
+    NLINE           reduce using rule 101 (assign -> ID some_op expression .)
+
+
+state 154
+
+    (58) relational_exp -> expression comp . expression
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    expression                     shift and go to state 167
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 155
+
+    (61) comp -> LESS .
+
+    COLON           reduce using rule 61 (comp -> LESS .)
+    DECIMAL         reduce using rule 61 (comp -> LESS .)
+    BOOL            reduce using rule 61 (comp -> LESS .)
+    NUMBER          reduce using rule 61 (comp -> LESS .)
+    ID              reduce using rule 61 (comp -> LESS .)
+    QUOTE           reduce using rule 61 (comp -> LESS .)
+
+
+state 156
+
+    (62) comp -> MORE .
+
+    COLON           reduce using rule 62 (comp -> MORE .)
+    DECIMAL         reduce using rule 62 (comp -> MORE .)
+    BOOL            reduce using rule 62 (comp -> MORE .)
+    NUMBER          reduce using rule 62 (comp -> MORE .)
+    ID              reduce using rule 62 (comp -> MORE .)
+    QUOTE           reduce using rule 62 (comp -> MORE .)
+
+
+state 157
+
+    (63) comp -> EQUALS .
+
+    COLON           reduce using rule 63 (comp -> EQUALS .)
+    DECIMAL         reduce using rule 63 (comp -> EQUALS .)
+    BOOL            reduce using rule 63 (comp -> EQUALS .)
+    NUMBER          reduce using rule 63 (comp -> EQUALS .)
+    ID              reduce using rule 63 (comp -> EQUALS .)
+    QUOTE           reduce using rule 63 (comp -> EQUALS .)
+
+
+state 158
+
+    (64) comp -> NEQUALS .
+
+    COLON           reduce using rule 64 (comp -> NEQUALS .)
+    DECIMAL         reduce using rule 64 (comp -> NEQUALS .)
+    BOOL            reduce using rule 64 (comp -> NEQUALS .)
+    NUMBER          reduce using rule 64 (comp -> NEQUALS .)
+    ID              reduce using rule 64 (comp -> NEQUALS .)
+    QUOTE           reduce using rule 64 (comp -> NEQUALS .)
+
+
+state 159
+
+    (65) comp -> LEQUALS .
+
+    COLON           reduce using rule 65 (comp -> LEQUALS .)
+    DECIMAL         reduce using rule 65 (comp -> LEQUALS .)
+    BOOL            reduce using rule 65 (comp -> LEQUALS .)
+    NUMBER          reduce using rule 65 (comp -> LEQUALS .)
+    ID              reduce using rule 65 (comp -> LEQUALS .)
+    QUOTE           reduce using rule 65 (comp -> LEQUALS .)
+
+
+state 160
+
+    (66) comp -> MEQUALS .
+
+    COLON           reduce using rule 66 (comp -> MEQUALS .)
+    DECIMAL         reduce using rule 66 (comp -> MEQUALS .)
+    BOOL            reduce using rule 66 (comp -> MEQUALS .)
+    NUMBER          reduce using rule 66 (comp -> MEQUALS .)
+    ID              reduce using rule 66 (comp -> MEQUALS .)
+    QUOTE           reduce using rule 66 (comp -> MEQUALS .)
+
+
+state 161
+
+    (56) bool_expr -> relational_exp AND . bool_expr
+    (55) bool_expr -> . relational_exp
+    (56) bool_expr -> . relational_exp AND bool_expr
+    (57) bool_expr -> . relational_exp OR bool_expr
+    (58) relational_exp -> . expression comp expression
+    (59) relational_exp -> . TRUE
+    (60) relational_exp -> . FALSE
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    TRUE            shift and go to state 143
+    FALSE           shift and go to state 144
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    relational_exp                 shift and go to state 142
+    bool_expr                      shift and go to state 168
+    expression                     shift and go to state 151
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 162
+
+    (57) bool_expr -> relational_exp OR . bool_expr
+    (55) bool_expr -> . relational_exp
+    (56) bool_expr -> . relational_exp AND bool_expr
+    (57) bool_expr -> . relational_exp OR bool_expr
+    (58) relational_exp -> . expression comp expression
+    (59) relational_exp -> . TRUE
+    (60) relational_exp -> . FALSE
+    (67) expression -> . term
+    (68) expression -> . term PLUS term
+    (69) expression -> . term MINUS term
+    (70) term -> . factor
+    (71) term -> . factor DIVIDE factor
+    (72) term -> . factor TIMES factor
+    (73) factor -> . constant
+    (74) factor -> . COLON LPAREN expression RPAREN
+    (76) constant -> . dots
+    (77) constant -> . DECIMAL
+    (78) constant -> . BOOL
+    (79) constant -> . NUMBER
+    (80) constant -> . string
+    (81) constant -> . call
+    (82) constant -> . call_array
+    (83) dots -> . ID
+    (84) dots -> . repeat_dots
+    (39) string -> . QUOTE repeat_string QUOTE
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (75) call_array -> . ID LBRACK expression RBRACK
+    (85) repeat_dots -> . ID DOT right_id
+
+    TRUE            shift and go to state 143
+    FALSE           shift and go to state 144
+    COLON           shift and go to state 27
+    DECIMAL         shift and go to state 29
+    BOOL            shift and go to state 30
+    NUMBER          shift and go to state 31
+    ID              shift and go to state 35
+    QUOTE           shift and go to state 37
+
+    relational_exp                 shift and go to state 142
+    bool_expr                      shift and go to state 169
+    expression                     shift and go to state 151
+    term                           shift and go to state 23
+    factor                         shift and go to state 25
+    constant                       shift and go to state 26
+    dots                           shift and go to state 28
+    string                         shift and go to state 32
+    call                           shift and go to state 33
+    call_array                     shift and go to state 34
+    repeat_dots                    shift and go to state 36
+
+state 163
+
+    (96) input -> variable ASSIGN INPUT LPAREN . string RPAREN
+    (39) string -> . QUOTE repeat_string QUOTE
+
+    QUOTE           shift and go to state 37
+
+    string                         shift and go to state 170
+
+state 164
+
+    (97) display -> PRINT LPAREN expression RPAREN .
+
+    NLINE           reduce using rule 97 (display -> PRINT LPAREN expression RPAREN .)
+
+
+state 165
+
+    (111) if -> IF LPAREN bool_expr RPAREN . block if_content
+    (8) block -> . LCURLY repeat_block RCURLY
+
+    LCURLY          shift and go to state 172
+
+    block                          shift and go to state 171
+
+state 166
+
+    (95) while -> WHILE LPAREN bool_expr RPAREN . block
+    (8) block -> . LCURLY repeat_block RCURLY
+
+    LCURLY          shift and go to state 172
+
+    block                          shift and go to state 173
+
+state 167
+
+    (58) relational_exp -> expression comp expression .
+
+    AND             reduce using rule 58 (relational_exp -> expression comp expression .)
+    OR              reduce using rule 58 (relational_exp -> expression comp expression .)
+    NLINE           reduce using rule 58 (relational_exp -> expression comp expression .)
+    RPAREN          reduce using rule 58 (relational_exp -> expression comp expression .)
+
+
+state 168
+
+    (56) bool_expr -> relational_exp AND bool_expr .
+
+    NLINE           reduce using rule 56 (bool_expr -> relational_exp AND bool_expr .)
+    RPAREN          reduce using rule 56 (bool_expr -> relational_exp AND bool_expr .)
+
+
+state 169
+
+    (57) bool_expr -> relational_exp OR bool_expr .
+
+    NLINE           reduce using rule 57 (bool_expr -> relational_exp OR bool_expr .)
+    RPAREN          reduce using rule 57 (bool_expr -> relational_exp OR bool_expr .)
+
+
+state 170
+
+    (96) input -> variable ASSIGN INPUT LPAREN string . RPAREN
+
+    RPAREN          shift and go to state 174
+
+
+state 171
+
+    (111) if -> IF LPAREN bool_expr RPAREN block . if_content
+    (112) if_content -> . ELSE IF
+    (113) if_content -> . ELSE block
+    (114) if_content -> .
+
+    ELSE            shift and go to state 176
+    NLINE           reduce using rule 114 (if_content -> .)
+
+    if_content                     shift and go to state 175
+
+state 172
+
+    (8) block -> LCURLY . repeat_block RCURLY
+    (9) repeat_block -> . statement NLINE repeat_block
+    (10) repeat_block -> . statement NLINE
+    (11) repeat_block -> . NLINE
+    (88) statement -> . display
+    (89) statement -> . if
+    (90) statement -> . while
+    (91) statement -> . input
+    (92) statement -> . assign
+    (93) statement -> . call
+    (94) statement -> . return
+    (97) display -> . PRINT LPAREN expression RPAREN
+    (111) if -> . IF LPAREN bool_expr RPAREN block if_content
+    (95) while -> . WHILE LPAREN bool_expr RPAREN block
+    (96) input -> . variable ASSIGN INPUT LPAREN string RPAREN
+    (101) assign -> . ID some_op expression
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (98) return -> . RETURN
+    (99) return -> . RETURN bool_expr
+    (100) return -> . RETURN expression
+    (29) variable -> . VAR ID variable_content
+
+    NLINE           shift and go to state 179
+    PRINT           shift and go to state 113
+    IF              shift and go to state 114
+    WHILE           shift and go to state 115
+    ID              shift and go to state 116
+    RETURN          shift and go to state 117
+    VAR             shift and go to state 10
+
+    repeat_block                   shift and go to state 177
+    statement                      shift and go to state 178
+    display                        shift and go to state 105
+    if                             shift and go to state 106
+    while                          shift and go to state 107
+    input                          shift and go to state 108
+    assign                         shift and go to state 109
+    call                           shift and go to state 110
+    return                         shift and go to state 111
+    variable                       shift and go to state 180
+
+state 173
+
+    (95) while -> WHILE LPAREN bool_expr RPAREN block .
+
+    NLINE           reduce using rule 95 (while -> WHILE LPAREN bool_expr RPAREN block .)
+
+
+state 174
+
+    (96) input -> variable ASSIGN INPUT LPAREN string RPAREN .
+
+    NLINE           reduce using rule 96 (input -> variable ASSIGN INPUT LPAREN string RPAREN .)
+
+
+state 175
+
+    (111) if -> IF LPAREN bool_expr RPAREN block if_content .
+
+    NLINE           reduce using rule 111 (if -> IF LPAREN bool_expr RPAREN block if_content .)
+
+
+state 176
+
+    (112) if_content -> ELSE . IF
+    (113) if_content -> ELSE . block
+    (8) block -> . LCURLY repeat_block RCURLY
+
+    IF              shift and go to state 181
+    LCURLY          shift and go to state 172
+
+    block                          shift and go to state 182
+
+state 177
+
+    (8) block -> LCURLY repeat_block . RCURLY
+
+    RCURLY          shift and go to state 183
+
+
+state 178
+
+    (9) repeat_block -> statement . NLINE repeat_block
+    (10) repeat_block -> statement . NLINE
+
+    NLINE           shift and go to state 184
+
+
+state 179
+
+    (11) repeat_block -> NLINE .
+
+    RCURLY          reduce using rule 11 (repeat_block -> NLINE .)
+
+
+state 180
+
+    (96) input -> variable . ASSIGN INPUT LPAREN string RPAREN
+
+    ASSIGN          shift and go to state 185
+
+
+state 181
+
+    (112) if_content -> ELSE IF .
+
+    NLINE           reduce using rule 112 (if_content -> ELSE IF .)
+
+
+state 182
+
+    (113) if_content -> ELSE block .
+
+    NLINE           reduce using rule 113 (if_content -> ELSE block .)
+
+
+state 183
+
+    (8) block -> LCURLY repeat_block RCURLY .
+
+    ELSE            reduce using rule 8 (block -> LCURLY repeat_block RCURLY .)
+    NLINE           reduce using rule 8 (block -> LCURLY repeat_block RCURLY .)
+
+
+state 184
+
+    (9) repeat_block -> statement NLINE . repeat_block
+    (10) repeat_block -> statement NLINE .
+    (9) repeat_block -> . statement NLINE repeat_block
+    (10) repeat_block -> . statement NLINE
+    (11) repeat_block -> . NLINE
+    (88) statement -> . display
+    (89) statement -> . if
+    (90) statement -> . while
+    (91) statement -> . input
+    (92) statement -> . assign
+    (93) statement -> . call
+    (94) statement -> . return
+    (97) display -> . PRINT LPAREN expression RPAREN
+    (111) if -> . IF LPAREN bool_expr RPAREN block if_content
+    (95) while -> . WHILE LPAREN bool_expr RPAREN block
+    (96) input -> . variable ASSIGN INPUT LPAREN string RPAREN
+    (101) assign -> . ID some_op expression
+    (107) call -> . ID LPAREN repeat_call RPAREN
+    (98) return -> . RETURN
+    (99) return -> . RETURN bool_expr
+    (100) return -> . RETURN expression
+    (29) variable -> . VAR ID variable_content
+
+    RCURLY          reduce using rule 10 (repeat_block -> statement NLINE .)
+    NLINE           shift and go to state 179
+    PRINT           shift and go to state 113
+    IF              shift and go to state 114
+    WHILE           shift and go to state 115
+    ID              shift and go to state 116
+    RETURN          shift and go to state 117
+    VAR             shift and go to state 10
+
+    statement                      shift and go to state 178
+    repeat_block                   shift and go to state 186
+    display                        shift and go to state 105
+    if                             shift and go to state 106
+    while                          shift and go to state 107
+    input                          shift and go to state 108
+    assign                         shift and go to state 109
+    call                           shift and go to state 110
+    return                         shift and go to state 111
+    variable                       shift and go to state 180
+
+state 185
+
+    (96) input -> variable ASSIGN . INPUT LPAREN string RPAREN
+
+    INPUT           shift and go to state 148
+
+
+state 186
+
+    (9) repeat_block -> statement NLINE repeat_block .
+
+    RCURLY          reduce using rule 9 (repeat_block -> statement NLINE repeat_block .)
+

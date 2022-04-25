@@ -1,10 +1,5 @@
 from ply.lex import lex
 
-FILENAME = 'animals.ty'
-
-with open('programs/' + FILENAME, 'r') as file:
-    data = file.read()
-
 reserved = {
     'class' : 'CLASS',
     'func'  : 'FUNC',
@@ -28,7 +23,7 @@ tokens = [
     'NLINE',
     'COLON',
     'COMMA',
-    'PERIOD',
+    'DOT',
     'LPAREN',
     'RPAREN',
     'LCURLY',
@@ -48,8 +43,7 @@ tokens = [
     'PASSIGN',
     'LASSIGN',
     'MASSIGN',
-    'DASSIGN'
-    'LEQUALS'
+    'DASSIGN',
     'LEQUALS',
     'MEQUALS',
 # OPERATORS
@@ -69,7 +63,7 @@ tokens = [
 t_NLINE     = r'\n'
 t_COLON     = ':'
 t_COMMA     = ','
-t_PERIOD    = '.'
+t_DOT    = '.'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
 t_LCURLY    = r'\{'
@@ -89,10 +83,10 @@ t_NEQUALS   = '!='
 t_LEQUALS   = '<='
 t_MEQUALS   = '>='
 
-t_PASSIGN   = '+='
-t_LASSIGN   = '-='
-t_MASSIGN   = '*='
-t_DASSIGN = '/='
+t_PASSIGN   = '\+='
+t_LASSIGN   = '\-='
+t_MASSIGN   = '\*='
+t_DASSIGN = '\/='
 
 # Operator rules
 t_PLUS      = r'\+'
@@ -100,6 +94,12 @@ t_MINUS     = '-'
 t_TIMES     = r'\*'
 t_DIVIDE    = r'\/'
 t_ASSIGN    = '='
+
+precedence = (
+    ('left', '+', '-'),
+    ('left', '*', '/'),
+    ('right', 'UMINUS'),
+)
 
 # Regex rules
 def t_ID(t):
@@ -129,16 +129,8 @@ t_ignore = ' \t'
 
 # Error handler for illegal characters
 def t_error(t):
-    print(f'Illegal character {t.value[0]!r}')
+    # print(f'Illegal character {t.value[0]!r}')
     t.lexer.skip(1)
 
 lexer = lex()
 
-lexer.input(data)
-
-# Tokenize
-while True:
-    tok = lexer.token()
-    if not tok:
-        break # no more input
-    print(tok)
