@@ -45,6 +45,11 @@ tokens = [
     'MORE',
     'EQUALS',
     'NEQUALS',
+    'PASSIGN',
+    'LASSIGN',
+    'MASSIGN',
+    'DASSIGN'
+    'LEQUALS'
     'LEQUALS',
     'MEQUALS',
 # OPERATORS
@@ -83,6 +88,12 @@ t_EQUALS    = '=='
 t_NEQUALS   = '!='
 t_LEQUALS   = '<='
 t_MEQUALS   = '>='
+
+t_PASSIGN   = '+='
+t_LASSIGN   = '-='
+t_MASSIGN   = '*='
+t_DASSIGN = '/='
+
 # Operator rules
 t_PLUS      = r'\+'
 t_MINUS     = '-'
