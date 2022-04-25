@@ -1,4 +1,4 @@
-from ply.lex import lex
+import ply.lex as lex
 
 reserved = {
     'class' : 'CLASS',
@@ -8,8 +8,8 @@ reserved = {
     'Float' : 'FLOAT',
     'String': 'STRING',
     'Bool'  : 'BOOL',
-    'True'  : 'TRUE',
-    'False' : 'FALSE',
+    'true'  : 'TRUE',
+    'false' : 'FALSE',
     'print' : 'PRINT',
     'if'    : 'IF',
     'else'  : 'ELSE',
@@ -30,7 +30,7 @@ tokens = [
     'RCURLY',
     'LBRACK',
     'RBRACK',
-    'QUOTE',
+    # 'QUOTE',
     'BSLASH',
     'ARROW',
 # RELATIONAL OPERATORS
@@ -55,22 +55,21 @@ tokens = [
 # REGEX
     'ID',
     'NUMBER',
-    'DECIMAL',
+    'FLOATLIT',
     'STRINGLIT'
 ] + list(reserved.values())
 
 # Symbol rules
-t_NLINE     = r'\n'
 t_COLON     = ':'
 t_COMMA     = ','
-t_DOT    = '.'
+t_DOT    = '\.'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
 t_LCURLY    = r'\{'
 t_RCURLY    = r'\}'
 t_LBRACK    = r'\['
 t_RBRACK    = r'\]'
-t_QUOTE     = '"'
+# t_QUOTE     = '"'
 t_BSLASH    = r'\\'
 t_ARROW     = '->'
 # Relational operator rules
@@ -107,30 +106,37 @@ def t_ID(t):
     t.type = reserved.get(t.value, 'ID')     # Check for reserved words
     return t
 
+def t_FLOATLIT(t):
+    r'\d+.\d+'
+    t.type = "FLOATLIT"
+    t.value = float(t.value)
+    return t
+
 def t_NUMBER(t):
     r'\d+'
     t.value = int(t.value)
     return t
 
-def t_DECIMAL(t):
-    r'\d+.\d+'
-    t.value = float(t.value)
-    return t
-
 def t_STRINGLIT(t):
     # [^"] = Every character except "
     r'\"[^"]*\"'
-    t.value = t.value[1:-1]     # remove quotes
+    t.type = 'STRINGLIT'
+    t.value = t.value     # remove quotes
     return t
 
+def t_NLINE(t):
+    r'\n+'
+    t.lexer.lineno += len(t.value)
+    t.value = 'newline'
+    return t
 
 # Ignored characters
 t_ignore = ' \t'
 
 # Error handler for illegal characters
 def t_error(t):
-    # print(f'Illegal character {t.value[0]!r}')
+    print("invalid character: ", t.value[0])
     t.lexer.skip(1)
 
-lexer = lex()
+lexer = lex.lex()
 

@@ -1,16 +1,21 @@
 from parser import parser
+from lexer import lexer
 import glob
 
 
 def run_test(filename):
-    print("Parsing code")
+    print("Parsing code for test @ " + filename)
 
     file = open(filename)
     s = file.read()
     file.close()
 
     parser.parse(s)
-    print('Parsed Successfully')
+    lexer.lineno = 1
+
+
+
+    print('\n')
 
 
 def run_tests():

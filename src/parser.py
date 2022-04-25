@@ -27,25 +27,23 @@ def p_program_options(p):
 
 # base block: allows statements
 def p_block(p):
-    ''' block : LCURLY repeat_block RCURLY'''
+    ''' block : LCURLY NLINE repeat_block RCURLY'''
 
 
 def p_repeat_block(p):
     ''' repeat_block : statement NLINE repeat_block
-        | statement NLINE
-        | NLINE'''
+        |'''
 
 
 # init block: allows statements and declarations
 
 def p_init_block(p):
-    ''' init_block : LCURLY repeat_init_block RCURLY'''
+    ''' init_block : LCURLY NLINE repeat_init_block RCURLY'''
 
 
 def p_repeat_init_block(p):
     ''' repeat_init_block : init_block_content NLINE repeat_init_block
-        | init_block_content NLINE
-        | NLINE'''
+        |'''
 
 
 def p_init_block_content(p):
@@ -56,18 +54,17 @@ def p_init_block_content(p):
 # class block: allows functions and declarations
 
 def p_class_block(p):
-    ''' class_block : LCURLY repeat_class_block RCURLY'''
+    ''' class_block : LCURLY NLINE repeat_class_block RCURLY'''
 
 
 def p_repeat_class_block(p):
     ''' repeat_class_block : class_block_content NLINE repeat_class_block
-        | class_block_content NLINE
-        | NLINE'''
+        |'''
 
 
 def p_class_block_content(p):
-    ''' class_block_content : function
-        | declaration'''
+    ''' class_block_content : declaration
+        | function'''
 
 
 # blocks --------------------------------------------------
@@ -95,39 +92,32 @@ def p_param(p):
 # variables --------------------------------------------------
 
 def p_variable(p):
-    ''' variable : VAR ID variable_content '''
-
-
-def p_variable_content(p):
-    ''' variable_content : COLON type
-        |'''
+    ''' variable : VAR ID
+        | VAR ID COLON type'''
 
 
 def p_type(p):
-    ''' type : ID
-        | primitive
-        | LBRACK primitive RBRACK '''
+    ''' type : primitive
+        | ID
+        | LBRACK primitive RBRACK
+        | LBRACK ID RBRACK''' #might need to remove this array of custom types
 
 
 def p_primitive(p):
     ''' primitive : INT
         | FLOAT
         | STRING
-        | BOOL '''
+        | BOOL'''
 
 
 def p_string(p):
-    ''' string : QUOTE repeat_string QUOTE'''
-
-
-def p_repeat_string(p):
-    ''' repeat_string : string_expr
-        | string_expr repeat_string'''
+    ''' string : string_expr
+        | string_expr string'''
 
 
 def p_string_expr(p):
     ''' string_expr : STRINGLIT
-        | BSLASH LPAREN expression RPAREN '''
+        | BSLASH LPAREN expression RPAREN'''
 
 
 # variables --------------------------------------------------
@@ -154,15 +144,12 @@ def p_function_content(p):
 
 def p_declaration(p):
     ''' declaration : variable ASSIGN expression
-        | variable ASSIGN array '''
+        | variable ASSIGN array
+        | variable'''
 
 
 def p_array(p):
     ''' array : LBRACK repeat_array RBRACK'''
-
-
-def p_error(p):
-    print("syntax error, at char: ", p.value[0])
 
 
 def p_repeat_array(p):
@@ -177,7 +164,8 @@ def p_repeat_array(p):
 def p_bool_expr(p):
     ''' bool_expr : relational_exp
         | relational_exp AND bool_expr
-        | relational_exp OR bool_expr '''
+        | relational_exp OR bool_expr
+        | ID'''
 
 
 def p_relational_exp(p):
@@ -218,12 +206,12 @@ def p_call_array(p):
 
 def p_constant(p):
     ''' constant : dots
-        | DECIMAL
+        | FLOATLIT
         | BOOL
         | NUMBER
         | string
         | call
-        | call_array '''
+        | call_array'''
 
 
 # we might need this kind of syntax for easier semantic eval
@@ -298,10 +286,18 @@ def p_if(p):
     ''' if : IF LPAREN bool_expr RPAREN block if_content'''
 
 def p_if_content(p):
-    ''' if_content : ELSE IF
+    ''' if_content : ELSE if
         | ELSE block
         |'''
 
+
+def p_error(p):
+    if p == None:
+        token = "end of file"
+    else:
+        token = f"{p.type}({p.value}) on line {p.lineno}"
+
+    print(f"Syntax error: Unexpected {token}")
 
 # statements --------------------------------------------------
 

@@ -155,10 +155,6 @@ func main() {
     var cat = Cat("Tom", 6)
 
     var animals: [Animal] = [dog1, dog2, cat]
-
-    for animal in animals {
-        animal.sleep()
-    }
     
     var existed: String = ""
     if (dog1.age < dog2.age) {
