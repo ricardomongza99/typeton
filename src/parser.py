@@ -29,13 +29,13 @@ def p_init_block_content(p):
 #class block: allows functions and declarations
 
 def p_class_block(p):
-    ''' init_block : LCURLY repeat_class_block NLINE RCURLY'''
+    ''' class_block : LCURLY repeat_class_block NLINE RCURLY'''
 
 def p_repeat_class_block(p):
     ''' repeat_class_block : class_block_content repeat_class_block'''
 
 def p_class_block_content(p):
-    ''' class_block_content : statement | function | '''
+    ''' class_block_content : function | declaration | '''
 
 #blocks --------------------------------------------------
 
