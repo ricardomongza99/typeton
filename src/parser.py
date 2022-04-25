@@ -56,6 +56,7 @@ def p_param(p):
 
 #params --------------------------------------------------
 
+#program --------------------------------------------------
 
 def p_program(p):
     ''' program : repeat_program '''
@@ -67,6 +68,31 @@ def p_program_options(p):
     ''' program_options : class | function | declaration | '''
 
 
+#program --------------------------------------------------
 
+#variables --------------------------------------------------
+
+def p_variable(p):
+    ''' variable : VAR ID variable_content '''
+
+def p_variable_content(p):
+    ''' variable_content : COLON type |  '''
+
+def p_type(p):
+    ''' type : ID | primitive | LBRACKET primitive RBRACKET '''
+
+def p_primitive(p):
+    ''' primitive : INT | FLOAT | STRING | BOOL '''
+
+def p_string(p):
+    ''' string : QUOTE repeat_string QUOTE'''
+
+def p_repeat_string(p):
+    ''' repeat_string : string_expr | string_expr repeat_string'''
+
+def p_string_expr(p):
+    ''' string_expr : string | BSLASH LPAREN expression RPAREN '''
+
+#variables --------------------------------------------------
 
 parser = yacc.yacc(debug=True)
