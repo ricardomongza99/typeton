@@ -19,7 +19,7 @@ def run_test(filename):
 
 
 def run_tests():
-    test_files = glob.glob("./tests/*/*.ld")
+    test_files = glob.glob("./tests/*/*.ty")
     print("Running all tests")
 
     for fileName in test_files:
