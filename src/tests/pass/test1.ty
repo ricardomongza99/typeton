@@ -1,0 +1,49 @@
+
+
+class Animal {
+    var x: Int
+    var w: String = "hello"
+
+    func sleep() {
+            print("\(name) is sleeping")
+    }
+
+    var w: String = "hello"
+}
+
+
+func sum(num1: Int, num2: Int) -> Int {
+    return num1 + num2
+}
+
+func main() {
+    var myDecimal = 5.44
+    var nice = 10
+    var str = "h"
+
+    var items: [Int] = [1, 2, 3, 4, 5]
+
+    if ( 4 + 1 < 5 && true) {
+        print("First")
+    } else if (2 == 3) {
+        print("Second")
+    } else {
+        print("Third")
+    }
+
+    var counter = 4
+
+    while (counter < 10) {
+        print(counter)
+        counter += 1
+    }
+
+    var items: [Int] = [1, 2, 3, 4, 5]
+    
+    var i = 0
+
+    while (counter < 10) {
+        print(items[i])
+        i += 1
+    }
+}

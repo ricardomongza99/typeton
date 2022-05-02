@@ -42,5 +42,4 @@ func main() {
     }
 
     print("\(dog1.name) is \(existed) than \(dog2.name)")
-
 }
