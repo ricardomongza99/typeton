@@ -20,7 +20,7 @@ func main() {
 
     var items: [Int] = [1, 2, 3, 4, 5]
 
-    if ( 4 + 1 < 5 && true) {
+    if (4 + 1 < 5 && true) {
         print("First")
     } else if (2 == 3) {
         print("Second")

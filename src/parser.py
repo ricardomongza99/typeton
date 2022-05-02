@@ -166,10 +166,10 @@ def p_bool_expr(p):
         | relational_exp AND bool_expr
         | relational_exp OR bool_expr'''
 
+
 def p_relational_exp(p):
     ''' relational_exp : expression comp expression
-        | TRUE
-        | FALSE'''
+        | expression'''
 
 
 def p_comp(p):
@@ -205,7 +205,8 @@ def p_call_array(p):
 def p_constant(p):
     ''' constant : dots
         | FLOATLIT
-        | BOOL
+        | TRUE
+        | FALSE
         | NUMBER
         | string
         | call
@@ -255,8 +256,7 @@ def p_display(p):
 
 def p_return(p):
     ''' return : RETURN
-        | RETURN bool_expr
-        | RETURN expression '''
+        | RETURN bool_expr'''
 
 
 def p_assign(p):
