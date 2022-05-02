@@ -164,9 +164,7 @@ def p_repeat_array(p):
 def p_bool_expr(p):
     ''' bool_expr : relational_exp
         | relational_exp AND bool_expr
-        | relational_exp OR bool_expr
-        | ID'''
-
+        | relational_exp OR bool_expr'''
 
 def p_relational_exp(p):
     ''' relational_exp : expression comp expression
@@ -180,7 +178,7 @@ def p_comp(p):
         | EQUALS
         | NEQUALS
         | LEQUALS
-        | MEQUALS '''
+        | MEQUALS'''
 
 
 def p_expression(p):
