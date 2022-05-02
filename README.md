@@ -1,5 +1,5 @@
 # 🦭 TYPETON
-An object oriented language developed by two undergrads from Tec de Monterrey.
+An object oriented language developed by two rockstar engineering students at Tec de Monterrey.
 
 ## ⭐️ FEATURES
 - Local and global variables
@@ -155,10 +155,6 @@ func main() {
     var cat = Cat("Tom", 6)
 
     var animals: [Animal] = [dog1, dog2, cat]
-
-    for animal in animals {
-        animal.sleep()
-    }
     
     var existed: String = ""
     if (dog1.age < dog2.age) {
