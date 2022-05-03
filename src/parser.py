@@ -76,8 +76,8 @@ def p_class_block1(p):
 
 def p_class_block2(p):
     '''
-    class_block2 : NLINE
-                 | NLINE class_block1
+    class_block2 : NLINE class_block1
+                 | NLINE
     '''
 
 def p_class_block3(p):
@@ -85,6 +85,34 @@ def p_class_block3(p):
     class_block3 : function
                  | declaration
     '''
+
+
+def p_init_block(p):
+    '''
+    init_block : LCURLY init_block1 RCURLY
+    '''
+
+
+def p_init_block1(p):
+    '''
+    init_block1 : init_block2
+                | init_block3 init_block2
+    '''
+
+
+def p_init_block2(p):
+    '''
+    init_block2 : NLINE init_block1
+                | NLINE
+    '''
+
+
+def p_init_block3(p):
+    '''
+    init_block3 : statement
+                | declaration
+    '''
+
 
 def p_block(p):
     # base block: allows statements
@@ -95,20 +123,6 @@ def p_repeat_block(p):
     ''' repeat_block : statement NLINE repeat_block
         |'''
 
-
-def p_init_block(p):
-    # allows statements and declarations
-    ''' init_block : LCURLY NLINE repeat_init_block RCURLY'''
-
-
-def p_repeat_init_block(p):
-    ''' repeat_init_block : init_block_content NLINE repeat_init_block
-        |'''
-
-
-def p_init_block_content(p):
-    ''' init_block_content : statement
-        | declaration'''
 
 
 
