@@ -169,10 +169,10 @@ func main() {
 ```
 
 ## 🔍 SYNTAX DIAGRAM
-![Program](/syntax_diagram/program.png)
-![Top level](/syntax_diagram/top_level.png)
-![Params](/syntax_diagram/params.png)
-![Blocks](/syntax_diagram/blocks.png)
-![Statements](/syntax_diagram/statements.png)
-![Expressions](/syntax_diagram/expressions.png)
-![Variables](/syntax_diagram/variables.png)
+![Program](/diagram/program.png)
+![Top level](/diagram/top_level.png)
+![Params](/diagram/params.png)
+![Blocks](/diagram/blocks.png)
+![Statements](/diagram/statements.png)
+![Expressions](/diagram/expressions.png)
+![Variables](/diagram/variables.png)
