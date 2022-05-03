@@ -63,6 +63,29 @@ def p_array1(p):
 
 # -- BLOCKS -----------------------
 
+def p_class_block(p):
+    '''
+    class_block : LCURLY class_block1 RCURLY
+    '''
+
+def p_class_block1(p):
+    '''
+    class_block1 : class_block2
+                 | class_block3 class_block2
+    '''
+
+def p_class_block2(p):
+    '''
+    class_block2 : NLINE
+                 | NLINE class_block1
+    '''
+
+def p_class_block3(p):
+    '''
+    class_block3 : function
+                 | declaration
+    '''
+
 def p_block(p):
     # base block: allows statements
     ''' block : LCURLY NLINE repeat_block RCURLY'''
@@ -88,19 +111,6 @@ def p_init_block_content(p):
         | declaration'''
 
 
-def p_class_block(p):
-    # class block: allows functions and declarations
-    ''' class_block : LCURLY NLINE repeat_class_block RCURLY'''
-
-
-def p_repeat_class_block(p):
-    ''' repeat_class_block : class_block_content NLINE repeat_class_block
-        |'''
-
-
-def p_class_block_content(p):
-    ''' class_block_content : declaration
-        | function'''
 
 
 # -- PARAMS -----------------------
