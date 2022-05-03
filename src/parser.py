@@ -1,7 +1,8 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
 
-# program --------------------------------------------------
+
+# -- PROGRAM -----------------------
 
 def p_program(p):
     ''' program : repeat_program '''
@@ -19,14 +20,10 @@ def p_program_options(p):
         |'''
 
 
-# program --------------------------------------------------
+# -- BLOCKS -----------------------
 
-
-
-# blocks --------------------------------------------------
-
-# base block: allows statements
 def p_block(p):
+    # base block: allows statements
     ''' block : LCURLY NLINE repeat_block RCURLY'''
 
 
@@ -35,9 +32,8 @@ def p_repeat_block(p):
         |'''
 
 
-# init block: allows statements and declarations
-
 def p_init_block(p):
+    # allows statements and declarations
     ''' init_block : LCURLY NLINE repeat_init_block RCURLY'''
 
 
@@ -51,9 +47,8 @@ def p_init_block_content(p):
         | declaration'''
 
 
-# class block: allows functions and declarations
-
 def p_class_block(p):
+    # class block: allows functions and declarations
     ''' class_block : LCURLY NLINE repeat_class_block RCURLY'''
 
 
@@ -67,10 +62,7 @@ def p_class_block_content(p):
         | function'''
 
 
-# blocks --------------------------------------------------
-
-
-# params --------------------------------------------------
+# -- PARAMS -----------------------
 
 
 def p_params(p):
@@ -87,9 +79,7 @@ def p_param(p):
     ''' param : ID COLON type'''
 
 
-# params --------------------------------------------------
-
-# variables --------------------------------------------------
+# -- VARIABLES -----------------------
 
 def p_variable(p):
     ''' variable : VAR ID
@@ -120,9 +110,7 @@ def p_string_expr(p):
         | BSLASH LPAREN expression RPAREN'''
 
 
-# variables --------------------------------------------------
-
-# top_level --------------------------------------------------
+# -- TOP LEVEL -----------------------
 
 def p_class(p):
     ''' class : CLASS ID class_content class_block'''
@@ -157,9 +145,7 @@ def p_repeat_array(p):
         | expression COMMA repeat_array '''
 
 
-# top_level --------------------------------------------------
-
-# expressions --------------------------------------------------
+# -- EXPRESSIONS -----------------------
 
 def p_bool_expr(p):
     ''' bool_expr : relational_exp
@@ -213,8 +199,8 @@ def p_constant(p):
         | call_array'''
 
 
-# we might need this kind of syntax for easier semantic eval
 def p_dots(p):
+    # we might need this kind of syntax for easier semantic eval
     ''' dots : ID
         | repeat_dots'''
 
@@ -228,9 +214,7 @@ def p_right_id(p):
         | repeat_dots'''
 
 
-# expressions --------------------------------------------------
-
-# statements --------------------------------------------------
+# -- STATEMENTS -----------------------
 
 def p_statement(p):
     ''' statement : display
@@ -270,8 +254,10 @@ def p_some_op(p):
         | MASSIGN
         | DASSIGN'''
 
+
 def p_call(p):
     ''' call : ID LPAREN repeat_call RPAREN'''
+
 
 def p_repeat_call(p):
     ''' repeat_call : expression
@@ -279,9 +265,9 @@ def p_repeat_call(p):
         |'''
 
 
-
 def p_if(p):
     ''' if : IF LPAREN bool_expr RPAREN block if_content'''
+
 
 def p_if_content(p):
     ''' if_content : ELSE if
@@ -296,8 +282,6 @@ def p_error(p):
         token = f"{p.type}({p.value}) on line {p.lineno}"
 
     print(f"Syntax error: Unexpected {token}")
-
-# statements --------------------------------------------------
 
 
 parser = yacc.yacc(debug=True)
