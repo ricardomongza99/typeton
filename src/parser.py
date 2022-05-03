@@ -4,17 +4,20 @@ from lexer import lexer, tokens
 
 # -- PROGRAM -----------------------
 
+
 def p_program(p):
     '''
     program : program1 program
             | program1
     '''
 
+
 def p_program1(p):
     '''
     program1 : body NLINE
              | NLINE
     '''
+
 
 def p_body(p):
     '''
@@ -63,10 +66,12 @@ def p_array1(p):
 
 # -- BLOCKS -----------------------
 
+
 def p_class_block(p):
     '''
     class_block : LCURLY class_block1 RCURLY
     '''
+
 
 def p_class_block1(p):
     '''
@@ -74,11 +79,13 @@ def p_class_block1(p):
                  | class_block3 class_block2
     '''
 
+
 def p_class_block2(p):
     '''
     class_block2 : NLINE class_block1
                  | NLINE
     '''
+
 
 def p_class_block3(p):
     '''
@@ -115,16 +122,23 @@ def p_init_block3(p):
 
 
 def p_block(p):
-    # base block: allows statements
-    ''' block : LCURLY NLINE repeat_block RCURLY'''
+    '''
+    block : LCURLY block1 RCURLY
+    '''
 
 
-def p_repeat_block(p):
-    ''' repeat_block : statement NLINE repeat_block
-        |'''
+def p_block1(p):
+    '''
+    block1 : block2
+           | statement block2
+    '''
 
 
-
+def p_block2(p):
+    '''
+    block2 : NLINE block1
+           | NLINE
+    '''
 
 
 # -- PARAMS -----------------------
