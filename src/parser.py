@@ -64,6 +64,29 @@ def p_array1(p):
     '''
 
 
+# -- PARAMS -----------------------
+
+
+def p_params(p):
+    '''
+    params : LPAREN params1 RPAREN
+           | LPAREN RPAREN
+    '''
+
+
+def p_params1(p):
+    '''
+    params1 : param
+            | param COMMA params1
+    '''
+
+
+def p_param(p):
+    '''
+    param : ID COLON type
+    '''
+
+
 # -- BLOCKS -----------------------
 
 
@@ -139,23 +162,6 @@ def p_block2(p):
     block2 : NLINE block1
            | NLINE
     '''
-
-
-# -- PARAMS -----------------------
-
-
-def p_params(p):
-    ''' params : LPAREN params_content RPAREN '''
-
-
-def p_params_content(p):
-    ''' params_content : param
-        | param COMMA params_content
-        |'''
-
-
-def p_param(p):
-    ''' param : ID COLON type'''
 
 
 # -- VARIABLES -----------------------
