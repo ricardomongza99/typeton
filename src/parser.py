@@ -164,35 +164,65 @@ def p_block2(p):
     '''
 
 
-# -- VARIABLES -----------------------
+# -- STATEMENTS -----------------------
 
-def p_variable(p):
-    ''' variable : VAR ID
-        | VAR ID COLON type'''
-
-
-def p_type(p):
-    ''' type : primitive
-        | ID
-        | LBRACK primitive RBRACK
-        | LBRACK ID RBRACK''' #might need to remove this array of custom types
+def p_statement(p):
+    ''' statement : display
+        | if
+        | while
+        | input
+        | assign
+        | call
+        | return'''
 
 
-def p_primitive(p):
-    ''' primitive : INT
-        | FLOAT
-        | STRING
-        | BOOL'''
+def p_while(p):
+    ''' while : WHILE LPAREN bool_expr RPAREN block'''
 
 
-def p_string(p):
-    ''' string : string_expr
-        | string_expr string'''
+def p_input(p):
+    ''' input : variable ASSIGN INPUT LPAREN string RPAREN '''
 
 
-def p_string_expr(p):
-    ''' string_expr : STRINGLIT
-        | BSLASH LPAREN expression RPAREN'''
+def p_display(p):
+    ''' display : PRINT LPAREN expression RPAREN '''
+
+
+def p_return(p):
+    ''' return : RETURN
+        | RETURN bool_expr'''
+
+
+def p_assign(p):
+    ''' assign : ID some_op expression '''
+
+
+def p_some_op(p):
+    ''' some_op : ASSIGN
+        | PASSIGN
+        | LASSIGN
+        | MASSIGN
+        | DASSIGN'''
+
+
+def p_call(p):
+    ''' call : ID LPAREN repeat_call RPAREN'''
+
+
+def p_repeat_call(p):
+    ''' repeat_call : expression
+        | expression COMMA repeat_call
+        |'''
+
+
+def p_if(p):
+    ''' if : IF LPAREN bool_expr RPAREN block if_content'''
+
+
+def p_if_content(p):
+    ''' if_content : ELSE if
+        | ELSE block
+        |'''
 
 
 # -- EXPRESSIONS -----------------------
@@ -264,65 +294,36 @@ def p_right_id(p):
         | repeat_dots'''
 
 
-# -- STATEMENTS -----------------------
-
-def p_statement(p):
-    ''' statement : display
-        | if
-        | while
-        | input
-        | assign
-        | call
-        | return'''
+# -- VARIABLES -----------------------
 
 
-def p_while(p):
-    ''' while : WHILE LPAREN bool_expr RPAREN block'''
+def p_variable(p):
+    ''' variable : VAR ID
+        | VAR ID COLON type'''
 
 
-def p_input(p):
-    ''' input : variable ASSIGN INPUT LPAREN string RPAREN '''
+def p_type(p):
+    ''' type : primitive
+        | ID
+        | LBRACK primitive RBRACK
+        | LBRACK ID RBRACK''' #might need to remove this array of custom types
 
 
-def p_display(p):
-    ''' display : PRINT LPAREN expression RPAREN '''
+def p_primitive(p):
+    ''' primitive : INT
+        | FLOAT
+        | STRING
+        | BOOL'''
 
 
-def p_return(p):
-    ''' return : RETURN
-        | RETURN bool_expr'''
+def p_string(p):
+    ''' string : string_expr
+        | string_expr string'''
 
 
-def p_assign(p):
-    ''' assign : ID some_op expression '''
-
-
-def p_some_op(p):
-    ''' some_op : ASSIGN
-        | PASSIGN
-        | LASSIGN
-        | MASSIGN
-        | DASSIGN'''
-
-
-def p_call(p):
-    ''' call : ID LPAREN repeat_call RPAREN'''
-
-
-def p_repeat_call(p):
-    ''' repeat_call : expression
-        | expression COMMA repeat_call
-        |'''
-
-
-def p_if(p):
-    ''' if : IF LPAREN bool_expr RPAREN block if_content'''
-
-
-def p_if_content(p):
-    ''' if_content : ELSE if
-        | ELSE block
-        |'''
+def p_string_expr(p):
+    ''' string_expr : STRINGLIT
+        | BSLASH LPAREN expression RPAREN'''
 
 
 def p_error(p):
