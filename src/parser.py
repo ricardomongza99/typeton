@@ -249,70 +249,97 @@ def p_if2(p):
 # -- EXPRESSIONS -----------------------
 
 def p_bool_expr(p):
-    ''' bool_expr : relational_exp
-        | relational_exp AND bool_expr
-        | relational_exp OR bool_expr'''
+    '''
+    bool_expr : relational_exp
+              | relational_exp AND bool_expr
+              | relational_exp OR bool_expr
+    '''
 
 
 def p_relational_exp(p):
-    ''' relational_exp : expression comp expression
-        | expression'''
+    '''
+    relational_exp : expression comp expression
+                   | expression
+    '''
 
 
 def p_comp(p):
-    ''' comp : LESS
-        | MORE
-        | EQUALS
-        | NEQUALS
-        | LEQUALS
-        | MEQUALS'''
+    '''
+    comp : LESS
+         | MORE
+         | EQUALS
+         | NEQUALS
+         | LEQUALS
+         | MEQUALS
+    '''
 
 
 def p_expression(p):
-    ''' expression : term
-    | term PLUS term
-    | term MINUS term'''
+    '''
+    expression : term
+               | term PLUS term
+               | term MINUS term
+    '''
 
 
 def p_term(p):
-    ''' term : factor
-      | factor DIVIDE factor
-      | factor TIMES factor'''
+    '''
+    term : factor
+         | factor TIMES factor
+         | factor DIVIDE factor
+    '''
 
 
 def p_factor(p):
-    ''' factor : constant
-        | COLON LPAREN expression RPAREN'''
+    '''
+    factor : constant
+           | COLON LPAREN expression RPAREN
+    '''
 
 
 def p_call_array(p):
-    ''' call_array : ID LBRACK expression RBRACK '''
+    '''
+    call_array : ID LBRACK expression RBRACK
+    '''
 
 
 def p_constant(p):
-    ''' constant : dots
-        | FLOATLIT
-        | TRUE
-        | FALSE
-        | NUMBER
-        | string
-        | call
-        | call_array'''
+    '''
+    constant : constant2
+             | NUMBER
+             | FLOATLIT
+             | TRUE
+             | FALSE
+             | string
+             | call
+             | call_array
+    '''
 
 
-def p_dots(p):
-    # we might need this kind of syntax for easier semantic eval
-    ''' dots : ID
-        | repeat_dots'''
+def p_constant2(p):
+    '''
+    constant2 : ID
+              | ID PERIOD constant2
+    '''
 
-
-def p_repeat_dots(p):
-    ''' repeat_dots : ID DOT right_id'''
-
-
-def p_right_id(p):
-    ''' right_id : ID
-        | repeat_dots'''
+# Sorry Paco, I changed the 'DOT' Token to 'PERIOD' and commented out
+# this chunk of code. Maybe you are right, for now, let's just keep it simple :)
+#
+# def p_dots(p):
+#     # we might need this kind of syntax for easier semantic eval
+#     '''
+#     dots : ID
+#          | repeat_dots
+#     '''
+#
+#
+# def p_repeat_dots(p):
+#     ''' repeat_dots : ID DOT right_id'''
+#
+#
+# def p_right_id(p):
+#     ''' right_id : ID
+#         | repeat_dots'''
 
 
 # -- VARIABLES -----------------------
