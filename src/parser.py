@@ -5,19 +5,19 @@ from lexer import lexer, tokens
 # -- PROGRAM -----------------------
 
 def p_program(p):
-    ''' program : repeat_program '''
+    '''
+    program : body NLINE program
+            | body NLINE
+            | NLINE program
+            | NLINE
+    '''
 
-
-def p_repeat_program(p):
-    ''' repeat_program : program_options NLINE repeat_program
-        |'''
-
-
-def p_program_options(p):
-    ''' program_options : class
-        | function
-        | declaration
-        |'''
+def p_body(p):
+    '''
+    body : class
+         | function
+         | declaration
+    '''
 
 
 # -- BLOCKS -----------------------
@@ -276,7 +276,7 @@ def p_if_content(p):
 
 
 def p_error(p):
-    if p == None:
+    if p is None:
         token = "end of file"
     else:
         token = f"{p.type}({p.value}) on line {p.lineno}"
