@@ -24,6 +24,43 @@ def p_body(p):
     '''
 
 
+# -- TOP LEVEL -----------------------
+
+def p_class(p):
+    '''
+    class : CLASS ID class_block
+          | CLASS ID COLON ID class_block
+    '''
+
+
+def p_function(p):
+    '''
+    function : FUNC ID params init_block
+             | FUNC ID params ARROW primitive init_block
+    '''
+
+
+def p_declaration(p):
+    '''
+    declaration : variable ASSIGN expression
+                | variable ASSIGN array
+                | variable
+    '''
+
+
+def p_array(p):
+    '''
+    array : LBRACK array1 RBRACK
+    '''
+
+
+def p_array1(p):
+    '''
+    array1 : expression COMMA array1
+           | expression
+    '''
+
+
 # -- BLOCKS -----------------------
 
 def p_block(p):
@@ -112,41 +149,6 @@ def p_string(p):
 def p_string_expr(p):
     ''' string_expr : STRINGLIT
         | BSLASH LPAREN expression RPAREN'''
-
-
-# -- TOP LEVEL -----------------------
-
-def p_class(p):
-    ''' class : CLASS ID class_content class_block'''
-
-
-def p_class_content(p):
-    ''' class_content : COLON ID
-        |'''
-
-
-def p_function(p):
-    ''' function : FUNC ID params function_content init_block'''
-
-
-def p_function_content(p):
-    ''' function_content : ARROW primitive
-        |'''
-
-
-def p_declaration(p):
-    ''' declaration : variable ASSIGN expression
-        | variable ASSIGN array
-        | variable'''
-
-
-def p_array(p):
-    ''' array : LBRACK repeat_array RBRACK'''
-
-
-def p_repeat_array(p):
-    ''' repeat_array : expression
-        | expression COMMA repeat_array '''
 
 
 # -- EXPRESSIONS -----------------------
