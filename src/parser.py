@@ -346,32 +346,43 @@ def p_constant2(p):
 
 
 def p_variable(p):
-    ''' variable : VAR ID
-        | VAR ID COLON type'''
+    '''
+    variable : VAR ID
+             | VAR ID COLON type
+    '''
 
 
 def p_type(p):
-    ''' type : primitive
-        | ID
-        | LBRACK primitive RBRACK
-        | LBRACK ID RBRACK''' #might need to remove this array of custom types
+    # TODO: might need to remove the array of custom types
+    '''
+    type : ID
+         | primitive
+         | LBRACK primitive RBRACK
+         | LBRACK ID RBRACK
+    '''
 
 
 def p_primitive(p):
-    ''' primitive : INT
-        | FLOAT
-        | STRING
-        | BOOL'''
+    '''
+    primitive : INT
+              | FLOAT
+              | STRING
+              | BOOL
+    '''
 
 
 def p_string(p):
-    ''' string : string_expr
-        | string_expr string'''
+    '''
+    string : string_expr
+           | string_expr string
+    '''
 
 
 def p_string_expr(p):
-    ''' string_expr : STRINGLIT
-        | BSLASH LPAREN expression RPAREN'''
+    '''
+    string_expr : STRINGLIT
+                | BSLASH LPAREN expression RPAREN
+    '''
 
 
 def p_error(p):
