@@ -167,62 +167,83 @@ def p_block2(p):
 # -- STATEMENTS -----------------------
 
 def p_statement(p):
-    ''' statement : display
-        | if
-        | while
-        | input
-        | assign
-        | call
-        | return'''
+    '''
+    statement : display
+              | if
+              | while
+              | input
+              | assign
+              | call
+              | return
+    '''
 
 
 def p_while(p):
-    ''' while : WHILE LPAREN bool_expr RPAREN block'''
+    '''
+    while : WHILE LPAREN bool_expr RPAREN block
+    '''
 
 
 def p_input(p):
-    ''' input : variable ASSIGN INPUT LPAREN string RPAREN '''
+    '''
+    input : variable ASSIGN INPUT LPAREN string RPAREN
+    '''
 
 
 def p_display(p):
-    ''' display : PRINT LPAREN expression RPAREN '''
+    '''
+    display : PRINT LPAREN expression RPAREN
+    '''
 
 
 def p_return(p):
-    ''' return : RETURN
-        | RETURN bool_expr'''
+    '''
+    return : RETURN
+           | RETURN bool_expr
+    '''
 
 
 def p_assign(p):
-    ''' assign : ID some_op expression '''
+    '''
+    assign : ID assign1 expression
+    '''
 
 
-def p_some_op(p):
-    ''' some_op : ASSIGN
-        | PASSIGN
-        | LASSIGN
-        | MASSIGN
-        | DASSIGN'''
+def p_assign1(p):
+    '''
+    assign1 : ASSIGN
+            | PASSIGN
+            | LASSIGN
+            | MASSIGN
+            | DASSIGN
+    '''
 
 
 def p_call(p):
-    ''' call : ID LPAREN repeat_call RPAREN'''
+    '''
+    call : ID LPAREN call1 RPAREN
+    '''
 
 
-def p_repeat_call(p):
-    ''' repeat_call : expression
-        | expression COMMA repeat_call
-        |'''
+def p_call1(p):
+    '''
+    call1 : expression
+          | expression COMMA call1
+    '''
 
 
 def p_if(p):
-    ''' if : IF LPAREN bool_expr RPAREN block if_content'''
+    '''
+    if : IF LPAREN bool_expr RPAREN block
+       | IF LPAREN bool_expr RPAREN block if2
+    '''
 
 
-def p_if_content(p):
-    ''' if_content : ELSE if
+def p_if2(p):
+    '''
+    if2 : ELSE if
         | ELSE block
-        |'''
+    '''
 
 
 # -- EXPRESSIONS -----------------------
