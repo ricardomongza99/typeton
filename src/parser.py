@@ -6,10 +6,14 @@ from lexer import lexer, tokens
 
 def p_program(p):
     '''
-    program : body NLINE program
-            | body NLINE
-            | NLINE program
-            | NLINE
+    program : program1 program
+            | program1
+    '''
+
+def p_program1(p):
+    '''
+    program1 : body NLINE
+             | NLINE
     '''
 
 def p_body(p):
