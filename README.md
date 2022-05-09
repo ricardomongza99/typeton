@@ -102,7 +102,7 @@ print(userAge)
 print("You are \(userAge) years old!")
 ```
 
-## 📝 CODE EXAMPLES
+## 👨‍💻 CODE EXAMPLES
 
 
 **Program 1**: Iterate over an array of integers
@@ -167,6 +167,30 @@ func main() {
 
 }
 ```
+
+## 📝 TODO
+- [x] 💍 Project proposal
+    - [x] Documentation
+    - [x] Syntax diagram
+- [x] 🪙 Lexical analysis
+- [x] 📖 Syntax analysis
+- [x] 🧠 Semantic analysis
+    - [x] Functions directory
+    - [x] Variable tables
+    - [x] Semantics cube
+- [ ] 🏭 Code generation 
+    - [ ] For arithmetic expressions
+    - [ ] For sequential blocks (ASSIGN, INPUT, ETC.)
+    - [ ] For conditional blocks (IF, ELSE, WHILE)
+    - [ ] For functions
+    - [ ] For arrays
+    - [ ] For objects
+- [ ] 🖥 Virtual Machine
+    - [ ] Memory for execution (Global memory, temporal memory, execution stack)
+    - [ ] Arithmetic expressions execution
+    - [ ] Sequential blocks execution
+    - [ ] Conditional blocks execution
+- [ ] 🏁 Documentation review
 
 ## 🔍 SYNTAX DIAGRAM
 ![Program](/diagram/program.png)
