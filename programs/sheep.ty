@@ -1,5 +1,5 @@
-i = 5
-j = 2
+var i = 5
+var j = 2
 
 func pig(int a, float b) {
     while (a < 5) {
