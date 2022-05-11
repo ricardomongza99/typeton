@@ -176,7 +176,7 @@ func main() {
 - [x] 📖 Syntax analysis
 - [x] 🧠 Semantic analysis
     - [x] Functions directory
-    - [x] Variable tables
+    - [ ] Variable tables
     - [x] Semantics cube
 - [ ] 🏭 Code generation 
     - [ ] For arithmetic expressions
