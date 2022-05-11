@@ -8,7 +8,7 @@ func pig(a: Int, b: Int) {
     }
 }
 
-func sheep(a: Int, b: Float) {
+func sheep(a: Int, b: Float) -> Int {
     a = 21
     b = a * i
     print("Baah")
