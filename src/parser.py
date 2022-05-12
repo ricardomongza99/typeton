@@ -395,7 +395,6 @@ def p_primitive(p):
     if p[-1] == '->':
         dir_func.set_type(p[1])
     elif p[-1] == ':':
-        print(p[1])
         dir_func.set_var_type(p[1])
 
 
