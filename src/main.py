@@ -1,4 +1,5 @@
 from semantic import run_tests, Cube
+from virtual import run_tests as run_memory
 from parser import parser, dir_func
 import os
 
@@ -26,4 +27,6 @@ def run_semantic_tests():
 
 
 if __name__ == '__main__':
+    run_semantic_tests()
+    run_memory()
     main()
