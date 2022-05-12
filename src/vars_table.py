@@ -11,7 +11,7 @@ class VarsTable:
     def __init__(self):
         self.variables = {}
 
-    def add(self, id_, type_, value):
+    def add(self, id_):
         """ Add Variable to `variables` dictionary if not existent """
         if self.variables.get(id_) is None:
             self.variables[id_] = Variable(type_, value)
