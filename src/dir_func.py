@@ -4,7 +4,7 @@ from vars_table import VarsTable
 # we use the underscore at the end convention `id_` and `type_
 
 
-class Function:
+class Func:
     def __init__(self, type_):
         self.type_ = type_
         self.vars_table = VarsTable()
@@ -24,7 +24,7 @@ class DirFunc:
         """ Add Function to `functions` dictionary if not existent """
         if self.functions.get(id_) is None:
             self.current_id = id_
-            self.functions[id_] = Function('Void')
+            self.functions[id_] = Func('Void')
 
     def set_type(self, type_):
         """ Sets current function type """
