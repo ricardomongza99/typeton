@@ -392,8 +392,11 @@ def p_primitive(p):
               | STRING
               | BOOL
     '''
-    if p[-1] == "->":
+    if p[-1] == '->':
         dir_func.set_type(p[1])
+    elif p[-1] == ':':
+        print(p[1])
+        dir_func.set_var_type(p[1])
 
 
 def p_string(p):

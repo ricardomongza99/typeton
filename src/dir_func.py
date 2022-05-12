@@ -33,6 +33,11 @@ class DirFunc:
     def add_variable(self, id_):
         self.current_func.vars_table.add(id_)
 
+    def set_var_type(self, type_):
+        # TODO: Remove if statement
+        if self.current_id == 'global':
+            self.current_func.vars_table.set_type(type_)
+
     def display(self, debug=False):
         print("-" * 20)
         print("DIRECTORY FUNCTIONS")
