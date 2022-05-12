@@ -15,6 +15,7 @@ class DirFunc:
         self.funcs = {}
         self.current_id = 'global'
         self.add('global')
+        self.is_func = True
 
     @property
     def current_func(self):
@@ -26,15 +27,20 @@ class DirFunc:
             self.current_id = id_
             self.funcs[id_] = Func('Void')
 
-    def set_type(self, type_):
-        """ Sets current Func type """
-        self.current_func.type_ = type_
-
     def add_var(self, id_):
+        """ Add Var to the current function's vars table """
         self.current_func.vars_table.add(id_)
 
-    def set_var_type(self, type_):
-        self.current_func.vars_table.set_type(type_)
+    def will_set_type(self, type_operator):
+        """ Prepares for assigning type. Sets `is_func` to true if operator is function related -> """
+        self.is_func = type_operator == '->'
+
+    def set_type(self, type_):
+        """ Sets corresponding type either to function or to variable"""
+        if self.is_func:
+            self.current_func.type_ = type_
+        else:
+            self.current_func.vars_table.set_type(type_)
 
     def display(self, debug=False):
         print("-" * 20)

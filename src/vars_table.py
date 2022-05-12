@@ -24,6 +24,7 @@ class VarsTable:
             self.vars[id_] = Var(None, 1000)
 
     def set_type(self, type_):
+        """ Sets current var type """
         self.current_var.type_ = type_
 
     def display(self, id_):

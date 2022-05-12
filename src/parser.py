@@ -44,7 +44,7 @@ def p_class(p):
 def p_function(p):
     """
     function : FUNC ID add_function params init_block
-             | FUNC ID add_function params ARROW primitive init_block
+             | FUNC ID add_function params ARROW will_set_type primitive init_block
     """
 
 
@@ -88,7 +88,7 @@ def p_params1(p):
 
 def p_param(p):
     """
-    param : ID add_var COLON type
+    param : ID add_var COLON will_set_type type
     """
 
 
@@ -353,7 +353,7 @@ def p_constant2(p):
 def p_variable(p):
     """
     variable : VAR ID add_var
-             | VAR ID add_var COLON type
+             | VAR ID add_var COLON will_set_type type
     """
 
 
@@ -369,15 +369,11 @@ def p_type(p):
 
 def p_primitive(p):
     """
-    primitive : INT
-              | FLOAT
-              | STRING
-              | BOOL
+    primitive : INT     set_type
+              | FLOAT   set_type
+              | STRING  set_type
+              | BOOL    set_type
     """
-    if p[-1] == '->':
-        dir_func.set_type(p[1])
-    elif p[-1] == ':':
-        dir_func.set_var_type(p[1])
 
 
 def p_string(p):
@@ -401,7 +397,6 @@ def p_add_function(p):
     """
     add_function :
     """
-    # Add function to `dir_func` dictionary
     dir_func.add(p[-1])
 
 
@@ -411,6 +406,19 @@ def p_add_var(p):
     """
     dir_func.add_var(p[-1])
 
+
+def p_will_set_type(p):
+    """
+    will_set_type :
+    """
+    dir_func.will_set_type(p[-1])
+
+
+def p_set_type(p):
+    """
+    set_type :
+    """
+    dir_func.set_type(p[-1])
 
 # -- ERROR -----------------------
 
