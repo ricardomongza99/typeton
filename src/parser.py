@@ -77,7 +77,7 @@ def p_add_function(p):
     add_function :
     '''
     # Add function to `dir_func` dictionary
-    dir_func.add(p[-1], 'Void')
+    dir_func.add(p[-1])
 
 
 # -- PARAMS -----------------------
@@ -363,9 +363,16 @@ def p_constant2(p):
 
 def p_variable(p):
     '''
-    variable : VAR ID
-             | VAR ID COLON type
+    variable : VAR ID add_variable
+             | VAR ID add_variable COLON type
     '''
+
+
+def p_add_variable(p):
+    '''
+    add_variable :
+    '''
+    dir_func.add_variable(p[-1])
 
 
 def p_type(p):
