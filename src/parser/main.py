@@ -1,29 +1,28 @@
 import src
 from src.ply import yacc
 from src.lexer.main import lex, tokens
-from dir_func import DirFunc
+from src.directory.dir_func import DirFunc
+from src.semantic.main import Cube
+from src.memory.virtual import Memory
 
 
+# maybe should be named compiler?
 class Parser:
-
     def __init__(self):
         self.tokens = tokens
+        self.cube = Cube()
+        self.memory = Memory()
         self.lexer = lex
-        self.dir_func = DirFunc()
+        self.dir_func = DirFunc()  # potentially = DirFunc(memory, cube)
+        self.parser = yacc.yacc(module=self, start="program")
 
-    def init(self):
-        self.parser = yacc.yacc(module=self, )
+    def display_function_directory(self):
+        self.dir_func.display(debug=True)
 
-    def import_symbols(self, arr):
-        for func in arr:
-            print("adding function: ", func.__name__)
-            setattr(self, func.__name__, func)
+    def parse(self, file):
+        self.parser.parse(file, self.lexer, debug=True)
 
-
-
-
-    # parsing functions
-
+    # parser begin
     def p_program(self, p):
         """
         program : program1 program
@@ -360,25 +359,25 @@ class Parser:
         """
         add_function :
         """
-        dir_func.add(p[-1])
+        self.dir_func.add(p[-1])
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        dir_func.add_var(p[-1])
+        self.dir_func.add_var(p[-1])
 
     def p_will_set_type(self, p):
         """
         will_set_type :
         """
-        dir_func.will_set_type(p[-1])
+        self.dir_func.will_set_type(p[-1])
 
     def p_set_type(self, p):
         """
         set_type :
         """
-        dir_func.set_type(p[-1])
+        self.dir_func.set_type(p[-1])
 
     # -- ERROR -----------------------
 
@@ -389,8 +388,3 @@ class Parser:
             token = f"{p.type}({p.value}) on line {p.lineno}"
 
         print(f"Syntax error: Unexpected {token}")
-
-
-c = Compiler()
-c.import_symbols(exp_list)
-c.init()

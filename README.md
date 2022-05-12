@@ -15,8 +15,14 @@ An object oriented language developed by two rockstar engineering students at Te
 - Input/Output
 
 ## 🚗 GETTING STARTED
+
+To run the compiler simply execute ```python3 -m src.main```
+
+To Execute Specific Files: ```python3 -m src.{directory}.{fileName}```
+
+---
 **Start**
-```
+
 func main() {
     // Program starts here
 }

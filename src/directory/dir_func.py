@@ -1,4 +1,4 @@
-from vars_table import VarsTable
+from src.directory.vars_table import VarsTable
 
 # NOTE: `id` and `type` are reserved words in python, so
 # we use the underscore at the end convention `id_` and `type_

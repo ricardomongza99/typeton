@@ -17,7 +17,7 @@ def main():
     file.close()
 
     parser = Parser()
-    parser.dir_func.display(debug=True)
+    parser.display_function_directory()
 
     # parser.parse(data)
     print('Done')
