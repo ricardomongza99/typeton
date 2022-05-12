@@ -36,7 +36,6 @@ class DirFunc:
     def set_var_type(self, type_):
         self.current_func.vars_table.set_type(type_)
 
-
     def display(self, debug=False):
         print("-" * 20)
         print("DIRECTORY FUNCTIONS")
