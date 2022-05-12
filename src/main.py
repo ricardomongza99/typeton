@@ -16,7 +16,7 @@ def main():
     file.close()
 
     parser.parse(data)
-    dir_func.display()
+    dir_func.display(debug=True)
     print('Done')
 
 
