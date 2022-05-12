@@ -1,5 +1,9 @@
 import ply.yacc as yacc
 from lexer import lexer, tokens
+from dir_func import DirFunc
+
+
+dir_func = DirFunc()
 
 
 # -- PROGRAM -----------------------
@@ -29,6 +33,7 @@ def p_body(p):
 
 # -- TOP LEVEL -----------------------
 
+
 def p_class(p):
     '''
     class : CLASS ID class_block
@@ -38,8 +43,8 @@ def p_class(p):
 
 def p_function(p):
     '''
-    function : FUNC ID params init_block
-             | FUNC ID params ARROW primitive init_block
+    function : FUNC ID add_function params init_block
+             | FUNC ID add_function params ARROW primitive init_block
     '''
 
 
@@ -62,6 +67,17 @@ def p_array1(p):
     array1 : expression COMMA array1
            | expression
     '''
+
+
+# Semantic actions
+
+
+def p_add_function(p):
+    '''
+    add_function :
+    '''
+    # Add function to `dir_func` dictionary
+    dir_func.add(p[-1], 'Void')
 
 
 # -- PARAMS -----------------------
@@ -369,6 +385,8 @@ def p_primitive(p):
               | STRING
               | BOOL
     '''
+    if p[-1] == "->":
+        dir_func.set_type(p[1])
 
 
 def p_string(p):
