@@ -363,16 +363,16 @@ def p_constant2(p):
 
 def p_variable(p):
     """
-    variable : VAR ID add_variable
-             | VAR ID add_variable COLON type
+    variable : VAR ID add_var
+             | VAR ID add_var COLON type
     """
 
 
-def p_add_variable(p):
+def p_add_var(p):
     """
-    add_variable :
+    add_var :
     """
-    dir_func.add_variable(p[-1])
+    dir_func.add_var(p[-1])
 
 
 def p_type(p):
