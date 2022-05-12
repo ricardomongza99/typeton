@@ -19,7 +19,6 @@ class VarsTable:
     def add(self, id_):
         """ Add Variable to `variables` dictionary if not existent """
         if self.vars.get(id_) is None:
-            # TODO: Default type should not be Int
             # TODO: Replace 1000 with correct memory directory
             self.current_id = id_
             self.vars[id_] = Variable(None, 1000)
