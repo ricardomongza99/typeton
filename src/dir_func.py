@@ -12,22 +12,22 @@ class Func:
 
 class DirFunc:
     def __init__(self):
-        self.functions = {}
+        self.funcs = {}
         self.current_id = 'global'
         self.add('global')
 
     @property
     def current_func(self):
-        return self.functions[self.current_id]
+        return self.funcs[self.current_id]
 
     def add(self, id_):
-        """ Add Function to `functions` dictionary if not existent """
-        if self.functions.get(id_) is None:
+        """ Add Func to `funcs` dictionary if not existent """
+        if self.funcs.get(id_) is None:
             self.current_id = id_
-            self.functions[id_] = Func('Void')
+            self.funcs[id_] = Func('Void')
 
     def set_type(self, type_):
-        """ Sets current function type """
+        """ Sets current Func type """
         self.current_func.type_ = type_
 
     def add_variable(self, id_):
@@ -44,12 +44,12 @@ class DirFunc:
         print("-" * 20)
         print('{:10} {:10}'.format('ID', 'TYPE'))
         print("-" * 20)
-        for id_, function in self.functions.items():
-            print('{:10} {:10}'.format(id_, function.type_))
+        for id_, func in self.funcs.items():
+            print('{:10} {:10}'.format(id_, func.type_))
         print("-" * 20)
 
         if debug:
-            for id_, function in self.functions.items():
+            for id_, func in self.funcs.items():
                 print("\n\n")
-                function.vars_table.display(id_)
+                func.vars_table.display(id_)
 
