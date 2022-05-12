@@ -99,7 +99,7 @@ def p_params1(p):
 
 def p_param(p):
     """
-    param : ID COLON type
+    param : ID add_var COLON type
     """
 
 
