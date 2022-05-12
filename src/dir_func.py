@@ -34,11 +34,8 @@ class DirFunc:
         self.current_func.vars_table.add(id_)
 
     def set_var_type(self, type_):
-        # TODO: Remove if statement
-        if self.current_id == 'global':
-            self.current_func.vars_table.set_type(type_)
-        else:
-            print(f'{self.current_id}: {type_}')
+        self.current_func.vars_table.set_type(type_)
+
 
     def display(self, debug=False):
         print("-" * 20)
