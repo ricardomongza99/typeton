@@ -45,9 +45,9 @@ class DirFunc:
         for id_, func in self.funcs.items():
             print('{:10} {:10}'.format(id_, func.type_))
         print("-" * 20)
-
+        print()
         if debug:
             for id_, func in self.funcs.items():
-                print("\n\n")
                 func.vars_table.display(id_)
+                print()
 
