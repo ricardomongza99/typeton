@@ -33,7 +33,7 @@ class DirFunc:
     def add_variable(self, id_):
         self.current_func.vars_table.add(id_)
 
-    def display(self, show_var_tables=False):
+    def display(self, debug=False):
         print("-" * 20)
         print("DIRECTORY FUNCTIONS")
         print("-" * 20)
@@ -43,7 +43,7 @@ class DirFunc:
             print('{:10} {:10}'.format(id_, function.type_))
         print("-" * 20)
 
-        if show_var_tables:
+        if debug:
             for id_, function in self.functions.items():
                 print("\n\n")
                 function.vars_table.display(id_)
