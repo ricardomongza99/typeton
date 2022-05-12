@@ -1,7 +1,7 @@
 # NOTE: `id` and `type` are reserved word in python, so
 # we use the underscore at the end convention `id_` and `type_
 
-class Variable:
+class Var:
     def __init__(self, type_, dir_):
         self.type_ = type_
         self.dir_ = dir_
@@ -21,7 +21,7 @@ class VarsTable:
         if self.vars.get(id_) is None:
             # TODO: Replace 1000 with correct memory directory
             self.current_id = id_
-            self.vars[id_] = Variable(None, 1000)
+            self.vars[id_] = Var(None, 1000)
 
     def set_type(self, type_):
         self.current_var.type_ = type_
