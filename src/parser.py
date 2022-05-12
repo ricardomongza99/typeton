@@ -10,72 +10,72 @@ dir_func = DirFunc()
 
 
 def p_program(p):
-    '''
+    """
     program : program1 program
             | program1
-    '''
+    """
 
 
 def p_program1(p):
-    '''
+    """
     program1 : body NLINE
              | NLINE
-    '''
+    """
 
 
 def p_body(p):
-    '''
+    """
     body : class
          | function
          | declaration
-    '''
+    """
 
 
 # -- TOP LEVEL -----------------------
 
 
 def p_class(p):
-    '''
+    """
     class : CLASS ID class_block
           | CLASS ID COLON ID class_block
-    '''
+    """
 
 
 def p_function(p):
-    '''
+    """
     function : FUNC ID add_function params init_block
              | FUNC ID add_function params ARROW primitive init_block
-    '''
+    """
 
 
 def p_declaration(p):
-    '''
+    """
     declaration : variable ASSIGN expression
                 | variable ASSIGN array
                 | variable
-    '''
+    """
 
 
 def p_array(p):
-    '''
+    """
     array : LBRACK array1 RBRACK
-    '''
+    """
 
 
 def p_array1(p):
-    '''
+    """
     array1 : expression COMMA array1
            | expression
-    '''
+    """
 
 
 # Semantic actions
 
 
 def p_add_function(p):
-    '''
+    """
     add_function :
-    '''
+    """
     # Add function to `dir_func` dictionary
     dir_func.add(p[-1])
 
@@ -84,106 +84,106 @@ def p_add_function(p):
 
 
 def p_params(p):
-    '''
+    """
     params : LPAREN params1 RPAREN
            | LPAREN RPAREN
-    '''
+    """
 
 
 def p_params1(p):
-    '''
+    """
     params1 : param
             | param COMMA params1
-    '''
+    """
 
 
 def p_param(p):
-    '''
+    """
     param : ID COLON type
-    '''
+    """
 
 
 # -- BLOCKS -----------------------
 
 
 def p_class_block(p):
-    '''
+    """
     class_block : LCURLY class_block1 RCURLY
-    '''
+    """
 
 
 def p_class_block1(p):
-    '''
+    """
     class_block1 : class_block2
                  | class_block3 class_block2
-    '''
+    """
 
 
 def p_class_block2(p):
-    '''
+    """
     class_block2 : NLINE class_block1
                  | NLINE
-    '''
+    """
 
 
 def p_class_block3(p):
-    '''
+    """
     class_block3 : function
                  | declaration
-    '''
+    """
 
 
 def p_init_block(p):
-    '''
+    """
     init_block : LCURLY init_block1 RCURLY
-    '''
+    """
 
 
 def p_init_block1(p):
-    '''
+    """
     init_block1 : init_block2
                 | init_block3 init_block2
-    '''
+    """
 
 
 def p_init_block2(p):
-    '''
+    """
     init_block2 : NLINE init_block1
                 | NLINE
-    '''
+    """
 
 
 def p_init_block3(p):
-    '''
+    """
     init_block3 : statement
                 | declaration
-    '''
+    """
 
 
 def p_block(p):
-    '''
+    """
     block : LCURLY block1 RCURLY
-    '''
+    """
 
 
 def p_block1(p):
-    '''
+    """
     block1 : block2
            | statement block2
-    '''
+    """
 
 
 def p_block2(p):
-    '''
+    """
     block2 : NLINE block1
            | NLINE
-    '''
+    """
 
 
 # -- STATEMENTS -----------------------
 
 def p_statement(p):
-    '''
+    """
     statement : display
               | if
               | while
@@ -191,136 +191,136 @@ def p_statement(p):
               | assign
               | call
               | return
-    '''
+    """
 
 
 def p_while(p):
-    '''
+    """
     while : WHILE LPAREN bool_expr RPAREN block
-    '''
+    """
 
 
 def p_input(p):
-    '''
+    """
     input : variable ASSIGN INPUT LPAREN string RPAREN
-    '''
+    """
 
 
 def p_display(p):
-    '''
+    """
     display : PRINT LPAREN expression RPAREN
-    '''
+    """
 
 
 def p_return(p):
-    '''
+    """
     return : RETURN
            | RETURN bool_expr
-    '''
+    """
 
 
 def p_assign(p):
-    '''
+    """
     assign : ID assign1 expression
-    '''
+    """
 
 
 def p_assign1(p):
-    '''
+    """
     assign1 : ASSIGN
             | PASSIGN
             | LASSIGN
             | MASSIGN
             | DASSIGN
-    '''
+    """
 
 
 def p_call(p):
-    '''
+    """
     call : ID LPAREN call1 RPAREN
-    '''
+    """
 
 
 def p_call1(p):
-    '''
+    """
     call1 : expression
           | expression COMMA call1
-    '''
+    """
 
 
 def p_if(p):
-    '''
+    """
     if : IF LPAREN bool_expr RPAREN block
        | IF LPAREN bool_expr RPAREN block if2
-    '''
+    """
 
 
 def p_if2(p):
-    '''
+    """
     if2 : ELSE if
         | ELSE block
-    '''
+    """
 
 
 # -- EXPRESSIONS -----------------------
 
 def p_bool_expr(p):
-    '''
+    """
     bool_expr : relational_exp
               | relational_exp AND bool_expr
               | relational_exp OR bool_expr
-    '''
+    """
 
 
 def p_relational_exp(p):
-    '''
+    """
     relational_exp : expression comp expression
                    | expression
-    '''
+    """
 
 
 def p_comp(p):
-    '''
+    """
     comp : LESS
          | MORE
          | EQUALS
          | NEQUALS
          | LEQUALS
          | MEQUALS
-    '''
+    """
 
 
 def p_expression(p):
-    '''
+    """
     expression : term
                | term PLUS term
                | term MINUS term
-    '''
+    """
 
 
 def p_term(p):
-    '''
+    """
     term : factor
          | factor TIMES factor
          | factor DIVIDE factor
-    '''
+    """
 
 
 def p_factor(p):
-    '''
+    """
     factor : constant
            | COLON LPAREN expression RPAREN
-    '''
+    """
 
 
 def p_call_array(p):
-    '''
+    """
     call_array : ID LBRACK expression RBRACK
-    '''
+    """
 
 
 def p_constant(p):
-    '''
+    """
     constant : constant2
              | NUMBER
              | FLOATLIT
@@ -329,14 +329,14 @@ def p_constant(p):
              | string
              | call
              | call_array
-    '''
+    """
 
 
 def p_constant2(p):
-    '''
+    """
     constant2 : ID
               | ID PERIOD constant2
-    '''
+    """
 
 # Sorry Paco, I changed the 'DOT' Token to 'PERIOD' and commented out
 # this chunk of code. Maybe you are right, for now, let's just keep it simple :)
@@ -362,36 +362,36 @@ def p_constant2(p):
 
 
 def p_variable(p):
-    '''
+    """
     variable : VAR ID add_variable
              | VAR ID add_variable COLON type
-    '''
+    """
 
 
 def p_add_variable(p):
-    '''
+    """
     add_variable :
-    '''
+    """
     dir_func.add_variable(p[-1])
 
 
 def p_type(p):
     # TODO: might need to remove the array of custom types
-    '''
+    """
     type : ID
          | primitive
          | LBRACK primitive RBRACK
          | LBRACK ID RBRACK
-    '''
+    """
 
 
 def p_primitive(p):
-    '''
+    """
     primitive : INT
               | FLOAT
               | STRING
               | BOOL
-    '''
+    """
     if p[-1] == '->':
         dir_func.set_type(p[1])
     elif p[-1] == ':':
@@ -400,17 +400,17 @@ def p_primitive(p):
 
 
 def p_string(p):
-    '''
+    """
     string : string_expr
            | string_expr string
-    '''
+    """
 
 
 def p_string_expr(p):
-    '''
+    """
     string_expr : STRINGLIT
                 | BSLASH LPAREN expression RPAREN
-    '''
+    """
 
 
 def p_error(p):
