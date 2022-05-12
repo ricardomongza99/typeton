@@ -69,17 +69,6 @@ def p_array1(p):
     """
 
 
-# Semantic actions
-
-
-def p_add_function(p):
-    """
-    add_function :
-    """
-    # Add function to `dir_func` dictionary
-    dir_func.add(p[-1])
-
-
 # -- PARAMS -----------------------
 
 
@@ -368,13 +357,6 @@ def p_variable(p):
     """
 
 
-def p_add_var(p):
-    """
-    add_var :
-    """
-    dir_func.add_var(p[-1])
-
-
 def p_type(p):
     # TODO: might need to remove the array of custom types
     """
@@ -410,6 +392,27 @@ def p_string_expr(p):
     string_expr : STRINGLIT
                 | BSLASH LPAREN expression RPAREN
     """
+
+
+# -- SEMANTIC ACTIONS -----------------------
+
+
+def p_add_function(p):
+    """
+    add_function :
+    """
+    # Add function to `dir_func` dictionary
+    dir_func.add(p[-1])
+
+
+def p_add_var(p):
+    """
+    add_var :
+    """
+    dir_func.add_var(p[-1])
+
+
+# -- ERROR -----------------------
 
 
 def p_error(p):
