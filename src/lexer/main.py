@@ -1,4 +1,4 @@
-import ply.lex as lex
+from src.ply import lex
 
 reserved = {
     'class' : 'CLASS',

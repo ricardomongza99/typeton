@@ -1,6 +1,6 @@
-from semantic import run_tests, Cube
-from virtual import run_tests as run_memory
-from parser import parser, dir_func
+from src.semantic.main import run_tests, Cube
+from src.memory.virtual import run_tests as run_memory
+from src.parser.main import Parser
 import os
 
 
@@ -16,8 +16,10 @@ def main():
     data = file.read()
     file.close()
 
-    parser.parse(data)
-    dir_func.display(debug=True)
+    parser = Parser()
+    parser.dir_func.display(debug=True)
+
+    # parser.parse(data)
     print('Done')
 
 
