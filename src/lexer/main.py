@@ -23,7 +23,7 @@ tokens = [
     'NLINE',
     'COLON',
     'COMMA',
-    'DOT',
+    'PERIOD',
     'LPAREN',
     'RPAREN',
     'LCURLY',
@@ -62,7 +62,7 @@ tokens = [
 # Symbol rules
 t_COLON     = ':'
 t_COMMA     = ','
-t_DOT    = '\.'
+t_PERIOD    = '\.'
 t_LPAREN    = r'\('
 t_RPAREN    = r'\)'
 t_LCURLY    = r'\{'

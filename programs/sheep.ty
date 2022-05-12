@@ -1,0 +1,27 @@
+var i: Int = 5
+var j: Int = 2
+
+func pig(a: Int, b: Int) {
+    while (a < 5) {
+        print("Oink!")
+        a += 1
+    }
+}
+
+func sheep(a: Int, b: Float) -> Int {
+    a = 21
+    b = a * i
+    print("Baah")
+    if (a < j) {
+        a += 4
+    } else {
+        a -= 2
+    }
+
+    pig(2, 4.1)
+}
+
+
+func main() {
+    sheep(1, 4)
+}

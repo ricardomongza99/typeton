@@ -1,5 +1,26 @@
-from semantic import run_tests, Cube
+from src.semantic.main import run_tests, Cube
 from src.memory.virtual import run_tests as run_memory
+from src.parser.main import Parser
+import os
+
+
+FILENAME = 'sheep.ty'
+
+
+def main():
+    # Get relative path
+    dirname = os.path.dirname(__file__)
+    filename = os.path.join(dirname, '../programs/' + FILENAME)
+
+    file = open(filename)
+    data = file.read()
+    file.close()
+
+    parser = Parser()
+    parser.dir_func.display(debug=True)
+
+    # parser.parse(data)
+    print('Done')
 
 
 def run_semantic_tests():
@@ -10,3 +31,4 @@ def run_semantic_tests():
 if __name__ == '__main__':
     run_semantic_tests()
     run_memory()
+    main()
