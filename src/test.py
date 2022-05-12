@@ -1,5 +1,5 @@
-from parser import parser
-from lexer import lexer
+from src.parser.main import parser
+from lexer import main
 import glob
 
 

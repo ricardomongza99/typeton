@@ -1,5 +1,5 @@
 from semantic import run_tests, Cube
-from virtual import run_tests as run_memory
+from src.memory.virtual import run_tests as run_memory
 
 
 def run_semantic_tests():
