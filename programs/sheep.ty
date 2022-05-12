@@ -1,5 +1,5 @@
-var i = 5
-var j = 2
+var i: Int = 5
+var j: Int = 2
 
 func pig(a: Int, b: Int) {
     while (a < 5) {
@@ -8,7 +8,7 @@ func pig(a: Int, b: Int) {
     }
 }
 
-func sheep(a: Int, b: Float) {
+func sheep(a: Int, b: Float) -> Int {
     a = 21
     b = a * i
     print("Baah")

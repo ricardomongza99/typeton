@@ -1,5 +1,5 @@
 from semantic import run_tests, Cube
-from parser import parser
+from parser import parser, dir_func
 import os
 
 
@@ -16,6 +16,7 @@ def main():
     file.close()
 
     parser.parse(data)
+    dir_func.display(debug=True)
     print('Done')
 
 
