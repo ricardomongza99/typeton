@@ -1,4 +1,4 @@
-# NOTE: `id` and `type` are reserved word in python, so
+# NOTE: `id` and `type` are reserved words in python, so
 # we use the underscore at the end convention `id_` and `type_
 
 class Var:
