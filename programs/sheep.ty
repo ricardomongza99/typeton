@@ -11,6 +11,8 @@ func pig(a: Int, b: Int) {
 func sheep(a: Int, b: Float) -> Int {
     a = 21
     b = a * i
+    var c: Int = 2
+
     print("Baah")
     if (a < j) {
         a += 4
@@ -23,5 +25,7 @@ func sheep(a: Int, b: Float) -> Int {
 
 
 func main() {
+    var test: Bool
+    test = true
     sheep(1, 4)
 }
