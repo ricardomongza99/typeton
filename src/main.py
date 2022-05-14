@@ -17,6 +17,7 @@ def main():
     file.close()
 
     parser = Parser()
+    parser.parse(data)
     parser.display_function_directory()
 
     # parser.parse(data)
@@ -29,6 +30,6 @@ def run_semantic_tests():
 
 
 if __name__ == '__main__':
-    run_semantic_tests()
-    run_memory()
+    #run_semantic_tests()
+    #run_memory()
     main()
