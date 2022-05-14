@@ -1,9 +1,9 @@
 import src
 from src.ply import yacc
-from src.lexer.lexer import lex, tokens
-from src.directory.dir_func import DirFunc
-from src.semantic.cube import Cube
-from src.memory.virtual import Memory
+from src.lexer import lex, tokens
+from src.directory import DirFunc
+from src.semantic import Cube
+from src.memory import Memory
 
 
 # maybe should be named compiler?
