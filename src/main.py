@@ -1,6 +1,6 @@
-from src.semantic.main import run_tests, Cube
+from src.semantic.cube import run_tests, Cube
 from src.memory.virtual import run_tests as run_memory
-from src.parser.main import Parser
+from src.parser.parser import Parser
 import os
 
 

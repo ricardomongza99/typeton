@@ -1,8 +1,8 @@
 import src
 from src.ply import yacc
-from src.lexer.main import lex, tokens
+from src.lexer.lexer import lex, tokens
 from src.directory.dir_func import DirFunc
-from src.semantic.main import Cube
+from src.semantic.cube import Cube
 from src.memory.virtual import Memory
 
 
