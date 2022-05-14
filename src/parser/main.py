@@ -19,8 +19,8 @@ class Parser:
     def display_function_directory(self):
         self.dir_func.display(debug=True)
 
-    def parse(self, file):
-        self.parser.parse(file, self.lexer, debug=True)
+    def parse(self, file, debug=False):
+        self.parser.parse(file, self.lexer, debug=debug)
 
     # parser begin
     def p_program(self, p):
