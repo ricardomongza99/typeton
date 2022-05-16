@@ -1,6 +1,6 @@
 # Testing
-from src.virtual.memory import Memory
-from src.virtual.scheduler import Scheduler
+from src.virtual.runtime import Memory
+from src.virtual.compilation import Scheduler
 from src.virtual.types import ValueType
 
 
