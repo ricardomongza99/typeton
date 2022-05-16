@@ -1,6 +1,4 @@
-from src.semantic.main import run_tests, Cube
-from src.virtual.test import run_tests as run_memory_tests
-from src.parser.main import Parser
+from src.parser import Parser
 import os
 
 
@@ -17,18 +15,12 @@ def main():
     file.close()
 
     parser = Parser()
+    parser.parse(data)
     parser.display_function_directory()
 
     # parser.parse(data)
     print('Done')
 
 
-def run_semantic_tests():
-    semantic = Cube()
-    run_tests(semantic)
-
-
 if __name__ == '__main__':
-    run_semantic_tests()
-    run_memory_tests()
     main()

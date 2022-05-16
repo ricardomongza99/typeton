@@ -1,9 +1,9 @@
 import src
 from src.ply import yacc
-from src.lexer.main import lex, tokens
-from src.directory.dir_func import DirFunc
-from src.semantic.main import Cube
-from src.virtual.memory import Memory
+from src.lexer import lex, tokens
+from src.directory import Directory
+from src.semantic import Cube
+from src.memory import Memory
 
 
 # maybe should be named compiler?
@@ -13,14 +13,14 @@ class Parser:
         self.cube = Cube()
         self.memory = Memory()
         self.lexer = lex
-        self.dir_func = DirFunc()  # potentially = DirFunc(memory, cube)
+        self.dir_func = Directory()  # potentially = DirFunc(memory, cube)
         self.parser = yacc.yacc(module=self, start="program")
 
     def display_function_directory(self):
         self.dir_func.display(debug=True)
 
-    def parse(self, file):
-        self.parser.parse(file, self.lexer, debug=True)
+    def parse(self, file, debug=False):
+        self.parser.parse(file, self.lexer, debug=debug)
 
     # parser begin
     def p_program(self, p):
@@ -365,7 +365,7 @@ class Parser:
         """
         add_var :
         """
-        self.dir_func.add_var(p[-1])
+        self.dir_func.add_variable(p[-1])
 
     def p_will_set_type(self, p):
         """
