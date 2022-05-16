@@ -3,7 +3,7 @@ from src.ply import yacc
 from src.lexer.main import lex, tokens
 from src.directory.dir_func import DirFunc
 from src.semantic.main import Cube
-from src.memory.virtual import Memory
+from src.virtual.memory import Memory
 
 
 # maybe should be named compiler?
