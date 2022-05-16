@@ -12,12 +12,14 @@ class Scheduler:
         resource, resource_error = self.__get_resource_from_type(value_type)
         if resource_error:
             print("invalid type")
+            return None, True
 
         new_address, error = get_available_address(resource)
         if error:
             print("could not assign new address for specified range")
+            return None, True
 
-        return new_address
+        return new_address, False
 
     def release_addresses(self, address_list):
         for address in address_list:

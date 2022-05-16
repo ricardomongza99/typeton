@@ -7,6 +7,9 @@ from src.virtual.compilation import Scheduler
 
 
 # maybe should be named compiler?
+from src.virtual.types import ValueType
+
+
 class Parser:
     def __init__(self):
         self.tokens = tokens
@@ -377,7 +380,7 @@ class Parser:
         """
         set_type :
         """
-        self.directory.set_type(p[-1])
+        self.directory.set_type(p[-1], memory=self.memory)
 
     # -- ERROR -----------------------
 
