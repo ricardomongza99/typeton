@@ -3,10 +3,11 @@ from queue import Queue
 
 
 class ValueType(Enum):
-    INT = "int"
-    STRING = "string"
-    FLOAT = "float"
-    BOOL = "bool"
+    INT = "Int"
+    VOID = "Void"
+    STRING = "String"
+    FLOAT = "Float"
+    BOOL = "Bool"
 
 
 class TypeResource:
