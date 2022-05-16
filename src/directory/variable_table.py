@@ -1,9 +1,13 @@
+from typing import Dict
+
 from .variable import Variable
+from ..virtual.compilation import Scheduler
+from ..virtual.types import ValueType
 
 
 class VariableTable:
     def __init__(self):
-        self.variables = {}
+        self.variables: Dict[str, Variable] = {}
         self.current_id = None
 
     @property
@@ -13,13 +17,18 @@ class VariableTable:
     def add(self, id_):
         """ Add Variable to `variables` dictionary if not existent """
         if self.variables.get(id_) is None:
-            # TODO: Replace 1000 with correct memory directory
             self.current_id = id_
-            self.variables[id_] = Variable(None, 1000)
+            # we can't know where to put it without the type, just store the reference for now
+            self.variables[id_] = Variable(None, None)
 
-    def set_type(self, type_):
+    def set_type(self, type_, memory: Scheduler):
         """ Sets current var type """
+        address, error = memory.schedule_address(ValueType(type_))
+        if error:  # TODO Create class to create compilation errors
+            return
+
         self.current_variable.type_ = type_
+        self.current_variable.address_ = address
 
     def display(self, id_):
         print("-" * 30)

@@ -1,4 +1,5 @@
 from .function import Function
+from ..virtual.compilation import Scheduler
 
 
 class Directory:
@@ -10,7 +11,7 @@ class Directory:
         self.is_function = True
 
     @property
-    def current_function(self):
+    def current_function(self) -> Function:
         return self.functions[self.current_id]
 
     def add(self, id_):
@@ -27,12 +28,12 @@ class Directory:
         """ Prepares for assigning type. Sets `is_func` to true if operator is function related -> """
         self.is_function = type_operator == '->'
 
-    def set_type(self, type_):
+    def set_type(self, type_, memory: Scheduler):
         """ Sets corresponding type either to function or to variable"""
         if self.is_function:
             self.current_function.type_ = type_
         else:
-            self.current_function.vars_table.set_type(type_)
+            self.current_function.vars_table.set_type(type_, memory)
 
     def display(self, debug=False):
         """ Displays directory of functions tables """
