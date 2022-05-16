@@ -3,7 +3,7 @@ from src.ply import yacc
 from src.lexer import lex, tokens
 from src.directory import Directory
 from src.semantic import Cube
-from src.memory import Memory
+from src.virtual.compilation import Scheduler
 
 
 # maybe should be named compiler?
@@ -11,13 +11,13 @@ class Parser:
     def __init__(self):
         self.tokens = tokens
         self.cube = Cube()
-        self.memory = Memory()
+        self.memory = Scheduler()
         self.lexer = lex
-        self.dir_func = Directory()  # potentially = DirFunc(memory, cube)
+        self.directory = Directory()  # potentially = Directory(memory, cube)
         self.parser = yacc.yacc(module=self, start="program")
 
     def display_function_directory(self):
-        self.dir_func.display(debug=True)
+        self.directory.display(debug=True)
 
     def parse(self, file, debug=False):
         self.parser.parse(file, self.lexer, debug=debug)
@@ -359,25 +359,25 @@ class Parser:
         """
         add_function :
         """
-        self.dir_func.add(p[-1])
+        self.directory.add(p[-1])
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        self.dir_func.add_variable(p[-1])
+        self.directory.add_variable(p[-1])
 
     def p_will_set_type(self, p):
         """
         will_set_type :
         """
-        self.dir_func.will_set_type(p[-1])
+        self.directory.will_set_type(p[-1])
 
     def p_set_type(self, p):
         """
         set_type :
         """
-        self.dir_func.set_type(p[-1])
+        self.directory.set_type(p[-1])
 
     # -- ERROR -----------------------
 
