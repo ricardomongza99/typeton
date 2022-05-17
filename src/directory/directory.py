@@ -60,9 +60,8 @@ class Directory:
         """ Releases Function From Directory and Virtual Memory"""
         if len(self.function_stack) > 1:
             function: Function = self.function_stack.pop()
-            if function.is_valid():
-                return CompilerError("Expected return for function with return type of ", function.type_.value)
 
             for key in function.vars_table.variables:
                 address = function.vars_table.variables[key].address_
+                print('releasing address: ', address)
                 memory.release_address(address)
