@@ -1,5 +1,6 @@
 # Static Helpers
 from src.virtual.types import TypeResource, MemoryType
+from enum import Enum
 
 
 def is_between_range(start: int, value: int, end: int):
@@ -38,15 +39,32 @@ def print_stats(resource: TypeResource):
     print("Freed Addresses", resource.free_addresses_list.qsize())
 
 
+class Layers(Enum):
+    GLOBAL = 0
+    LOCAL = 1
+    TEMPORARY = 2
+    CONSTANT = 3
+
+
+class Segment:
+    def __init__(self, type_: Layers, resources: [TypeResource], start, end):
+        self.type_ = type_
+        self.start = start
+        self.end = end
+        self.resources = resources
+
+
 def init_types(memory_types: [MemoryType]):
-    resource_list = []
+    segments = {}
     current_start = 0
 
-    for simple_type in memory_types:
-        new_end = current_start + simple_type.size
+    for layer in Layers:
+        segment = Segment(type_=layer, start=current_start, resources={},end=0)
+        for simple in memory_types:
+            new_end = current_start + simple.size
+            segment.resources[simple.type.value] = TypeResource(start=current_start, end=new_end, resource_type=simple.type)
+            current_start = new_end + 1
+        segment.end = current_start-1
+        segments[layer.value] = segment
 
-        resource = TypeResource(start=current_start, end=new_end, resource_type=simple_type.type)
-        resource_list.append(resource)
-        current_start = new_end + 1
-
-    return resource_list
+    return segments

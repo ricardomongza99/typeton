@@ -1,6 +1,7 @@
 from .function import Function
 from ..parser.errors import CompilerError
 from ..virtual.compilation import Scheduler
+from ..virtual.helpers import Layers
 from ..virtual.types import ValueType
 
 
@@ -14,7 +15,7 @@ class Directory:
         self.is_function = True
 
     def current_function(self) -> Function:
-        return self.function_stack[len(self.function_stack)-1]
+        return self.function_stack[len(self.function_stack) - 1]
 
     def add(self, id_):
         """ Add Func to `funcs` dictionary if not existent """
@@ -32,11 +33,12 @@ class Directory:
         self.current_function().type_pending = type_operator == '->'
 
     def set_type(self, type_, memory: Scheduler):
+        layer = Layers.GLOBAL if self.current_function().id_ == "global" else Layers.LOCAL
         """ Sets corresponding type either to function or to variable"""
         if self.current_function().type_pending:
             self.current_function().set_type(type_)
         else:
-            self.current_function().vars_table.set_type(type_, memory)
+            self.current_function().vars_table.set_type(type_, layer, memory)
 
     def display(self, debug=False):
         """ Displays directory of functions tables """
@@ -64,9 +66,3 @@ class Directory:
             for key in function.vars_table.variables:
                 address = function.vars_table.variables[key].address_
                 memory.release_address(address)
-
-
-
-
-
-

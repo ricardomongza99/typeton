@@ -2,6 +2,7 @@ from typing import Dict
 
 from .variable import Variable
 from ..virtual.compilation import Scheduler
+from ..virtual.helpers import Layers
 from ..virtual.types import ValueType
 
 
@@ -21,10 +22,10 @@ class VariableTable:
             # we can't know where to put it without the type, just store the reference for now
             self.variables[id_] = Variable(None, None)
 
-    def set_type(self, type_, memory: Scheduler):
+    def set_type(self, type_, layer: Layers, memory: Scheduler):
         """ Sets current var type """
         enum_value = ValueType(type_)
-        address, error = memory.schedule_address(enum_value)
+        address, error = memory.schedule_address(enum_value, layer)
         if error:  # TODO Create class to create compilation errors
             return
 
