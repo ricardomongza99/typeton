@@ -34,7 +34,7 @@ class VariableTable:
         print("-" * 30)
         print(f"{id_} VARS TABLE")
         print("-" * 30)
-        print('{:10} {:10} {:10}'.format('ID', 'TYPE', 'DIR'))
+        print('{:10} {:10} {:10}'.format('ID', 'TYPE', 'ADDRESS'))
         print("-" * 30)
         for id_, var in self.variables.items():
             # Unwrap optional. If var type is None use 'Undefined'
