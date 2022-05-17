@@ -29,11 +29,11 @@ class Directory:
 
     def will_set_type(self, type_operator):
         """ Prepares for assigning type. Sets `is_func` to true if operator is function related -> """
-        self.is_function = type_operator == '->'
+        self.current_function().type_pending = type_operator == '->'
 
     def set_type(self, type_, memory: Scheduler):
         """ Sets corresponding type either to function or to variable"""
-        if self.is_function:
+        if self.current_function().type_pending:
             self.current_function().set_type(type_)
         else:
             self.current_function().vars_table.set_type(type_, memory)
