@@ -1,4 +1,5 @@
 import src
+from src.parser.errors import CompilerError
 from src.ply import yacc
 from src.lexer import lex, tokens
 from src.directory import Directory
@@ -14,10 +15,14 @@ class Parser:
     def __init__(self):
         self.tokens = tokens
         self.cube = Cube()
+        self.compiler_errors = []
         self.memory = Scheduler()
         self.lexer = lex
         self.directory = Directory()  # potentially = Directory(memory, cube)
         self.parser = yacc.yacc(module=self, start="program")
+
+    def add_compiler_error(self, message, line_number):
+        self.compiler_errors.append(CompilerError(message, line_number))
 
     def display_function_directory(self):
         self.directory.display(debug=True)
@@ -55,8 +60,8 @@ class Parser:
 
     def p_function(self, p):
         """
-        function : FUNC ID add_function params init_block
-                 | FUNC ID add_function params ARROW will_set_type primitive init_block
+        function : FUNC ID add_function params init_block end_function
+                 | FUNC ID add_function params ARROW will_set_type primitive init_block end_function
         """
 
     def p_declaration(self, p):
@@ -364,6 +369,12 @@ class Parser:
         """
         self.directory.add(p[-1])
 
+    def p_end_function(self, p):
+        """
+        end_function :
+        """
+        self.directory.end_function(memory=self.memory)
+
     def p_add_var(self, p):
         """
         add_var :
@@ -390,4 +401,5 @@ class Parser:
         else:
             token = f"{p.type}({p.value}) on line {p.lineno}"
 
-        print(f"Syntax error: Unexpected {token}")
+        self.add_compiler_error(token, p.lineno)
+

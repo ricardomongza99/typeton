@@ -1,9 +1,16 @@
 var i: Int = 5
 var j: Int = 2
 
+
+func dog(a: Int, b: Int) -> Int{
+    var c: Float = a * b
+    return dog(a+1, b+2)
+}
+
 func pig(a: Int, b: Int) {
     while (a < 5) {
         print("Oink!")
+        dog(a,b)
         a += 1
     }
 }

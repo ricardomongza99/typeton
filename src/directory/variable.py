@@ -4,6 +4,7 @@ from src.virtual.types import ValueType
 
 
 class Variable:
-    def __init__(self, type_: ValueType or None, address):
+    def __init__(self, type_: ValueType or None, address, returned: bool = False):
         self.type_ = type_
         self.address_ = address
+        self.isReturned = returned

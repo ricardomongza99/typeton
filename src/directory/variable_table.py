@@ -23,11 +23,12 @@ class VariableTable:
 
     def set_type(self, type_, memory: Scheduler):
         """ Sets current var type """
-        address, error = memory.schedule_address(ValueType(type_))
+        enum_value = ValueType(type_)
+        address, error = memory.schedule_address(enum_value)
         if error:  # TODO Create class to create compilation errors
             return
 
-        self.current_variable.type_ = type_
+        self.current_variable.type_ = enum_value
         self.current_variable.address_ = address
 
     def display(self, id_):
@@ -38,7 +39,7 @@ class VariableTable:
         print("-" * 30)
         for id_, var in self.variables.items():
             # Unwrap optional. If var type is None use 'Undefined'
-            type_ = 'Undefined' if var.type_ is None else var.type_
+            type_ = 'Undefined' if var.type_.value is None else var.type_.value
 
             print('{:10} {:10} {:10}'.format(id_, type_, str(var.address_)))
         print("-" * 30)
