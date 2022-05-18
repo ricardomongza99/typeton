@@ -2,7 +2,7 @@ from src.parser import Parser
 import os
 
 
-FILENAME = 'sheep.ty'
+FILENAME = 'albert.ty'
 
 
 def main():
