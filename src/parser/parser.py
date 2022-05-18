@@ -252,16 +252,6 @@ class Parser:
                        | expression
         """
 
-    def p_comp(self, p):
-        """
-        comp : LESS
-             | MORE
-             | EQUALS
-             | NEQUALS
-             | LEQUALS
-             | MEQUALS
-        """
-
     def p_expression(self, p):
         """
         expression : term
@@ -304,26 +294,16 @@ class Parser:
         constant2 : ID
                   | ID PERIOD constant2
         """
-        print(p[1])
 
-    # Sorry Paco, I changed the 'DOT' Token to 'PERIOD' and commented out
-    # this chunk of code. Maybe you are right, for now, let's just keep it simple :)
-    #
-    # def p_dots(p):
-    #     # we might need this kind of syntax for easier semantic eval
-    #     '''
-    #     dots : ID
-    #          | repeat_dots
-    #     '''
-    #
-    #
-    # def p_repeat_dots(p):
-    #     ''' repeat_dots : ID DOT right_id'''
-    #
-    #
-    # def p_right_id(p):
-    #     ''' right_id : ID
-    #         | repeat_dots'''
+    def p_comp(self, p):
+        """
+        comp : LESS
+             | MORE
+             | EQUALS
+             | NEQUALS
+             | LEQUALS
+             | MEQUALS
+        """
 
     # -- VARIABLES -----------------------
 
