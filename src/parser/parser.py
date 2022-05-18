@@ -265,18 +265,18 @@ class Parser:
     def p_expression(self, p):
         """
         expression : term
-                   | term PLUS term
-                   | term MINUS term
+                   | term PLUS expression
+                   | term MINUS expression
         """
 
     def p_term(self, p):
         """
         term : factor
-             | factor TIMES factor
-             | factor DIVIDE factor
+             | factor TIMES term
+             | factor DIVIDE term
         """
 
-    def p_factor(sefl, p):
+    def p_factor(self, p):
         """
         factor : constant
                | COLON LPAREN expression RPAREN
@@ -304,6 +304,7 @@ class Parser:
         constant2 : ID
                   | ID PERIOD constant2
         """
+        print(p[1])
 
     # Sorry Paco, I changed the 'DOT' Token to 'PERIOD' and commented out
     # this chunk of code. Maybe you are right, for now, let's just keep it simple :)
