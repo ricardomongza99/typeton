@@ -252,31 +252,21 @@ class Parser:
                        | expression
         """
 
-    def p_comp(self, p):
-        """
-        comp : LESS
-             | MORE
-             | EQUALS
-             | NEQUALS
-             | LEQUALS
-             | MEQUALS
-        """
-
     def p_expression(self, p):
         """
         expression : term
-                   | term PLUS term
-                   | term MINUS term
+                   | term PLUS expression
+                   | term MINUS expression
         """
 
     def p_term(self, p):
         """
         term : factor
-             | factor TIMES factor
-             | factor DIVIDE factor
+             | factor TIMES term
+             | factor DIVIDE term
         """
 
-    def p_factor(sefl, p):
+    def p_factor(self, p):
         """
         factor : constant
                | COLON LPAREN expression RPAREN
@@ -305,24 +295,15 @@ class Parser:
                   | ID PERIOD constant2
         """
 
-    # Sorry Paco, I changed the 'DOT' Token to 'PERIOD' and commented out
-    # this chunk of code. Maybe you are right, for now, let's just keep it simple :)
-    #
-    # def p_dots(p):
-    #     # we might need this kind of syntax for easier semantic eval
-    #     '''
-    #     dots : ID
-    #          | repeat_dots
-    #     '''
-    #
-    #
-    # def p_repeat_dots(p):
-    #     ''' repeat_dots : ID DOT right_id'''
-    #
-    #
-    # def p_right_id(p):
-    #     ''' right_id : ID
-    #         | repeat_dots'''
+    def p_comp(self, p):
+        """
+        comp : LESS
+             | MORE
+             | EQUALS
+             | NEQUALS
+             | LEQUALS
+             | MEQUALS
+        """
 
     # -- VARIABLES -----------------------
 

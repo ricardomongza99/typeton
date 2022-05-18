@@ -1,0 +1,8 @@
+var a: Int = 1
+var b: Int = 2
+
+func main() {
+    var c: Float
+    c = 2.0
+    print(a + b - c)
+}
