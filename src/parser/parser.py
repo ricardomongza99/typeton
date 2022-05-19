@@ -3,7 +3,6 @@ from src.parser.errors import CompilerError
 from src.ply import yacc
 from src.lexer import lex, tokens
 from src.directory.function_table import FunctionTable
-from src.semantic import Cube
 from src.virtual.compilation import Scheduler
 
 
@@ -14,7 +13,6 @@ from src.virtual.types import ValueType
 class Parser:
     def __init__(self):
         self.tokens = tokens
-        self.cube = Cube()
         self.compiler_errors = []
         self.memory = Scheduler()
         self.lexer = lex
