@@ -29,7 +29,7 @@ class Cube:
         :param right_type: the right operand type
         :return: the resulting type if exists, None otherwise
        """
-        result_type = self._cube[f'{operator}:{left_type}:{right_type}']
+        result_type = self._cube.get(f'{operator}:{left_type}:{right_type}')
         return result_type
 
 
