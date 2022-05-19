@@ -5,7 +5,7 @@ from ..virtual.helpers import Layers
 from ..virtual.types import ValueType
 
 
-class Directory:
+class FunctionTable:
     """ A directory of functions """
 
     def __init__(self):

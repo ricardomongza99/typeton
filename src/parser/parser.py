@@ -2,7 +2,7 @@ import src
 from src.parser.errors import CompilerError
 from src.ply import yacc
 from src.lexer import lex, tokens
-from src.directory import Directory
+from src.directory.function_table import FunctionTable
 from src.semantic import Cube
 from src.virtual.compilation import Scheduler
 
@@ -18,7 +18,7 @@ class Parser:
         self.compiler_errors = []
         self.memory = Scheduler()
         self.lexer = lex
-        self.directory = Directory()  # potentially = Directory(memory, cube)
+        self.directory = FunctionTable()  # potentially = Directory(memory, cube)
         self.parser = yacc.yacc(module=self, start="program")
 
     def add_compiler_error(self, message, line_number):
