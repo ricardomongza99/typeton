@@ -45,7 +45,6 @@ comparison_combinations = [
     ['Int', 'Float', 'Bool'],
     ['Int', 'Int', 'Bool'],
     ['Float', 'Float', 'Bool'],
-    ['Bool', 'Bool', 'Bool'],
 ]
 
 assign_symbol = ['=']
