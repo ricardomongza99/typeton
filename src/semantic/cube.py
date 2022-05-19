@@ -56,9 +56,10 @@ comparison_combinations_bool = [
 
 assign_symbol = ['=']
 assign_combinations = [
-    ['Int', 'Float', 'Float'],
     ['Int', 'Int', 'Int'],
     ['Float', 'Float', 'Float'],
+    ['Int', 'Float', 'Float'],
+    ['Float', 'Int', 'Float'],
     ['Bool', 'Bool', 'Bool'],
 ]
 
