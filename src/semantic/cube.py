@@ -5,6 +5,7 @@ class Cube:
         # Fill cube
         self._add(arithmetic_symbols, arithmetic_combinations)
         self._add(comparison_symbols, comparison_combinations)
+        self._add(comparison_symbols_bool, comparison_combinations_bool)
         self._add(assign_symbol, assign_combinations)
         self._add(boolean_symbols, boolean_combinations)
 
@@ -18,7 +19,6 @@ class Cube:
         for operator in operators:
             for left_type, right_type, result_type in combinations:
                 self._cube[f'{operator}:{left_type}:{right_type}'] = result_type
-                self._cube[f'{operator}:{right_type}:{left_type}'] = result_type
 
     def check(self, operator, left_type, right_type):
         """
@@ -35,16 +35,23 @@ class Cube:
 
 arithmetic_symbols = ['+', '-', '*', '/']
 arithmetic_combinations = [
-    ['Int', 'Float', 'Float'],
     ['Int', 'Int', 'Int'],
-    ['Float', 'Float', 'Float']
+    ['Float', 'Float', 'Float'],
+    ['Int', 'Float', 'Float'],
+    ['Float', 'Int', 'Float'],
 ]
 
 comparison_symbols = ['==', '!=', '<', '<=', '>', '>=']
 comparison_combinations = [
-    ['Int', 'Float', 'Bool'],
     ['Int', 'Int', 'Bool'],
     ['Float', 'Float', 'Bool'],
+    ['Int', 'Float', 'Bool'],
+    ['Float', 'Int', 'Bool'],
+]
+
+comparison_symbols_bool = ['==', '!=']
+comparison_combinations_bool = [
+    ['Bool', 'Bool', 'Bool']
 ]
 
 assign_symbol = ['=']
@@ -59,4 +66,3 @@ boolean_symbols = ['&&', '||']
 boolean_combinations = [
     ['Bool', 'Bool', 'Bool']
 ]
-
