@@ -1,8 +1,5 @@
 import unittest
-from ..semantic import Cube
-
-
-cube = Cube()
+from ..semantic import cube
 
 
 class TestCube(unittest.TestCase):
