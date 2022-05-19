@@ -20,18 +20,17 @@ class Cube:
                 self._cube[f'{operator}:{left_type}:{right_type}'] = result_type
                 self._cube[f'{operator}:{right_type}:{left_type}'] = result_type
 
-    def check(self, operator, left, right):
+    def check(self, operator, left_type, right_type):
         """
         Checks and returns expected type for given parameters.
 
         :param operator: the operator to apply
-        :param left: the left operand type
-        :param right: the right operand type
+        :param left_type: the left operand type
+        :param right_type: the right operand type
         :return: the resulting type if exists, None otherwise
        """
-        result = self._cube[f'{operator}:{left}:{right}']
-
-        return result
+        result_type = self._cube[f'{operator}:{left_type}:{right_type}']
+        return result_type
 
 
 arithmetic_symbols = ['+', '-', '*', '/']
