@@ -1,9 +1,7 @@
 # Stores Type Data
-from math import floor
-from typing import Dict
 
 from src.singleton.debug import Debug
-from src.virtual.helpers import get_available_address, is_between_range, print_stats, init_types, Layers
+from src.virtual.helpers import get_available_address, print_stats, init_types, Layers
 from src.virtual.types import ValueType, DEFAULT_TYPES, MemoryType
 
 
@@ -25,7 +23,7 @@ class Scheduler:
         if layer == layer.TEMPORARY:
             debug = Debug.get_instance().get_map()
             if debug.get(new_address) is None:
-                debug[new_address] = "T"+str(self.debug_t)
+                debug[new_address] = "T" + str(self.debug_t)
                 self.debug_t += 1
 
         return new_address, False

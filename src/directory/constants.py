@@ -7,11 +7,11 @@ from src.virtual.helpers import Layers
 from src.virtual.types import ValueType
 
 
-
 class Constant:
     def __init__(self, address, type_):
         self.address = address
         self.type_ = type_
+
 
 class ConstantTable:
     def __init__(self):
@@ -52,7 +52,7 @@ class ConstantTable:
 
     def display(self):
         print(make_table("Constants", ["ID", "TYPE", "ADRESS"],
-                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address], self.table.items())))
+                         map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address], self.table.items())))
 
     def exists(self, key):
         if self.table.get(key) is None:

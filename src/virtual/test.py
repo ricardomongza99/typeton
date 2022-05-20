@@ -14,8 +14,4 @@ def run_tests():
         memory_instance.assign_address(x, x * 10)
         address_list.append(x)
 
-    memory_scheduler.release_addresses([6,7,8])
-    memory_instance.release_addresses([6,7,8])
-
     memory_scheduler.stats()
-
