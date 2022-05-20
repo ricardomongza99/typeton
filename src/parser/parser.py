@@ -341,7 +341,7 @@ class Parser:
 
     def p_string_expr(self, p):
         """
-        string_expr : STRINGLIT
+        string_expr : STRINGLIT add_constant
                     | BSLASH LPAREN expression RPAREN
         """
 
