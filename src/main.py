@@ -1,9 +1,7 @@
 from src.parser import Parser
 import os
 
-
 FILENAME = 'albert.ty'
-
 
 def main():
     # Get relative path
@@ -16,9 +14,13 @@ def main():
 
     parser = Parser()
     parser.parse(data)
-    parser.display_function_directory()
 
-    # parser.parse(data)
+    parser.quadGenerator.display()
+    parser.constant_table.display()
+    parser.directory.display(debug=True)
+
+
+# parser.parse(data)
     print('Done')
 
 
