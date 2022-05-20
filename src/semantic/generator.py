@@ -1,7 +1,7 @@
 from typing import List
 
 from src.directory.constants import ConstantTable
-from src.directory.directory import Directory
+from src.directory.function_table import FunctionTable
 from src.semantic import Cube
 from src.semantic.quadruple import Quad, OperationType
 from src.singleton.debug import Debug
@@ -24,7 +24,7 @@ class Operand:
 
 
 class QuadGenerator:
-    def __init__(self, scheduler: Scheduler, directory: Directory):
+    def __init__(self, scheduler: Scheduler, directory: FunctionTable):
         self.__operand_address_stack: List[Operand] = []  # stores the assigned virtual address, not actual value
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []

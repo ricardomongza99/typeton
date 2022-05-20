@@ -4,8 +4,7 @@ from src.parser.errors import CompilerError
 from src.ply import yacc
 from src.lexer import lex, tokens
 
-from src.directory import Directory
-from src.semantic import Cube
+from src.directory import FunctionTable
 from src.semantic.generator import QuadGenerator, Operand, Operator
 from src.semantic.quadruple import OperationType
 from src.virtual.compilation import Scheduler
@@ -21,7 +20,7 @@ class Parser:
         self.constant_table = ConstantTable()
 
         self.lexer = lex
-        self.directory = Directory()  # potentially = Directory(memory, cube)
+        self.directory = FunctionTable()  # potentially = Directory(memory, cube)
         self.quadGenerator = QuadGenerator(scheduler=self.memory, directory=self.directory)
 
         self.parser = yacc.yacc(module=self, start="program")
