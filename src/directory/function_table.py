@@ -1,5 +1,7 @@
 from .function import Function
+from .variable import Variable
 from ..parser.errors import CompilerError
+from ..utils.display import make_table
 from ..virtual.compilation import Scheduler
 from ..virtual.helpers import Layers
 from ..virtual.types import ValueType
@@ -37,24 +39,19 @@ class FunctionTable:
         """ Sets corresponding type either to function or to variable"""
         if self.current_function().type_pending:
             self.current_function().set_type(type_)
+            return None
         else:
-            self.current_function().vars_table.set_type(type_, layer, memory)
+            return self.current_function().vars_table.set_type(type_, layer, memory)
 
     def display(self, debug=False):
         """ Displays directory of functions tables """
-        print("-" * 20)
-        print("DIRECTORY FUNCTIONS")
-        print("-" * 20)
-        print('{:10} {:10}'.format('ID', 'TYPE'))
-        print("-" * 20)
-        for id_, func in self.functions.items():
-            print('{:10} {:10}'.format(id_, func.type_.value))
-        print("-" * 20)
-        print()
+
+        print(make_table("Function Directory", ["ID", "TYPE"],
+                          map(lambda fun: [fun[0], fun[1].type_.value], self.functions.items())))
+
         if debug:
             for id_, func in self.functions.items():
-                func.vars_table.display(id_)
-                print()
+                print(func.vars_table.display(id_))
 
     def end_function(self, memory: Scheduler):
         """ Releases Function From Directory and Virtual Memory"""
@@ -63,5 +60,17 @@ class FunctionTable:
 
             for key in function.vars_table.variables:
                 address = function.vars_table.variables[key].address_
-                print('releasing address: ', address)
                 memory.release_address(address)
+
+    def find(self, id_):
+        stack_copy = self.function_stack[:]
+
+        while len(stack_copy) > 0:
+            function = stack_copy.pop()
+            variable_table = function.vars_table.variables
+            if variable_table.get(id_) is not None:
+                # segment = Layers.GLOBAL if function.id_ == 'global' else Layers.LOCAL
+                variable = variable_table[id_]
+                return variable.address_, variable.type_
+
+        return None, None

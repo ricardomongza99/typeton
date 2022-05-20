@@ -1,6 +1,8 @@
 from typing import Dict
 
 from .variable import Variable
+from ..singleton.debug import Debug
+from ..utils.display import make_table
 from ..virtual.compilation import Scheduler
 from ..virtual.helpers import Layers
 from ..virtual.types import ValueType
@@ -29,18 +31,13 @@ class VariableTable:
         if error:  # TODO Create class to create compilation errors
             return
 
+        debug: Debug = Debug.get_instance().get_map()
+        debug[address] = str(self.current_id)
         self.current_variable.type_ = enum_value
         self.current_variable.address_ = address
 
-    def display(self, id_):
-        print("-" * 30)
-        print(f"{id_} VARS TABLE")
-        print("-" * 30)
-        print('{:10} {:10} {:10}'.format('ID', 'TYPE', 'ADDRESS'))
-        print("-" * 30)
-        for id_, var in self.variables.items():
-            # Unwrap optional. If var type is None use 'Undefined'
-            type_ = 'Undefined' if var.type_.value is None else var.type_.value
+        return self.current_id
 
-            print('{:10} {:10} {:10}'.format(id_, type_, str(var.address_)))
-        print("-" * 30)
+    def display(self, id_):
+        return make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
+                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items()))

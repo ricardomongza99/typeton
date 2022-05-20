@@ -1,22 +1,28 @@
 import src
+from src.directory.constants import ConstantTable
 from src.parser.errors import CompilerError
 from src.ply import yacc
 from src.lexer import lex, tokens
-from src.directory.function_table import FunctionTable
-from src.virtual.compilation import Scheduler
 
+from src.directory import FunctionTable
+from src.semantic.generator import QuadGenerator, Operand, Operator
+from src.semantic.quadruple import OperationType
+from src.virtual.compilation import Scheduler
 
 # maybe should be named compiler?
 from src.virtual.types import ValueType
-
 
 class Parser:
     def __init__(self):
         self.tokens = tokens
         self.compiler_errors = []
         self.memory = Scheduler()
+        self.constant_table = ConstantTable()
+
         self.lexer = lex
         self.directory = FunctionTable()  # potentially = Directory(memory, cube)
+        self.quadGenerator = QuadGenerator(scheduler=self.memory, directory=self.directory)
+
         self.parser = yacc.yacc(module=self, start="program")
 
     def add_compiler_error(self, message, line_number):
@@ -64,7 +70,7 @@ class Parser:
 
     def p_declaration(self, p):
         """
-        declaration : variable ASSIGN expression
+        declaration : variable ASSIGN push_operator expression execute_remaining
                     | variable ASSIGN array
                     | variable
         """
@@ -200,12 +206,12 @@ class Parser:
 
     def p_assign(self, p):
         """
-        assign : ID assign1 expression
+        assign : ID push_variable assign1 expression execute_remaining
         """
 
     def p_assign1(self, p):
         """
-        assign1 : ASSIGN
+        assign1 : ASSIGN push_operator
                 | PASSIGN
                 | LASSIGN
                 | MASSIGN
@@ -240,34 +246,34 @@ class Parser:
     def p_bool_expr(self, p):
         """
         bool_expr : relational_exp
-                  | relational_exp AND bool_expr
-                  | relational_exp OR bool_expr
+                  | relational_exp AND push_operator bool_expr
+                  | relational_exp OR push_operator bool_expr
         """
 
     def p_relational_exp(self, p):
         """
-        relational_exp : expression comp expression
+        relational_exp : expression comp push_operator expression
                        | expression
         """
 
     def p_expression(self, p):
         """
-        expression : term
-                   | term PLUS expression
-                   | term MINUS expression
+        expression : term execute_priority_1
+                   | term execute_priority_1 PLUS push_operator expression
+                   | term execute_priority_1 MINUS push_operator  expression
         """
 
     def p_term(self, p):
         """
-        term : factor
-             | factor TIMES term
-             | factor DIVIDE term
+        term : factor execute_priority_2
+             | factor execute_priority_2 TIMES push_operator term
+             | factor execute_priority_2 DIVIDE push_operator term
         """
 
     def p_factor(self, p):
         """
         factor : constant
-               | COLON LPAREN expression RPAREN
+               | LPAREN push_operator expression RPAREN push_operator
         """
 
     def p_call_array(self, p):
@@ -277,19 +283,18 @@ class Parser:
 
     def p_constant(self, p):
         """
-        constant : constant2
-                 | NUMBER
-                 | FLOATLIT
-                 | TRUE
-                 | FALSE
+        constant :  INTLIT   add_constant
+                 | FLOATLIT add_constant
+                 | BOOLLIT add_constant
                  | string
                  | call
                  | call_array
+                 | constant2
         """
 
     def p_constant2(self, p):
         """
-        constant2 : ID
+        constant2 : ID push_variable
                   | ID PERIOD constant2
         """
 
@@ -307,8 +312,7 @@ class Parser:
 
     def p_variable(self, p):
         """
-        variable : VAR ID add_var
-                 | VAR ID add_var COLON will_set_type type
+        variable : VAR ID add_var COLON will_set_type type
         """
 
     def p_type(self, p):
@@ -336,7 +340,7 @@ class Parser:
 
     def p_string_expr(self, p):
         """
-        string_expr : STRINGLIT
+        string_expr : STRINGLIT add_constant
                     | BSLASH LPAREN expression RPAREN
         """
 
@@ -352,7 +356,15 @@ class Parser:
         """
         end_function :
         """
+        self.quadGenerator.execute_remaining()
         self.directory.end_function(memory=self.memory)
+
+    def p_add_constant(self, p):
+        """
+        add_constant :
+        """
+        self.constant_table.add(p[-1], self.memory)
+        self.quadGenerator.push_constant(p[-1], self.constant_table)
 
     def p_add_var(self, p):
         """
@@ -360,17 +372,67 @@ class Parser:
         """
         self.directory.add_variable(p[-1])
 
+    def p_execute_priority_1(self, p):
+        """
+        execute_priority_1 :
+        """
+
+        self.quadGenerator.execute_if_possible(1)
+
+    def p_execute_priority_2(self, p):
+        """
+        execute_priority_2 :
+        """
+
+        self.quadGenerator.execute_if_possible(2)
+
     def p_will_set_type(self, p):
         """
         will_set_type :
         """
         self.directory.will_set_type(p[-1])
 
+    # QuadGenerator Actions
+    def p_push_operator(self, p):
+        """
+        push_operator :
+        """
+        type_ = OperationType(p[-1])
+        priority = 0
+
+        if type_ is OperationType.ASSIGN:
+            priority = 0
+        elif type_ is OperationType.ADD:
+            priority = 1
+        elif type_ is OperationType.SUBTRACT:
+            priority = 1
+        elif type_ is OperationType.MULTIPLY:
+            priority = 2
+        elif type_ is OperationType.DIVIDE:
+            priority = 2
+
+        operator = Operator(priority, p[-1])
+        self.quadGenerator.push_operator(operator)
+
+    def p_push_variable(self, p):
+        """
+         push_variable :
+        """
+        self.quadGenerator.push_variable(p[-1])
+
+    def p_execute_remaining(self, p):
+        """
+         execute_remaining :
+        """
+        self.quadGenerator.execute_remaining()
+
     def p_set_type(self, p):
         """
         set_type :
         """
-        self.directory.set_type(p[-1], memory=self.memory)
+        id_ = self.directory.set_type(p[-1], memory=self.memory)
+        if id_ is not None:
+            self.quadGenerator.push_variable(id_)
 
     # -- ERROR -----------------------
 
@@ -382,3 +444,5 @@ class Parser:
 
         self.add_compiler_error(token, p.lineno)
 
+    def display_debug(self):
+        self.constant_table.display()

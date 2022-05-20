@@ -5,6 +5,8 @@ class OperationType(Enum):
     MULTIPLY = '*'
     DIVIDE = '/'
     ADD = '+'
+    LPAREN = '('
+    RPAREN = ')'
     SUBTRACT = '-'
     ASSIGN = '='
     GOTOF = 'gotof'
@@ -19,7 +21,7 @@ class OperationType(Enum):
     PRINT = 'print'
 
 
-class Quadruple:
+class Quad:
     def __init__(self, operation, left_address, right_address, result_address):
         self.operation: OperationType = OperationType(operation)
         self.left_address = left_address

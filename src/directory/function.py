@@ -12,7 +12,7 @@ class Function:
         self.has_return_value = False
         self.type_: ValueType = ValueType(type_)
         self.type_pending = type_pending
-        self.vars_table = VariableTable()
+        self.vars_table: VariableTable = VariableTable()
 
     def set_type(self, type_):
         self.type_: ValueType = ValueType(type_)
