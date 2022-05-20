@@ -2,7 +2,7 @@ from typing import List
 
 from src.directory.constants import ConstantTable
 from src.directory.function_table import FunctionTable
-from src.semantic import Cube
+from src.semantic.cube import check as check_type
 from src.semantic.quadruple import Quad, OperationType
 from src.singleton.debug import Debug
 from src.utils.display import make_table, TableOptions
@@ -29,7 +29,6 @@ class QuadGenerator:
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
         self.directory = directory
-        self.cube = Cube()  # static so we can import it anywhere
         self.parenthesis_start = [0]  # operators indexed before this value do not exist
         self.scheduler = scheduler
 
@@ -107,7 +106,7 @@ class QuadGenerator:
         right: Operand = self.__operand_address_stack.pop()
         left = self.__operand_address_stack.pop()
 
-        type_match = self.cube.check(operator.value, left.type_.value, right.type_.value)
+        type_match = check_type(operator.value, left.type_.value, right.type_.value)
         if type_match is None:
             print('error')
 
