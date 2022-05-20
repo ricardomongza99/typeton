@@ -7,6 +7,7 @@ reserved = {
     'Int': 'INT',
     'Float': 'FLOAT',
     'String': 'STRING',
+    'Void': 'VOID',
     'Bool': 'BOOL',
     'print': 'PRINT',
     'if': 'IF',
@@ -73,18 +74,18 @@ t_BSLASH = r'\\'
 t_ARROW = '->'
 # Relational operator rules
 t_AND = '&&'
-t_OR = '\|\|'
+t_OR = r'\|\|'
 t_LESS = '<'
 t_MORE = '>'
 t_EQUALS = '=='
-t_NEQUALS = '!='
-t_LEQUALS = '<='
-t_MEQUALS = '>='
+t_NEQUALS = r'!='
+t_LEQUALS = r'<='
+t_MEQUALS = r'>='
 
-t_PASSIGN = '\+='
-t_LASSIGN = '\-='
-t_MASSIGN = '\*='
-t_DASSIGN = '\/='
+t_PASSIGN = r'\+='
+t_LASSIGN = r'\-='
+t_MASSIGN = r'\*='
+t_DASSIGN = r'\/='
 
 # Operator rules
 t_PLUS = r'\+'
@@ -104,6 +105,7 @@ def t_BOOLLIT(t):
     r'true|false'
     t.type = "BOOLLIT"
     return t
+
 
 # Regex rules
 def t_ID(t):
@@ -134,8 +136,8 @@ def t_STRINGLIT(t):
 
 
 def t_NLINE(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
+    r'\n'
+    t.lexer.lineno += 1
     t.value = 'newline'
     return t
 

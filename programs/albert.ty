@@ -1,8 +1,5 @@
-var a: Int = 1
-var b: Int = 5
+func main() -> Void {
 
-
-func main() {
-    var y: String = "hi"
-    var x: Float = 20 * b / (3 + 5) + (3 * b - (3 + 4)) + 5 * a
+    var y: Bool = true
+    y = 3 < 5 + (9 - 2) * (6 + 5 * 3 - (10 * 5) * 11 - (3 / 2  * 3)) && 3 < 2 + 5 - 10
 }

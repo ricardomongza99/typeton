@@ -42,6 +42,7 @@ _comparison_combinations = [
     ['Float', 'Float', 'Bool'],
     ['Int', 'Float', 'Bool'],
     ['Float', 'Int', 'Bool'],
+
 ]
 
 _comparison_symbols_bool = ['==', '!=']
@@ -52,6 +53,7 @@ _comparison_combinations_bool = [
 _assign_symbol = ['=']
 _assign_combinations = [
     ['Int', 'Int', 'Int'],
+    ['String', 'String', 'String'],
     ['Float', 'Float', 'Float'],
     ['Int', 'Float', 'Float'],
     ['Float', 'Int', 'Float'],
