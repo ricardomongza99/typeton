@@ -5,11 +5,25 @@ class Debug:
     __instance = None
     __id_map = {}
     __compiler_errors = []
+    __debug_actions = []
     __no_run = False
 
     @staticmethod
     def get_map():
         return Debug.__id_map
+
+    @staticmethod
+    def get_errors():
+        return Debug.__compiler_errors
+
+
+    @staticmethod
+    def add_action(action):
+        Debug.__debug_actions.append(action)
+
+    @staticmethod
+    def add_error(error):
+        Debug.__compiler_errors.append(error)
 
     @staticmethod
     def set_no_run(toggle):
