@@ -1,10 +1,8 @@
 class CompilerError:
-    def __init__(self, message: str, line_number = None):
+    def __init__(self, message: str, location: str = "",  trace=""):
         self.message = message
-        self.line_number = line_number
+        self.trace = trace
+        self.location = location
 
     def print(self):
-        if self.line_number is None:
-            print("CompilationError: ", self.message)
-        else:
-            print(f'CompilationError: {self.message} at line: {self.line_number}')
+        print(f'Inside {self.trace}:{self.location} - CompilationError: {self.message}')

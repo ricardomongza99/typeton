@@ -1,6 +1,7 @@
 from typing import Dict
 
 from .variable import Variable
+from ..parser.errors import CompilerError
 from ..singleton.debug import Debug
 from ..utils.display import make_table
 from ..virtual.compilation import Scheduler
@@ -29,7 +30,7 @@ class VariableTable:
         enum_value = ValueType(type_)
         address, error = memory.schedule_address(enum_value, layer)
         if error:  # TODO Create class to create compilation errors
-            return
+            Debug.add_error(CompilerError("Too many Variables"))
 
         debug: Debug = Debug.get_instance().get_map()
         debug[address] = str(self.current_id)

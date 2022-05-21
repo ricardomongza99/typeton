@@ -29,7 +29,7 @@ class OperationType(Enum):
 
 
 class Quad:
-    def __init__(self, operation, left_address, right_address, result_address):
+    def __init__(self, operation, left_address=None, right_address=None, result_address=None):
         self.operation: OperationType = OperationType(operation)
         self.left_address = left_address
         self.right_address = right_address

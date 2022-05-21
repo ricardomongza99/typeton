@@ -1,4 +1,6 @@
 from .function import Function
+from ..parser.errors import CompilerError
+from ..singleton.debug import Debug
 from ..utils.display import make_table
 from ..virtual.compilation import Scheduler
 from ..virtual.helpers import Layers
@@ -21,8 +23,9 @@ class FunctionTable:
             reference = Function(id_=id_)
             self.functions[id_] = reference
             self.function_stack.append(reference)
-            return False
-        return True
+            return
+
+        Debug.add_error(CompilerError(f'Function "{id_}" redeclared'))
 
     def add_variable(self, id_):
         """ Add Var to the current function's vars table """
@@ -54,10 +57,22 @@ class FunctionTable:
                 address = function.vars_table.variables[key].address_
                 memory.release_address(address)
 
+    def current_trace(self):
+        stack_copy = self.function_stack[:]
+        stack_copy.reverse()
+        trace = ""
+        while len(stack_copy) > 0:
+            function = stack_copy.pop()
+            if len(stack_copy) == 0:
+                trace += f'{function.id_}'
+            else:
+                trace += f'{function.id_}.'
+        return trace
+
     def find(self, id_):
         stack_copy = self.function_stack[:]
 
-        while len(stack_copy) > 0: # go from local to global
+        while len(stack_copy) > 0:  # go from local to global
             function = stack_copy.pop()
             variable_table = function.vars_table.variables
             if variable_table.get(id_) is not None:
