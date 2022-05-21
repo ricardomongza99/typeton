@@ -1,3 +1,4 @@
+import functools
 from typing import List
 
 from src.directory import FunctionTable
@@ -5,13 +6,26 @@ from src.directory.constants import ConstantTable
 from src.lexer import lex, tokens
 from src.parser.errors import CompilerError
 from src.ply import yacc
-from src.semantic.generator import QuadGenerator, Operator
+from src.semantic.expression import Operator
+from src.semantic.generator import QuadGenerator
 from src.semantic.quadruple import OperationType
+from src.singleton.debug import Debug
 from src.virtual.compilation import Scheduler
+
+
+def semantic_action(func):
+    @functools.wraps(func)
+    def wrapper(self, p):
+        if len(self.compiler_errors) == 0:
+            return func(self, p)
+        return
+
+    return wrapper
 
 
 class Parser:
     def __init__(self):
+        self.data = None
         self.tokens = tokens
         self.compiler_errors: List[CompilerError] = []
         self.memory = Scheduler()
@@ -34,6 +48,7 @@ class Parser:
         self.directory.display(debug=True)
 
     def parse(self, data: str, debug=False):
+        self.data = data
         self.parser.parse(data, self.lexer, debug=debug)
 
     # parser begin
@@ -55,7 +70,6 @@ class Parser:
              | function
              | declaration
         """
-        print("body")
 
     # -- TOP LEVEL -----------------------
 
@@ -76,12 +90,17 @@ class Parser:
                     | variable ASSIGN array
                     | variable
         """
-        print("dec")
+
+    def p_declaration_error(self, p):
+        """
+        declaration : variable ASSIGN push_operator error execute_priority_0
+        """
+        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_array(self, p):
         """
-        array : LBRACK array1 RBRACK
-        """
+            array : LBRACK array1 RBRACK
+            """
 
     def p_array1(self, p):
         """
@@ -185,6 +204,7 @@ class Parser:
                   | call
                   | return
         """
+        print('statement')
 
     def p_while(self, p):
         """
@@ -212,12 +232,26 @@ class Parser:
         assign : ID push_variable assign1 bool_expr execute_priority_0
         """
 
-    def recover(self, token_set):  # Future error handling
+    def p_assign_error_1(self, p):
+        """
+        assign : ID push_variable error execute_priority_0
+        """
+        self.compiler_errors.append(CompilerError(f'Invalid assigment after "{p[1]}"'))
+
+    def p_assign_error(self, p):
+        """
+        assign : ID push_variable assign1 error execute_priority_0
+        """
+        self.compiler_errors.append(CompilerError(f'Invalid Expression after "{p[1]} = "'))
+
+    def recover(self, token_set=None):  # Future error handling
         while True:
             tok = self.parser.token()
-            print(tok.type)
-            if not tok or tok.type in token_set:
+            if tok is not None:
+                print(tok)
+            if not tok or (token_set is None or tok.type in token_set):
                 break
+        return tok
 
     def p_assign1(self, p):  # TODO add rest to semantic cube
         """
@@ -241,14 +275,24 @@ class Parser:
 
     def p_if(self, p):
         """
-        if : IF LPAREN bool_expr RPAREN block
-           | IF LPAREN bool_expr RPAREN block if2
+        if : if_single
+           | if_multiple
         """
 
-    def p_if2(self, p):
+    def p_if_single(self, p):  # allow single
         """
-        if2 : ELSE if
-            | ELSE block
+        if_single : IF LPAREN bool_expr RPAREN get_conditional block fill_end
+        """
+
+    def p_if_multiple(self, p):
+        """
+        if_multiple : IF LPAREN bool_expr RPAREN get_conditional block if_multiple_2
+        """
+
+    def p_if_multiple_2(self, p):  # force else at the end, less loop-holes, safer code
+        """
+        if_multiple_2 : fill_and_goto ELSE if_multiple
+                      | fill_and_goto ELSE  block fill_end
         """
 
     # -- EXPRESSIONS -----------------------
@@ -260,9 +304,9 @@ class Parser:
                   | relational_exp execute_priority_1 OR push_operator bool_expr
         """
 
-    def p_relational_exp(self, p):
+    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent parser panic. fix this
         """
-        relational_exp : expression execute_priority_2 comp expression
+        relational_exp : expression execute_priority_2 comp relational_exp
                        | expression execute_priority_2
         """
 
@@ -280,16 +324,36 @@ class Parser:
              | factor execute_priority_4 DIVIDE push_operator term
         """
 
+    def p_term_error(self, p):
+        """
+        term : factor execute_priority_4 TIMES error push_operator term
+             | factor execute_priority_4 DIVIDE error push_operator term
+
+        """
+        self.compiler_errors[-1].message = f'Expected valid expression after "{p[3]}"'
+
     def p_factor(self, p):
         """
-        factor : constant
-               | LPAREN push_operator bool_expr RPAREN push_operator
+            factor : constant
+                   | LPAREN push_operator bool_expr RPAREN push_operator
+            """
+
+    def p_factor_error(self, p):
         """
+        factor : LPAREN push_operator error RPAREN push_operator
+        """
+        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+
+    def p_execute_remaining(self, p):
+        """
+        execute_remaining :
+        """
+        self.quadGenerator.execute_remaining()
 
     def p_call_array(self, p):
         """
-        call_array : ID LBRACK expression RBRACK
-        """
+            call_array : ID LBRACK expression RBRACK
+            """
 
     def p_constant(self, p):
         """
@@ -325,14 +389,25 @@ class Parser:
         variable : VAR ID add_var COLON type
         """
 
+    def p_variable_error(self, p):
+        """
+        variable : VAR ID error type
+        """
+        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+
+    def p_variable_error_1(self, p):
+        """
+        variable : VAR ID add_var COLON error NLINE
+        """
+        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
         """
-        type : variable_primitive
-             | ID
-             | LBRACK variable_primitive RBRACK
-             | LBRACK ID RBRACK
-        """
+            type : variable_primitive
+                 | LBRACK variable_primitive RBRACK
+                 | LBRACK ID RBRACK
+            """
 
     def p_function_return_type(self, p):
         """
@@ -365,30 +440,42 @@ class Parser:
 
     # -- SEMANTIC ACTIONS -----------------------
 
+    @semantic_action
     def p_add_function(self, p):
         """
         add_function :
         """
-        if self.should_run():
-            error = self.directory.add(p[-1])
-            if error:
-                self.compiler_errors.append(error)
+        self.directory.add(p[-1])
 
+    def handle_error(self, possible_error):
+        if type(possible_error) == list:
+            for err in possible_error:
+                if err is not None and type(err) is CompilerError:
+                    err.trace = self.directory.current_trace()
+                    self.compiler_errors.append(err)
+        elif possible_error is not None and type(possible_error) is CompilerError:
+            possible_error.trace = self.directory.current_trace()
+            self.compiler_errors.append(possible_error)
+        return possible_error
+
+    @semantic_action
     def p_end_function(self, p):
         """
         end_function :
         """
-        if self.should_run():
-            self.handle_error(self.quadGenerator.execute_remaining())
-            self.directory.end_function(memory=self.memory)
 
+        self.handle_error(self.quadGenerator.execute_remaining())
+        self.handle_error(self.directory.end_function(memory=self.memory))
+
+    @semantic_action
     def p_add_constant(self, p):
         """
         add_constant :
         """
-        self.constant_table.add(p[-1], self.memory)
-        self.quadGenerator.push_constant(p[-1], self.constant_table)
+        self.handle_error(self.constant_table.add(p[-1], self.memory))
+        self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
 
+    @semantic_action
     def p_add_var(self, p):
         """
         add_var :
@@ -396,36 +483,37 @@ class Parser:
         # if self.should_run():
         self.handle_error(self.directory.add_variable(p[-1]))
 
+    @semantic_action
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
-        if self.should_run():
-            self.handle_error(self.quadGenerator.execute_if_possible(0))
+        self.handle_error(self.quadGenerator.execute_remaining())
 
+    @semantic_action
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
 
-        if self.should_run():
-            self.handle_error(self.quadGenerator.execute_if_possible(1))
+        self.handle_error(self.quadGenerator.execute_if_possible(1))
 
+    @semantic_action
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
         """
 
-        if self.should_run():
-            self.handle_error(self.quadGenerator.execute_if_possible(2))
+        self.handle_error(self.quadGenerator.execute_if_possible(2))
 
+    @semantic_action
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
-        if self.should_run():
-            self.handle_error(self.quadGenerator.execute_if_possible(4))
+        self.handle_error(self.quadGenerator.execute_if_possible(4))
 
+    @semantic_action
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
@@ -433,6 +521,7 @@ class Parser:
 
         self.handle_error(self.quadGenerator.execute_if_possible(4))
 
+    @semantic_action
     def p_set_function_type(self, p):
         """
         set_function_type :
@@ -440,7 +529,28 @@ class Parser:
 
         self.handle_error(self.directory.set_function_type(p[-1]))
 
-    # QuadGenerator Actions
+    @semantic_action
+    def p_get_conditional(self, p):
+        """
+        get_conditional :
+        """
+        self.quadGenerator.get_conditional()
+
+    @semantic_action
+    def p_fill_and_goto(self, p):
+        """
+        fill_and_goto :
+        """
+        self.quadGenerator.fill_and_goto()
+
+    @semantic_action
+    def p_fill_end(self, p):
+        """
+        fill_end :
+        """
+        self.quadGenerator.fill_end()
+
+    @semantic_action
     def p_push_operator(self, p):
         """
         push_operator :
@@ -469,22 +579,20 @@ class Parser:
         operator = Operator(priority, type_)
         self.handle_error(self.quadGenerator.push_operator(operator))
 
+    @semantic_action
     def p_push_variable(self, p):
         """
          push_variable :
         """
         self.handle_error(self.quadGenerator.push_variable(p[-1]))
 
-    def handle_error(self, error):
-        if error is not None and type(error) is CompilerError:
-            self.compiler_errors.append(error)
-
+    @semantic_action
     def p_set_variable_type(self, p):
         """
         set_variable_type :
         """
 
-        id_ = self.directory.set_variable_type(p[-1], memory=self.memory)
+        id_ = self.handle_error(self.directory.set_variable_type(p[-1], memory=self.memory))
         if id_ is not None:
             self.handle_error(self.quadGenerator.push_variable(id_))
 
@@ -495,8 +603,13 @@ class Parser:
             token = "end of file"
             print("end of file")
         else:
-            token = f'Unexpected symbol "{p.value}"'
-            self.compiler_errors.append(CompilerError(token, p.lineno))
+            token = self.recover({"NLINE"})
+            line_start = self.data.rfind('\n', 0, p.lexpos) + 1
+            col = (p.lexpos - line_start) + 1
+
+            self.handle_error(
+                CompilerError("Unexpected " + str(p.value), f'({p.lineno}:{col})', self.directory.current_trace()))
+            return token
 
     def display_debug(self):
         self.constant_table.display()

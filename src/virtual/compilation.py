@@ -1,5 +1,5 @@
 # Stores Type Data
-
+from src.parser.errors import CompilerError
 from src.singleton.debug import Debug
 from src.virtual.helpers import get_available_address, print_stats, init_types, Layers
 from src.virtual.types import ValueType, DEFAULT_TYPES, MemoryType
@@ -14,10 +14,10 @@ class Scheduler:
     def schedule_address(self, value_type: ValueType, layer: Layers):
         segment = self.__segments[layer.value]
         resource = segment.resources[value_type.value]
-
         new_address, error = get_available_address(resource)
+
         if error:
-            print("could not assign new address for specified range")
+            Debug.add_error(CompilerError("could not assign new address for specified range"))
             return None, True
 
         if layer == layer.TEMPORARY:

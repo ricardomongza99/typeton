@@ -1,5 +1,21 @@
 func main() -> Void {
 
-    var y: Bool = true
-    y = 3 < 5 + (9 - 2) * (6 + 5 * 3 - (10 * 5) * 11 - (3 / 2  * 3)) && 3 < 2 + 5 - 10
+    var f: Float  = 20 * 3
+    var y: Int = 5
+    y = 3 * (f / 2.03)
+
+    var x: Float = 10 * 3 / (3 * 10 * (4))
+
+    if (x > 10) {
+        if (x < 10) {
+            y = 10
+        } else {
+            x = 10
+        }
+    } else if (x == 10){
+        y = y + 5
+    } else {
+        y = y - 5
+    }
+
 }
