@@ -281,7 +281,7 @@ class Parser:
 
     def p_if_single(self, p):  # allow single
         """
-        if_single : IF LPAREN bool_expr RPAREN get_conditional block fill_end
+        if_single : IF LPAREN bool_expr RPAREN get_conditional block fill_end_single
         """
 
     def p_if_multiple(self, p):
@@ -549,6 +549,13 @@ class Parser:
         fill_end :
         """
         self.quadGenerator.fill_end()
+
+    @semantic_action
+    def p_fill_end_single(self, p):
+        """
+        fill_end_single :
+        """
+        self.quadGenerator.fill_end_single()
 
     @semantic_action
     def p_push_operator(self, p):

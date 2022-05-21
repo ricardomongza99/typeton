@@ -27,7 +27,7 @@ class ConditionalActions:
         return ActionResult(quad)
 
     def fill_and_goto(self): # used after each else / elseif to fill gotof
-        self.__fill_gotof()
+        self.__fill_gotof(1)
         if len(self.goto_jumps) > 0:
             self.__fill_goto()
 
@@ -35,13 +35,16 @@ class ConditionalActions:
         self.goto_jumps.append(len(self.quad_list))
         return ActionResult(goto_quad)
 
+    def fill_end_single(self):
+        self.__fill_gotof(0)
+
     def fill_end(self): # used to fill last goto
         index = self.goto_jumps.pop()
         self.quad_list[index].result_address = len(self.quad_list)  # next quad
 
-    def __fill_gotof(self):
+    def __fill_gotof(self, skip):
         pending_jump_index = self.goto_f_jumps.pop()
-        self.quad_list[pending_jump_index].result_address = len(self.quad_list) + 1
+        self.quad_list[pending_jump_index].result_address = len(self.quad_list)+skip
 
     def __fill_goto(self):
         print("filling goto")

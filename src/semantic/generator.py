@@ -59,6 +59,9 @@ class QuadGenerator:
 
     # Conditionals -------------------------------------------
 
+    def fill_end_single(self):
+        self.conditional_actions.fill_end_single()
+
     def get_conditional(self):
         result = self.conditional_actions.get_conditional(self.expression_actions.get_operands(), self.__quad_list)
         self.__handle_result(result)
