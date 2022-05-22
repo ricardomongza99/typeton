@@ -44,7 +44,7 @@ class ContextMemory:
         self.size_data = size_data
         self.global_data = global_data
         self.type_data = type_data
-        self.data_storage: Dict[ValueType, any] = {};'l'
+        self.data_storage: Dict[ValueType, any] = {}
         self.memory_map: Dict[int, int] = {}
         self.storage_map = Dict[ValueType, List]
         self.__init_storage()
