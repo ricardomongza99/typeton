@@ -29,6 +29,7 @@ class Parser:
         self.compiler_errors: List[CompilerError] = []
         self.memory = Scheduler()
         self.directory = FunctionTable()  # potentially = Directory(memory, cube)
+        self.searchSymbol = "NLINE"
 
         self.lexer = lex
         self.constant_table = ConstantTable()
@@ -48,7 +49,7 @@ class Parser:
 
     def parse(self, data: str, debug=False):
         self.data = data
-        self.parser.parse(data, self.lexer, debug=debug)
+        self.parser.parse(data, self.lexer, debug=False)
 
     # parser begin
     def p_program(self, p):
@@ -77,11 +78,19 @@ class Parser:
         class : CLASS ID class_block
               | CLASS ID COLON ID class_block
         """
+        print('class')
 
     def p_function(self, p):
         """
         function : FUNC ID add_function params ARROW function_return_type init_block end_function
         """
+        print('error')
+
+    def p_function_error(self, p):
+        """
+        function : FUNC error ARROW
+        """
+        print("invalid function declaration")
 
     def p_declaration(self, p):
         """
@@ -89,12 +98,13 @@ class Parser:
                     | variable ASSIGN array
                     | variable
         """
+        print("declaration")
 
     def p_declaration_error(self, p):
         """
-        declaration : variable ASSIGN push_operator error execute_priority_0
+        declaration : variable error NLINE
         """
-        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+        self.compiler_errors[-1].message = f'Invalid expression"'
 
     def p_array(self, p):
         """
@@ -115,6 +125,13 @@ class Parser:
                | LPAREN RPAREN
         """
 
+    # def p_params_error(self, p):
+    #     """
+    #     params : LPAREN params1 RPAREN
+    #            | LPAREN RPAREN
+    #     """
+
+
     def p_params1(self, p):
         """
         params1 : param
@@ -123,10 +140,27 @@ class Parser:
 
     def p_param(self, p):
         """
-        param : ID add_var COLON type set_variable_type
+        param : ID add_param COLON variable_primitive
         """
 
-    # -- BLOCKS -----------------------
+    def p_param_error(self, p):
+        """
+        param : ID error variable_primitive
+              | error COLON variable_primitive
+        """
+
+        if p[2] != ':':
+            print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
+            self.recover("RCURLY")
+            self.directory.function_stack.pop()
+        elif type(p[1]) is not str and p[1].value == ':':
+            print(f' Missing identifier: Add id before colon " empty :" --> variable_name : ..."')
+            self.recover({"RCURLY"})
+            self.directory.function_stack.pop()
+
+
+
+# -- BLOCKS -----------------------
 
     def p_class_block(self, p):
         """
@@ -216,13 +250,13 @@ class Parser:
 
     def p_display(self, p):
         """
-        display : PRINT LPAREN expression RPAREN
+        display : PRINT push_operator LPAREN bool_expr RPAREN execute_builtin_call
         """
 
     def p_return(self, p):
         """
         return : RETURN
-               | RETURN bool_expr
+               | RETURN push_operator bool_expr set_return
         """
 
     def p_assign(self, p):
@@ -342,12 +376,6 @@ class Parser:
         """
         self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
-    def p_execute_remaining(self, p):
-        """
-        execute_remaining :
-        """
-        self.quadGenerator.execute_remaining()
-
     def p_call_array(self, p):
         """
             call_array : ID LBRACK expression RBRACK
@@ -443,7 +471,7 @@ class Parser:
         """
         add_function :
         """
-        self.directory.add(p[-1])
+        self.directory.add(p[-1], self.quadGenerator.get_next_quad())
 
     def handle_error(self, possible_error):
         if type(possible_error) == list:
@@ -452,9 +480,18 @@ class Parser:
                     err.trace = self.directory.current_trace()
                     self.compiler_errors.append(err)
         elif possible_error is not None and type(possible_error) is CompilerError:
-            possible_error.trace = self.directory.current_trace()
+            possible_error.trace = \
+                self.directory.current_trace() if possible_error.trace is None else possible_error.trace
             self.compiler_errors.append(possible_error)
         return possible_error
+
+    @semantic_action
+    def p_validate_return(self, p):
+        """
+        set_return :
+        """
+
+        self.handle_error(self.directory.set_return())
 
     @semantic_action
     def p_end_function(self, p):
@@ -474,19 +511,33 @@ class Parser:
         self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
 
     @semantic_action
+    def p_add_param(self, p):
+        """
+        add_param :
+        """
+        self.handle_error(self.directory.add_variable(p[-1], True))
+
+    @semantic_action
     def p_add_var(self, p):
         """
         add_var :
         """
         # if self.should_run():
-        self.handle_error(self.directory.add_variable(p[-1]))
+        self.handle_error(self.directory.add_variable(p[-1], False))
 
     @semantic_action
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
-        self.handle_error(self.quadGenerator.execute_remaining())
+        self.handle_error(self.quadGenerator.execute_if_possible(0))
+
+    @semantic_action
+    def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
+        """
+        execute_builtin_call :
+        """
+        self.handle_error(self.quadGenerator.execute_builtin_call())
 
     @semantic_action
     def p_execute_priority_1(self, p):
@@ -509,7 +560,7 @@ class Parser:
         """
         execute_priority_3 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(4))
+        self.handle_error(self.quadGenerator.execute_if_possible(3))
 
     @semantic_action
     def p_execute_priority_4(self, p):
@@ -586,7 +637,7 @@ class Parser:
         type_ = OperationType(p[-1])
         priority = 0
 
-        if type_ is OperationType.ASSIGN:
+        if type_ is {OperationType.ASSIGN}:
             priority = 0
         elif type_ in {OperationType.AND, OperationType.OR}:
             priority = 1
@@ -618,7 +669,7 @@ class Parser:
         set_variable_type :
         """
 
-        id_ = self.handle_error(self.directory.set_variable_type(p[-1], memory=self.memory))
+        id_ = self.handle_error(self.directory.set_variable_type(p[-1], self.memory))
         if id_ is not None:
             self.handle_error(self.quadGenerator.push_variable(id_))
 
@@ -628,14 +679,12 @@ class Parser:
         if p is None:
             token = "end of file"
             print("end of file")
+            return token
         else:
-            token = self.recover({"NLINE"})
             line_start = self.data.rfind('\n', 0, p.lexpos) + 1
             col = (p.lexpos - line_start) + 1
-
+            # self.parser.errok()
             self.handle_error(
                 CompilerError("Unexpected " + str(p.value), f'({p.lineno}:{col})', self.directory.current_trace()))
-            return token
-
     def display_debug(self):
         self.constant_table.display()
