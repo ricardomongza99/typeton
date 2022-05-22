@@ -18,12 +18,12 @@ class VariableTable:
     def current_variable(self):
         return self.variables[self.current_id]
 
-    def add(self, id_):
+    def add(self, id_, is_param):
         """ Add Variable to `variables` dictionary if not existent """
         if self.variables.get(id_) is None:
             self.current_id = id_
             # we can't know where to put it without the type, just store the reference for now
-            self.variables[id_] = Variable(None, None)
+            self.variables[id_] = Variable(is_param=is_param)
 
     def set_type(self, type_, layer: Layers, memory: Scheduler):
         """ Sets current var type """
