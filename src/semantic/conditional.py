@@ -17,13 +17,13 @@ class ConditionalActions:
         self.goto_f_jumps = []
         self.quad_list = quad_list
 
-    def get_conditional(self, operand_list, quad_list): #get conditional
+    def get_conditional(self, operand_list):
         expression: Operand = operand_list.pop()
         if expression.type_ is not ValueType.BOOL:
             return ActionResult(error=CompilerError("Type Error, if expression should be boolean"))
 
         quad = Quad(operation=OperationType.GOTOF, left_address=expression.address, right_address=None)
-        self.goto_f_jumps.append(len(quad_list))  # current quad
+        self.goto_f_jumps.append(len(self.quad_list))  # current quad
         return ActionResult(quad)
 
     def fill_and_goto(self): # used after each else / elseif to fill gotof

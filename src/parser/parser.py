@@ -9,7 +9,6 @@ from src.ply import yacc
 from src.semantic.expression import Operator
 from src.semantic.generator import QuadGenerator
 from src.semantic.quadruple import OperationType
-from src.singleton.debug import Debug
 from src.virtual.compilation import Scheduler
 
 
@@ -204,11 +203,10 @@ class Parser:
                   | call
                   | return
         """
-        print('statement')
 
     def p_while(self, p):
         """
-        while : WHILE LPAREN bool_expr RPAREN block
+        while : WHILE LPAREN save_loop_start bool_expr set_loop_condition RPAREN block fill_and_reset_loop
         """
 
     def p_input(self, p):
@@ -556,6 +554,27 @@ class Parser:
         fill_end_single :
         """
         self.quadGenerator.fill_end_single()
+
+    @semantic_action
+    def p_save_loop_start(self, p):
+        """
+        save_loop_start :
+        """
+        self.quadGenerator.save_loop_start()
+
+    @semantic_action
+    def p_set_loop_condition(self, p):
+        """
+        set_loop_condition :
+        """
+        self.quadGenerator.set_loop_condition()
+
+    @semantic_action
+    def p_fill_and_reset_loop(self, p):
+        """
+        fill_and_reset_loop :
+        """
+        self.quadGenerator.fill_and_reset_loop()
 
     @semantic_action
     def p_push_operator(self, p):

@@ -1,8 +1,9 @@
-from typing import List, Dict
+from typing import List
 
 from src.directory.function_table import FunctionTable
 from src.semantic.conditional import ConditionalActions
 from src.semantic.expression import ExpressionActions
+from src.semantic.loop import LoopActions
 from src.semantic.quadruple import Quad
 from src.semantic.type import ActionResult
 from src.singleton.debug import Debug
@@ -17,6 +18,7 @@ class QuadGenerator:
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
+        self.loop_actions = LoopActions(self.__quad_list)
         self.expression_actions = ExpressionActions()
 
     # Expressions -------------------------------------------
@@ -37,6 +39,45 @@ class QuadGenerator:
         result = self.expression_actions.push_constant(value, constant_table)
         return self.__handle_result(result)
 
+    def execute_remaining(self):
+        results = self.expression_actions.execute_remaining(self.scheduler)
+        return self.__handle_result(results)
+
+    # -------------------------------------------------------
+
+    # Conditionals -------------------------------------------
+
+    def fill_end_single(self):
+        self.conditional_actions.fill_end_single()
+
+    def get_conditional(self):
+        result = self.conditional_actions.get_conditional(self.expression_actions.get_operands())
+        self.__handle_result(result)
+
+    def fill_and_goto(self):
+        result = self.conditional_actions.fill_and_goto()
+        self.__handle_result(result)
+
+    def fill_end(self):
+        self.conditional_actions.fill_end()
+
+    # -------------------------------------------------------
+
+    # Loop -------------------------------------------
+
+    def save_loop_start(self):
+        self.__handle_result(self.loop_actions.save_loop_start())
+
+    def set_loop_condition(self):
+        self.__handle_result(self.loop_actions.set_loop_condition(self.expression_actions.get_operands().pop()))
+
+    def fill_and_reset_loop(self):
+        self.__handle_result(self.loop_actions.fill_and_reset_loop())
+
+    # -------------------------------------------------------
+
+    # Helpers
+
     def __handle_result(self, results):
         if type(results) is ActionResult:
             if results.has_quad():
@@ -50,32 +91,6 @@ class QuadGenerator:
             elif result.has_error():
                 errors.append(result.error)
         return errors
-
-    def execute_remaining(self):
-        results = self.expression_actions.execute_remaining(self.scheduler)
-        return self.__handle_result(results)
-
-    # -------------------------------------------------------
-
-    # Conditionals -------------------------------------------
-
-    def fill_end_single(self):
-        self.conditional_actions.fill_end_single()
-
-    def get_conditional(self):
-        result = self.conditional_actions.get_conditional(self.expression_actions.get_operands(), self.__quad_list)
-        self.__handle_result(result)
-
-    def fill_and_goto(self):
-        result = self.conditional_actions.fill_and_goto()
-        self.__handle_result(result)
-
-    def fill_end(self):
-        self.conditional_actions.fill_end()
-
-    # -------------------------------------------------------
-
-    # Helpers
 
     def display(self):
         address_map = Debug.get_map()
