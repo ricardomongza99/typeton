@@ -24,6 +24,11 @@ func main() -> Void {
         y = y - 5
     }
 
+    while (x < 4 && y == 1) {
+        y = 10
+        x = x + 1
+    }
+
 
 
 }
