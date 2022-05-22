@@ -1,0 +1,11 @@
+class Dog {
+    var a: Int
+
+    func bark() {
+        print("Woof!")
+    }
+}
+
+func main() {
+
+}

@@ -1,0 +1,6 @@
+func main() {
+    var a: Int
+    var b: Float
+    var c: Bool
+    var d: String
+}
