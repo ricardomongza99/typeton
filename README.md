@@ -182,17 +182,17 @@ func main() {
 - [x] 📖 Syntax analysis
 - [x] 🧠 Semantic analysis
     - [x] Functions directory
-    - [ ] Variable tables
+    - [x] Variable tables
     - [x] Semantics cube
 - [ ] 🏭 Code generation 
-    - [ ] For arithmetic expressions
-    - [ ] For sequential blocks (ASSIGN, INPUT, ETC.)
-    - [ ] For conditional blocks (IF, ELSE, WHILE)
+    - [x] For arithmetic expressions
+    - [x] For sequential blocks (ASSIGN, INPUT, ETC.)
+    - [x] For conditional blocks (IF, ELSE, WHILE, WHILE)
     - [ ] For functions
     - [ ] For arrays
     - [ ] For objects
 - [ ] 🖥 Virtual Machine
-    - [ ] Memory for execution (Global memory, temporal memory, execution stack)
+    - [x] Memory for execution (Global memory, temporal memory, execution stack)
     - [ ] Arithmetic expressions execution
     - [ ] Sequential blocks execution
     - [ ] Conditional blocks execution
