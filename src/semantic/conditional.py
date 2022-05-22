@@ -1,7 +1,7 @@
 from typing import Dict, List
 
 from src.parser.errors import CompilerError
-from src.semantic.expression import Operand
+from src.semantic.type import Operand
 from src.semantic.quadruple import Quad, OperationType
 from src.semantic.type import ActionResult
 from src.virtual.types import ValueType

@@ -5,29 +5,18 @@ from src.directory.constants import ConstantTable
 from src.parser.errors import CompilerError
 from src.semantic.cube import check as check_type
 from src.semantic.quadruple import Quad, OperationType
-from src.semantic.type import ActionResult
+from src.semantic.type import ActionResult, Operand, Operator
 from src.singleton.debug import Debug
 from src.virtual.compilation import Scheduler
 from src.virtual.helpers import Layers
 from src.virtual.types import ValueType
 
 
-class Operator:
-    def __init__(self, priority: int, type_: OperationType):
-        self.priority = priority
-        self.type_ = type_
-
-
-class Operand:
-    def __init__(self, type_: ValueType, address: int):
-        self.type_ = type_
-        self.address = address
-
-
 class ExpressionActions:
-    def __init__(self):
-        self.__operand_address_stack: List[Operand] = []  # stores the assigned virtual address, not actual value
-        self.__operator_stack: List[Operator] = []
+    def __init__(self, operands, operators):
+        self.__operand_address_stack: List[Operand] = operands  # stores the
+        # ed virtual address, not actual value
+        self.__operator_stack: List[Operator] = operators
         self.parenthesis_start = [0]  # operators indexed before this value do not exist
 
     def push_variable(self, id_, directory: FunctionTable):
@@ -44,7 +33,10 @@ class ExpressionActions:
 
     def execute_if_possible(self, priority, scheduler: Scheduler):
         last_operator: Operator = self.__peek_operators()
+
         if last_operator is not None and last_operator.priority == priority:
+            if priority == 0:
+                return self.__execute_assign(scheduler)
             return self.__execute_arithmetic(scheduler)
         return ActionResult()
 
@@ -80,16 +72,18 @@ class ExpressionActions:
         return None
 
     def __execute_assign(self, scheduler: Scheduler):
+        operator = self.__operator_stack.pop()
         right = self.__operand_address_stack.pop()
         left = self.__operand_address_stack.pop()
 
         address_map = Debug.get_map()
-        type_match = check_type(OperationType.ASSIGN.value, left.type_.value, right.type_.value)
+
+        type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
         if type_match is None:
             return ActionResult(error=CompilerError(
-                f'Type: {address_map[left.address]}:'
+                f'{address_map[left.address]}:'
                 f'{left.type_.value} '
-                f'{OperationType.ASSIGN.value} '
+                f'{operator.type_.value} '
                 f'{address_map[right.address]} '
                 f'({left.type_.value} and {right.type_.value} are not compatible)'))
 
@@ -106,9 +100,6 @@ class ExpressionActions:
 
     def __execute_arithmetic(self, scheduler: Scheduler):
         operator = self.__operator_stack.pop()
-
-        if operator.type_ == OperationType.ASSIGN:
-            return self.__execute_assign(scheduler)
 
         right: Operand = self.__operand_address_stack.pop()
         left: Operand = self.__operand_address_stack.pop()

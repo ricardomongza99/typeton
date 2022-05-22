@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+from src.utils.display import make_table
 from src.virtual.types import ValueType
 
 
@@ -10,14 +11,39 @@ class SizeData:
         self.bool_count = bool_count
         self.string_count = string_count
 
+    def add_variable_size(self, type_: ValueType):
+        if type_ is ValueType.INT:
+            self.int_count += 1
+        elif type_ is ValueType.FLOAT:
+            self.float_count += 1
+        elif type_ is ValueType.BOOL:
+            self.bool_count += 1
+        elif type_ is ValueType.STRING:
+            self.string_count += 1
+        else:
+            print("Error unknown type")
+
 
 class FunctionData:
-    def __init__(self, id_: str, type_: ValueType, parameter_signature: str, start_quad: int, size: SizeData):
+    def __init__(self, id_: str, start_quad: int = 0):
         self.id_ = id_
-        self.size = size
+        self.size_data = SizeData(0, 0, 0, 0)
         self.start_quad = start_quad
-        self.type = type_
-        self.parameter_signature = parameter_signature
+        self.type_ = None
+        self.parameter_signature = []
+
+    def add_variable_size(self, type_: ValueType):
+        self.size_data.add_variable_size(type_)
+
+    def print_signature(self):
+        result = ""
+        for type_ in self.parameter_signature:
+            result += f'{type_.value}:'
+
+        if result == "":
+            return "No Params"
+        return result[:-1]
+
 
 
 class Directory:

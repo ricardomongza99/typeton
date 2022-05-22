@@ -34,6 +34,8 @@ _arithmetic_combinations = [
     ['Float', 'Float', 'Float'],
     ['Int', 'Float', 'Float'],
     ['Float', 'Int', 'Float'],
+    ['String', 'String', 'String'],
+
 ]
 
 _comparison_symbols = ['==', '!=', '<', '<=', '>', '>=']

@@ -1,8 +1,9 @@
 from typing import List
 
 from src.directory.function_table import FunctionTable
+from src.semantic.built_in import Builtin_Function_Actions
 from src.semantic.conditional import ConditionalActions
-from src.semantic.expression import ExpressionActions
+from src.semantic.expression import ExpressionActions, Operand, Operator
 from src.semantic.loop import LoopActions
 from src.semantic.quadruple import Quad
 from src.semantic.type import ActionResult
@@ -13,15 +14,23 @@ from src.virtual.compilation import Scheduler
 
 class QuadGenerator:
     def __init__(self, scheduler: Scheduler, directory: FunctionTable):
+        self.__operand_address_stack: List[Operand] = []  # stores the
+        # ed virtual address, not actual value
+        self.__operator_stack: List[Operator] = []
+
         self.__quad_list: List[Quad] = []
         self.directory = directory
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
         self.loop_actions = LoopActions(self.__quad_list)
-        self.expression_actions = ExpressionActions()
+        self.expression_actions = ExpressionActions(self.__operand_address_stack, self.__operator_stack)
+        self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
     # Expressions -------------------------------------------
+
+    def get_next_quad(self):
+        return len(self.__quad_list)
 
     def push_variable(self, id_):
         result = self.expression_actions.push_variable(id_, self.directory)
@@ -114,3 +123,6 @@ class QuadGenerator:
 
     def __push_quad(self, quad: Quad):
         self.__quad_list.append(quad)
+
+    def execute_builtin_call(self):
+        self.builtin_actions.execute_call(self.__operator_stack, self.__operand_address_stack)
