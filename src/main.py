@@ -1,16 +1,13 @@
 from src.parser import Parser
 import os
-
+from config.definitions import PROGRAMS_DIR
 from src.singleton.debug import Debug
 
 FILENAME = 'albert.ty'
 
 
 def main():
-    # Get relative path
-    dirname = os.path.dirname(__file__)
-    filename = os.path.join(dirname, '../programs/' + FILENAME)
-
+    filename = os.path.join(PROGRAMS_DIR, FILENAME)
     file = open(filename)
     data = file.read()
     file.close()
@@ -23,13 +20,9 @@ def main():
     # parser.directory.display(debug=True)
     parser.print_compiler_errors()
 
-
     # parser.parse(data)
     print('Done')
 
 
 if __name__ == '__main__':
     main()
-
-
-
