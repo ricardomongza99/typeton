@@ -3,7 +3,8 @@
 
 
 class Variable:
-    def __init__(self, is_param=False):
+    def __init__(self, id_, is_param=False):
+        self.id_ = id_
         self.type_ = None
         self.address_ = None
         self.isReturned = None
