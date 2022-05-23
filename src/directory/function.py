@@ -24,7 +24,7 @@ class Function:
     def add_variable(self, id_, is_param):
         self._vars_table.add(id_, is_param)
 
-    def display_variabes(self, id_):
+    def display_variables(self, id_):
         self._vars_table.display(id_)
 
     def set_variable_type(self, type_, layer, memory):

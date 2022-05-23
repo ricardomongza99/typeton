@@ -35,5 +35,5 @@ class VariableTable:
         return self.current_variable.id_
 
     def display(self, id_):
-        return make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
-                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items()))
+        print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
+                         map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items())))

@@ -5,6 +5,7 @@ from ..allocator.allocator import Allocator
 from ..allocator.helpers import Layers
 from ..allocator.types import ValueType
 from ..parser.errors import CompilerError
+from ..utils.debug import Debug
 from ..utils.display import make_table, TableOptions
 from ..virtual_machine.types import FunctionData
 
@@ -16,11 +17,9 @@ class FunctionTable:
         self.functions = {}
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
-        self.global_function: Function = Function('placeholder')
 
         # We need this for global variable search
         self.add("global", 0)
-        self.global_function = self.current_function
         self.current_function.set_type("Void")
 
     def add(self, id_, quad_start: int):
@@ -98,7 +97,9 @@ class FunctionTable:
 
         if debug:
             for id_, func in self.functions.items():
-                print(func.display_variables(id_))
+                func.display_variables(id_)
+
+        # print(Debug.map()[3000])
 
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""

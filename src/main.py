@@ -16,8 +16,8 @@ def main():
 
     parser.quadGenerator.display()
     parser.print_compiler_errors()
-    # parser.constant_table.display()
-    # parser.directory.display(debug=True)
+    parser.constant_table.display()
+    parser.directory.display(debug=True)
 
     print('Done')
 
