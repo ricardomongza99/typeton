@@ -27,6 +27,7 @@ class Parser:
         self.data = None
         self.tokens = tokens
         self.compiler_errors: List[CompilerError] = []
+        self.syntax_error = None
         self.memory = Scheduler()
         self.directory = FunctionTable()  # potentially = Directory(memory, cube)
         self.searchSymbol = "NLINE"
@@ -675,16 +676,25 @@ class Parser:
 
     # -- ERROR -----------------------
 
+    # def p_error(self, p):
+    #     if p is None:
+    #         token = "end of file"
+    #         print("end of file")
+    #         return token
+    #     else:
+    #         line_start = self.data.rfind('\n', 0, p.lexpos) + 1
+    #         col = (p.lexpos - line_start) + 1
+    #         # self.parser.errok()
+    #         self.handle_error(
+    #             CompilerError("Unexpected " + str(p.value), f'({p.lineno}:{col})', self.directory.current_trace()))
     def p_error(self, p):
-        if p is None:
-            token = "end of file"
-            print("end of file")
-            return token
+        error_message = 'Syntax error'
+        if p:
+            error_message += f': at token {p.type} ({p.value}) on line {p.lineno}'
         else:
-            line_start = self.data.rfind('\n', 0, p.lexpos) + 1
-            col = (p.lexpos - line_start) + 1
-            # self.parser.errok()
-            self.handle_error(
-                CompilerError("Unexpected " + str(p.value), f'({p.lineno}:{col})', self.directory.current_trace()))
+            error_message += f': end of file'
+        self.syntax_error = error_message
+        self.parser.restart()
+
     def display_debug(self):
         self.constant_table.display()
