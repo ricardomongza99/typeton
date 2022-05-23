@@ -1,6 +1,6 @@
 func main() -> Void {
     var a: Int = 1
     var b: Float = 2.0
-    var d: Bool = True
+    var d: Bool = true
     var c: String = "Hello world!"
 }
