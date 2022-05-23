@@ -1,0 +1,7 @@
+var a: Int
+var b: Float
+
+func main() -> Void {
+    var a: Int
+    var b: Float
+}
