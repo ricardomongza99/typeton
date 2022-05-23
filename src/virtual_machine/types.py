@@ -1,7 +1,7 @@
 from typing import List, Dict
 
 from src.utils.display import make_table
-from src.virtual.types import ValueType
+from src.allocator.types import ValueType
 
 
 class SizeData:

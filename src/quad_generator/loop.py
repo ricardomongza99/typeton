@@ -1,12 +1,7 @@
-from typing import Dict, List
-
 from src.parser.errors import CompilerError
-from src.semantic.type import Operand
-from src.semantic.quadruple import Quad, OperationType
-from src.semantic.type import ActionResult
-from src.virtual.compilation import Scheduler
-from src.virtual.types import ValueType
-from src.semantic.cube import check as semantic_check
+from src.quad_generator.type import Operand
+from src.quad_generator.type import Quad, OperationType
+from src.allocator.types import ValueType
 
 """
 Conditional semantic actions

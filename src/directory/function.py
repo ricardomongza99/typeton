@@ -2,7 +2,7 @@ from .variable_table import VariableTable
 
 # NOTE: `type` is a reserved words in python, so
 # we use the underscore at the end convention `type_`
-from ..virtual.types import ValueType
+from ..allocator.types import ValueType
 
 
 class Function:

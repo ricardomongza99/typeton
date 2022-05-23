@@ -1,14 +1,14 @@
 from typing import List
 
 from src.directory.function_table import FunctionTable
-from src.semantic.built_in import Builtin_Function_Actions
-from src.semantic.conditional import ConditionalActions
-from src.semantic.expression import ExpressionActions, Operand, Operator
-from src.semantic.loop import LoopActions
-from src.semantic.quadruple import Quad
+from src.quad_generator.built_in import Builtin_Function_Actions
+from src.quad_generator.conditional import ConditionalActions
+from src.quad_generator.expression import ExpressionActions, Operand, Operator
+from src.quad_generator.loop import LoopActions
+from src.quad_generator.type import Quad
 from src.singleton.debug import Debug
 from src.utils.display import make_table, TableOptions
-from src.virtual.compilation import Scheduler
+from src.allocator.index import Scheduler
 
 
 class QuadGenerator:

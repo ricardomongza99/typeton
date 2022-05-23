@@ -3,9 +3,9 @@ from typing import Dict
 from .function import Function
 from ..parser.errors import CompilerError
 from ..utils.display import make_table, TableOptions
-from ..virtual.compilation import Scheduler
-from ..virtual.helpers import Layers
-from ..virtual.types import ValueType
+from ..allocator.index import Scheduler
+from ..allocator.helpers import Layers
+from ..allocator.types import ValueType
 from ..virtual_machine.types import FunctionData
 
 

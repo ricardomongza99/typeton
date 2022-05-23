@@ -1,8 +1,8 @@
 # Stores Type Data
 from src.parser.errors import CompilerError
 from src.singleton.debug import Debug
-from src.virtual.helpers import get_available_address, print_stats, init_types, Layers
-from src.virtual.types import ValueType, DEFAULT_TYPES, MemoryType
+from src.allocator.helpers import get_available_address, print_stats, init_types, Layers
+from src.allocator.types import ValueType, DEFAULT_TYPES, MemoryType
 
 
 class Scheduler:

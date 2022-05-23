@@ -4,9 +4,9 @@ from .variable import Variable
 from ..parser.errors import CompilerError
 from ..singleton.debug import Debug
 from ..utils.display import make_table
-from ..virtual.compilation import Scheduler
-from ..virtual.helpers import Layers
-from ..virtual.types import ValueType
+from ..allocator.index import Scheduler
+from ..allocator.helpers import Layers
+from ..allocator.types import ValueType
 
 
 class VariableTable:

@@ -1,14 +1,14 @@
 from typing import List
 
+from src.allocator.index import Scheduler
 from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
 from src.lexer import lex, tokens
 from src.parser.errors import CompilerError
 from src.ply import yacc
-from src.semantic.expression import Operator
-from src.semantic.generator import QuadGenerator
-from src.semantic.quadruple import OperationType
-from src.virtual.compilation import Scheduler
+from src.quad_generator.expression import Operator
+from src.quad_generator.index import QuadGenerator
+from src.quad_generator.type import OperationType
 
 
 class Parser:
@@ -172,11 +172,9 @@ class Parser:
         if p[2] != ':':
             print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
             self.recover("RCURLY")
-            self.directory.function_stack.pop()
         elif type(p[1]) is not str and p[1].value == ':':
             print(f' Missing identifier: Add id before colon " empty :" --> variable_name : ..."')
             self.recover({"RCURLY"})
-            self.directory.function_stack.pop()
 
     # -- BLOCKS -----------------------
 

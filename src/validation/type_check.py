@@ -3,7 +3,7 @@
 _cube = {}
 
 
-def check(operator, left_type, right_type):
+def type_check(operator, left_type, right_type):
     """
     Checks and returns expected type for given parameters.
 

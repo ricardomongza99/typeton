@@ -2,9 +2,9 @@ from typing import Dict
 
 from src.singleton.debug import Debug
 from src.utils.display import make_table
-from src.virtual.compilation import Scheduler
-from src.virtual.helpers import Layers
-from src.virtual.types import ValueType
+from src.allocator.index import Scheduler
+from src.allocator.helpers import Layers
+from src.allocator.types import ValueType
 
 
 class Constant:

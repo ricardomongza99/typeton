@@ -1,5 +1,5 @@
 # Static Helpers
-from src.virtual.types import TypeResource, MemoryType
+from src.allocator.types import TypeResource, MemoryType
 from enum import Enum
 
 

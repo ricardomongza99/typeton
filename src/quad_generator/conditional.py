@@ -1,10 +1,6 @@
-from typing import Dict, List
-
 from src.parser.errors import CompilerError
-from src.semantic.type import Operand
-from src.semantic.quadruple import Quad, OperationType
-from src.semantic.type import ActionResult
-from src.virtual.types import ValueType
+from src.quad_generator.type import Quad, OperationType, Operand
+from src.allocator.types import ValueType
 
 """
 Conditional semantic actions
@@ -20,11 +16,11 @@ class ConditionalActions:
     def get_conditional(self, operand_list):
         expression: Operand = operand_list.pop()
         if expression.type_ is not ValueType.BOOL:
-            return ActionResult(error=CompilerError("Type Error, if expression should be boolean"))
+            return CompilerError("Type Error, if expression should be boolean")
 
         quad = Quad(operation=OperationType.GOTOF, left_address=expression.address, right_address=None)
         self.goto_f_jumps.append(len(self.quad_list))  # current quad
-        return ActionResult(quad)
+        self.quad_list.append(quad)
 
     def fill_and_goto(self): # used after each else / elseif to fill gotof
         self.__fill_gotof(1)
@@ -33,7 +29,7 @@ class ConditionalActions:
 
         goto_quad = Quad(operation=OperationType.GOTO, left_address=OperationType.GOTO, result_address=None)
         self.goto_jumps.append(len(self.quad_list))
-        return ActionResult(goto_quad)
+        self.quad_list.append(goto_quad)
 
     def fill_end_single(self):
         self.__fill_gotof(0)

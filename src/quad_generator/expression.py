@@ -3,13 +3,13 @@ from typing import List
 from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
 from src.parser.errors import CompilerError
-from src.semantic.cube import check as check_type
-from src.semantic.quadruple import Quad, OperationType
-from src.semantic.type import Operand, Operator
+from src.validation.type_check import type_check as check_type
+from src.quad_generator.type import Quad, OperationType
+from src.quad_generator.type import Operand, Operator
 from src.singleton.debug import Debug
-from src.virtual.compilation import Scheduler
-from src.virtual.helpers import Layers
-from src.virtual.types import ValueType
+from src.allocator.index import Scheduler
+from src.allocator.helpers import Layers
+from src.allocator.types import ValueType
 
 
 class ExpressionActions:
