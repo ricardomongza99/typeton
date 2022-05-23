@@ -3,7 +3,7 @@ var b: Int = 2
 var c: Int = 3
 var d: Int = 4
 
-func main() -> Void {
+func main()  {
     a = a + b * c - d
     b = 2 * 5 - 3
     c = 2 + 4

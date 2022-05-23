@@ -7,7 +7,7 @@ from src.validation.type_check import type_check as check_type
 from src.quad_generator.type import Quad, OperationType
 from src.quad_generator.type import Operand, Operator
 from src.utils.debug import Debug
-from src.allocator.index import Scheduler
+from src.allocator.allocator import Allocator
 from src.allocator.helpers import Layers
 from src.allocator.types import ValueType
 
@@ -31,7 +31,7 @@ class ExpressionActions:
     def get_operands(self):
         return self.__operand_address_stack
 
-    def execute_if_possible(self, priority, scheduler: Scheduler):
+    def execute_if_possible(self, priority, scheduler: Allocator):
         last_operator: Operator = self.__peek_operators()
 
         if last_operator is not None and last_operator.priority == priority:
@@ -39,14 +39,14 @@ class ExpressionActions:
                 return self.__execute_assign(scheduler)
             return self.__execute_arithmetic(scheduler)
 
-    def push_operator(self, new_operator: Operator, scheduler: Scheduler):
+    def push_operator(self, new_operator: Operator, scheduler: Allocator):
         is_parenthesis, errors = self.__handle_parenthesis(new_operator, scheduler)
         if is_parenthesis or errors is not None:
             return errors
         else:
             self.__operator_stack.append(new_operator)
 
-    def execute_remaining(self, scheduler: Scheduler):
+    def execute_remaining(self, scheduler: Allocator):
         errors = []
         while len(self.__operator_stack) > self.parenthesis_start[-1] and len(self.__operand_address_stack) > 2:
             errors.append(self.__execute_arithmetic(scheduler))
@@ -58,7 +58,7 @@ class ExpressionActions:
         self.__operand_address_stack.append(operand)
 
     # Helpers
-    def __handle_parenthesis(self, operator: Operator, scheduler: Scheduler):
+    def __handle_parenthesis(self, operator: Operator, scheduler: Allocator):
         if operator.type_ == OperationType.LPAREN:
             self.parenthesis_start.append(len(self.__operator_stack))
             return True, None
@@ -68,7 +68,7 @@ class ExpressionActions:
             return True, errors
         return False, None
 
-    def __execute_assign(self, scheduler: Scheduler):
+    def __execute_assign(self, scheduler: Allocator):
         address_map = Debug.map()
 
         operator = self.__operator_stack.pop()
@@ -95,7 +95,7 @@ class ExpressionActions:
         if not scheduler.is_segment(right.address, Layers.CONSTANT):
             scheduler.release_address(right.address)
 
-    def __execute_arithmetic(self, scheduler: Scheduler):
+    def __execute_arithmetic(self, scheduler: Allocator):
         operator = self.__operator_stack.pop()
 
         right: Operand = self.__operand_address_stack.pop()
@@ -111,7 +111,7 @@ class ExpressionActions:
                 f'{operator.type_.value} '
                 f'{address_map[right.address]}')
 
-        result, error = scheduler.schedule_address(ValueType(type_match), Layers.TEMPORARY)
+        result, error = scheduler.allocate_address(ValueType(type_match), Layers.TEMPORARY)
         self.__operand_address_stack.append(Operand(ValueType(type_match), result))
 
         quad = (Quad(

@@ -114,9 +114,10 @@ def t_ID(t):
 
 
 def t_FLOATLIT(t):
-    r'\d+.\d+'
+    r'\d+\.\d+'
     t.type = "FLOATLIT"
     t.value = float(t.value)
+    print(t.value)
     return t
 
 

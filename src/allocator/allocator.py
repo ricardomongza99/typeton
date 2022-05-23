@@ -1,19 +1,19 @@
 # Stores Type Data
-from src.parser.errors import CompilerError
 from src.allocator.helpers import get_available_address, print_stats, init_types, Layers
-from src.allocator.types import ValueType, DEFAULT_TYPES, MemoryType
+from src.allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
+from src.parser.errors import CompilerError
 from src.utils.debug import Debug
 
 
-class Scheduler:
+class Allocator:
     def __init__(self, type_resources: [MemoryType] = DEFAULT_TYPES):
         self.__segments = init_types(type_resources)
-        self.debug_t = 0
 
     # Compilation
-    def schedule_address(self, value_type: ValueType, layer: Layers):
+    def allocate_address(self, value_type: ValueType, layer: Layers):
         segment = self.__segments[layer.value]
-        resource = segment.resources[value_type.value]
+        resource: TypeResource = segment.resources[value_type.value]
+        # Refactor method get_available_address
         new_address, error = get_available_address(resource)
 
         if error:
@@ -22,10 +22,11 @@ class Scheduler:
         if layer == layer.TEMPORARY:
             debug = Debug.map()
             if debug.get(new_address) is None:
-                debug[new_address] = "T" + str(self.debug_t)
-                self.debug_t += 1
+                temp_type = f'{resource.type.value[0].lower()}'
+                temp_address = str(new_address - resource.start)
+                debug[new_address] = f'T{temp_address} ({temp_type})'
 
-        return new_address, False
+        return new_address, None
 
     def get_segment(self, address):
         for key in self.__segments:

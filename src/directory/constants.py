@@ -2,7 +2,7 @@ from typing import Dict
 
 from src.utils.debug import Debug
 from src.utils.display import make_table
-from src.allocator.index import Scheduler
+from src.allocator.allocator import Allocator
 from src.allocator.helpers import Layers
 from src.allocator.types import ValueType
 
@@ -17,7 +17,7 @@ class ConstantTable:
     def __init__(self):
         self.table: Dict[str, Constant] = {}
 
-    def add(self, value, memory: Scheduler):
+    def add(self, value, memory: Allocator):
         if self.exists(value):
             return
 
@@ -34,7 +34,7 @@ class ConstantTable:
             # TODO error handling
             return
 
-        address, error = memory.schedule_address(type_, Layers.CONSTANT)
+        address, error = memory.allocate_address(type_, Layers.CONSTANT)
 
         debug = Debug.get_instance().map()
         debug[address] = str(value)

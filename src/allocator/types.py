@@ -26,8 +26,8 @@ class MemoryType:
 
 
 DEFAULT_TYPES = [
-    MemoryType(value_type=ValueType.INT, size=500),
-    MemoryType(value_type=ValueType.FLOAT, size=500),
-    MemoryType(value_type=ValueType.BOOL, size=300),
-    MemoryType(value_type=ValueType.STRING, size=500)
+    MemoryType(value_type=ValueType.INT, size=499),
+    MemoryType(value_type=ValueType.FLOAT, size=499),
+    MemoryType(value_type=ValueType.BOOL, size=499),
+    MemoryType(value_type=ValueType.STRING, size=499)
 ]

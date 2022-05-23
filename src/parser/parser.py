@@ -1,6 +1,6 @@
 from typing import List
 
-from src.allocator.index import Scheduler
+from src.allocator.allocator import Allocator
 from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
 from src.lexer import lex, tokens
@@ -19,7 +19,7 @@ class Parser:
         self.error_data = 1
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
-        self.memory = Scheduler()
+        self.memory = Allocator()
         self.directory = FunctionTable()
         self.searchSymbol = "NLINE"
 
@@ -28,7 +28,6 @@ class Parser:
         self.quadGenerator = QuadGenerator(scheduler=self.memory, directory=self.directory)
         self.tokens = tokens
         self.parser = yacc.yacc(module=self, start="program", debug=True)
-
 
     def print_compiler_errors(self):
         for err in self.compiler_errors:
