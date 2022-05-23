@@ -22,10 +22,11 @@ class FunctionTable:
     def current_function(self) -> Function:
         return self.function_stack[len(self.function_stack) - 1]
 
-    def add(self, id_, quad_start: int):
+    def add(self, id_, quad_start: int, is_void):
         """ Add Func to `funcs` dictionary if not existent """
         if self.functions.get(id_) is None:
             reference = Function(id_=id_)
+            reference.pending_type = not is_void
             reference.type_ = ValueType.VOID
             self.functions[id_] = reference
             self.function_stack.append(reference)
@@ -35,7 +36,7 @@ class FunctionTable:
             self.function_data_table[id_].type_ = ValueType.VOID
             return
 
-        Debug.add_error(CompilerError(f'Function "{id_}" redeclared'))
+        return CompilerError(f'Function {id_} redeclared')
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
@@ -43,17 +44,24 @@ class FunctionTable:
 
     def set_function_type(self, type_):
         self.current_function().set_type(type_)
-        self.function_data_table[self.current_function().id_].type_ = ValueType(type_)
+
+        self.function_data().type_ = ValueType(type_)
 
     def set_param_type(self, type_, memory: Scheduler):
         layer = Layers.GLOBAL if self.current_function().id_ == "global" else Layers.LOCAL
         self.function_data_table[self.current_function().id_].add_variable_size(ValueType(type_))
         return self.current_function().vars_table.set_type(type_, layer, memory)
 
+    def function_data(self):
+        return self.function_data_table[self.current_function().id_]
+
     def set_variable_type(self, type_, memory: Scheduler):
         layer = Layers.GLOBAL if self.current_function().id_ == "global" else Layers.LOCAL
-        self.function_data_table[self.current_function().id_].add_variable_size(ValueType(type_))
+        self.function_data().add_variable_size(ValueType(type_))
         id_ = self.current_function().vars_table.set_type(type_, layer, memory)
+
+        if self.current_function().is_pending_type():
+            return self.set_function_type(type_)
 
         is_param = self.current_function().vars_table.current_variable.is_param
         if is_param:
@@ -96,7 +104,6 @@ class FunctionTable:
     def end_function(self, memory: Scheduler):
         """ Releases Function From Directory and Virtual Memory"""
 
-        print(self.current_trace())
         error = self.__validate_return()
 
         if len(self.function_stack) > 1:
@@ -146,5 +153,3 @@ class FunctionTable:
                 trace=self.current_trace()
             )
         return None
-
-

@@ -1,4 +1,3 @@
-import functools
 from typing import List
 
 from src.directory import FunctionTable
@@ -16,6 +15,7 @@ class Parser:
     def __init__(self):
         self.data = None
         self.tokens = tokens
+        self.error_data = 1
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
         self.memory = Scheduler()
@@ -72,7 +72,16 @@ class Parser:
 
     def p_function(self, p):
         """
-        function : FUNC ID add_function params ARROW function_return_type init_block end_function
+        function : FUNC ID add_function params  set_void init_block end_function
+                 | FUNC ID add_function params ARROW variable_primitive init_block end_function
+        """
+
+        if p[5] != '-->':
+            self.directory.current_function().pending_type = False
+
+    def p_function_error(self, p):
+        """
+        function : FUNC ID error init_block
         """
 
     def p_function_error(self, p):
@@ -112,6 +121,13 @@ class Parser:
                | LPAREN RPAREN
         """
 
+    def p_params_error(self, p):
+        """
+        params : LPAREN error RPAREN
+        """
+        self.compiler_errors[
+            -1].message = f'Expected valid parameres such as: "some_func( an_id: Int, other_id: Bool...)" or "some_func()"'
+
     # def p_params_error(self, p):
     #     """
     #     params : LPAREN params1 RPAREN
@@ -124,10 +140,42 @@ class Parser:
                 | param COMMA params1
         """
 
+    def p_params1_error(self, p):
+        """
+        params1 : error COMMA params1
+        """
+
     def p_param(self, p):
         """
         param : ID add_param COLON variable_primitive
         """
+
+    # def p_param_error(self, p):
+    #     """
+    #     param : ID error variable_primitive
+    #           | error COLON variable_primitive
+    #           | error variable_primitive
+    #     """
+    #     if p[2] == ':':
+    #         self.compiler_errors[-1].message = f'Missing identifier before colon "{p[1]}"'
+    #     elif type(p[1]) is str:
+    #         self.compiler_errors[-1].message = f'Missing Colon:  {p[1]} : <-- add here'
+    #     else:
+    #         self.compiler_errors[-1].message = f'Invalid param declaration: "{p[1]}"'
+    #
+
+    # self.parser.restart()
+
+    #     print('received ', p[1], p[2], p[3])
+    #     print(self.parser.token())
+    #     if p[2] != ':':
+    #         print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
+    #         self.recover("COMMA")
+    #     elif type(p[1]) is not str and p[1].value == ':':
+    #         print('error here')
+    #         # self.compiler_errors[
+    #         #     1].message = f' Missing identifier: Add id before colon " empty :" --> variable_name : ..."',
+    #
 
     def p_param_error(self, p):
         """
@@ -222,6 +270,11 @@ class Parser:
                   | return
         """
 
+    def p_statement_error(self, p):
+        """
+        statement : error
+        """
+
     def p_while(self, p):
         """
         while : WHILE LPAREN save_loop_start bool_expr set_loop_condition RPAREN block fill_and_reset_loop
@@ -263,9 +316,7 @@ class Parser:
     def recover(self, token_set=None):  # Future error handling
         while True:
             tok = self.parser.token()
-            if tok is not None:
-                print(tok)
-            if not tok or (token_set is None or tok.type in token_set):
+            if not tok or tok.type in token_set:
                 break
         return tok
 
@@ -419,15 +470,6 @@ class Parser:
                  | LBRACK ID RBRACK
             """
 
-    def p_function_return_type(self, p):
-        """
-       function_return_type : INT set_function_type
-                 | FLOAT   set_function_type
-                 | STRING  set_function_type
-                 | BOOL    set_function_type
-                 | VOID    set_function_type
-       """
-
     def p_variable_primitive(self, p):
         """
         variable_primitive : INT    set_variable_type
@@ -456,6 +498,12 @@ class Parser:
         """
         self.directory.add(p[-1], self.quadGenerator.get_next_quad())
 
+    def p_set_void(self, p):
+        """
+        set_void :
+        """
+        self.directory.current_function().set_type("Void")
+
     def handle_error(self, possible_error):
         if type(possible_error) == list:
             for err in possible_error:
@@ -472,14 +520,12 @@ class Parser:
         """
         set_return :
         """
-
         self.handle_error(self.directory.set_return())
 
     def p_end_function(self, p):
         """
         end_function :
         """
-
         self.handle_error(self.quadGenerator.execute_remaining())
         self.handle_error(self.directory.end_function(memory=self.memory))
 
@@ -500,7 +546,6 @@ class Parser:
         """
         add_var :
         """
-        # if self.should_run():
         self.handle_error(self.directory.add_variable(p[-1], False))
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
@@ -539,13 +584,6 @@ class Parser:
         execute_priority_4 :
         """
         self.handle_error(self.quadGenerator.execute_if_possible(4))
-
-    def p_set_function_type(self, p):
-        """
-        set_function_type :
-        """
-
-        self.handle_error(self.directory.set_function_type(p[-1]))
 
     def p_get_conditional(self, p):
         """
@@ -634,17 +672,6 @@ class Parser:
 
     # -- ERROR -----------------------
 
-    # def p_error(self, p):
-    #     if p is None:
-    #         token = "end of file"
-    #         print("end of file")
-    #         return token
-    #     else:
-    #         line_start = self.data.rfind('\n', 0, p.lexpos) + 1
-    #         col = (p.lexpos - line_start) + 1
-    #         # self.parser.errok()
-    #         self.handle_error(
-    #             CompilerError("Unexpected " + str(p.value), f'({p.lineno}:{col})', self.directory.current_trace()))
     def p_error(self, p):
         error_message = 'Syntax error'
         if p:
@@ -656,3 +683,23 @@ class Parser:
 
     def display_debug(self):
         self.constant_table.display()
+
+    #
+    # def p_error(self, p):
+    #     if p is None:
+    #         token = "end of file"
+    #         print("end of file")
+    #         return token
+    #     else:
+    #         line_start = self.data.rfind('\n', 0, p.lexpos) + 1
+    #         col = (p.lexpos - line_start) + 1
+    #         # self.handle_error(
+    #         # self.recover({"RCURLY"})
+    #         self.compiler_errors.append(CompilerError(
+    #             "Unexpected " + str(p.value),
+    #             f'({p.lineno}:{col})',
+    #             self.directory.current_trace()
+    #         ))
+    #
+    #         self.recover({"}"})
+    #         self.parser.errok()

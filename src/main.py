@@ -16,9 +16,10 @@ def main():
     parser.parse(data)
 
     parser.quadGenerator.display()
+    parser.print_compiler_errors()
     # parser.constant_table.display()
     # parser.directory.display(debug=True)
-    parser.print_compiler_errors()
+
 
     # parser.parse(data)
     print('Done')

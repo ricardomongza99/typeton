@@ -47,6 +47,5 @@ class ConditionalActions:
         self.quad_list[pending_jump_index].result_address = len(self.quad_list)+skip
 
     def __fill_goto(self):
-        print("filling goto")
         pending_jump_index = self.goto_jumps.pop()
         self.quad_list[pending_jump_index].result_address = len(self.quad_list)

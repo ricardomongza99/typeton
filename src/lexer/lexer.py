@@ -7,7 +7,6 @@ reserved = {
     'Int': 'INT',
     'Float': 'FLOAT',
     'String': 'STRING',
-    'Void': 'VOID',
     'Bool': 'BOOL',
     'print': 'PRINT',
     'if': 'IF',

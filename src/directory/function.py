@@ -6,13 +6,18 @@ from ..virtual.types import ValueType
 
 
 class Function:
-    def __init__(self, id_: str, type_="Void"):
+    def __init__(self, id_: str):
         self.id_ = id_
-        self.type_: ValueType = ValueType(type_)
+        self.type_: ValueType = ValueType.VOID
         self.vars_table: VariableTable = VariableTable()
         self.has_return = False
+        self.pending_type = True
+
+    def is_pending_type(self):
+        return self.pending_type
 
     def set_type(self, type_):
+        self.pending_type = False
         self.type_: ValueType = ValueType(type_)
 
     def valid_function(self):

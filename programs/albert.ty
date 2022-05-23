@@ -1,4 +1,21 @@
-func main() -> Void {
+
+var a: Int = 20
+var b: Int = 30
+var c: Bool = a + b < b - a
+
+
+func duck(name: String, age: Int, adult:Bool, score: Float) -> Int {
+    name = "Hello" + name
+    var temp: Int = age / 2
+    adult = false
+
+    print("Hello World")
+
+    return temp
+}
+
+func main() {
+    b = a - b + a
 
     var f: Float  = 20 * 3
     var y: Int = 5
@@ -28,7 +45,5 @@ func main() -> Void {
         y = 10
         x = x + 1
     }
-
-
 
 }
