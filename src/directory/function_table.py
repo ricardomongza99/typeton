@@ -3,7 +3,7 @@ from typing import Dict
 from .function import Function
 from ..parser.errors import CompilerError
 from ..utils.display import make_table, TableOptions
-from ..allocator.index import Scheduler
+from ..allocator.allocator import Allocator
 from ..allocator.helpers import Layers
 from ..allocator.types import ValueType
 from ..virtual_machine.types import FunctionData
@@ -45,7 +45,7 @@ class FunctionTable:
         self.current_function.set_type(type_)
         self.function_data().type_ = ValueType(type_)
 
-    def set_param_type(self, type_, memory: Scheduler):
+    def set_param_type(self, type_, memory: Allocator):
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
         self.function_data().add_variable_size(ValueType(type_))
         return self.current_function.vars_table.set_type(type_, layer, memory)
@@ -53,7 +53,7 @@ class FunctionTable:
     def function_data(self):
         return self.function_data_table[self.current_function.id_]
 
-    def set_variable_type(self, type_, memory: Scheduler):
+    def set_variable_type(self, type_, memory: Allocator):
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
         self.function_data().add_variable_size(ValueType(type_))
         id_ = self.current_function.vars_table.set_type(type_, layer, memory)
@@ -100,7 +100,7 @@ class FunctionTable:
             for id_, func in self.functions.items():
                 print(func.vars_table.display(id_))
 
-    def end_function(self, memory: Scheduler):
+    def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
         error = self.__validate_return()
 

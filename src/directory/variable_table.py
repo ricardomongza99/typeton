@@ -2,7 +2,7 @@ from typing import Dict
 
 from .variable import Variable
 from ..allocator.helpers import Layers
-from ..allocator.index import Scheduler
+from ..allocator.allocator import Allocator
 from ..allocator.types import ValueType
 from ..parser.errors import CompilerError
 from ..utils.debug import Debug
@@ -25,10 +25,10 @@ class VariableTable:
             # we can't know where to put it without the type, just store the reference for now
             self.variables[id_] = Variable(is_param=is_param)
 
-    def set_type(self, type_, layer: Layers, memory: Scheduler):
+    def set_type(self, type_, layer: Layers, memory: Allocator):
         """ Sets current var type """
         enum_value = ValueType(type_)
-        address, error = memory.schedule_address(enum_value, layer)
+        address, error = memory.allocate_address(enum_value, layer)
         if error:  # TODO Create class to create compilation errors
             return CompilerError("Too many Variables")
 
