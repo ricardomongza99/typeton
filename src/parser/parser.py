@@ -12,16 +12,6 @@ from src.semantic.quadruple import OperationType
 from src.virtual.compilation import Scheduler
 
 
-def semantic_action(func):
-    @functools.wraps(func)
-    def wrapper(self, p):
-        if len(self.compiler_errors) == 0:
-            return func(self, p)
-        return
-
-    return wrapper
-
-
 class Parser:
     def __init__(self):
         self.data = None
@@ -79,19 +69,16 @@ class Parser:
         class : CLASS ID class_block
               | CLASS ID COLON ID class_block
         """
-        print('class')
 
     def p_function(self, p):
         """
         function : FUNC ID add_function params ARROW function_return_type init_block end_function
         """
-        print('error')
 
     def p_function_error(self, p):
         """
         function : FUNC error ARROW
         """
-        print("invalid function declaration")
 
     def p_declaration(self, p):
         """
@@ -99,7 +86,6 @@ class Parser:
                     | variable ASSIGN array
                     | variable
         """
-        print("declaration")
 
     def p_declaration_error(self, p):
         """
@@ -132,7 +118,6 @@ class Parser:
     #            | LPAREN RPAREN
     #     """
 
-
     def p_params1(self, p):
         """
         params1 : param
@@ -159,9 +144,7 @@ class Parser:
             self.recover({"RCURLY"})
             self.directory.function_stack.pop()
 
-
-
-# -- BLOCKS -----------------------
+    # -- BLOCKS -----------------------
 
     def p_class_block(self, p):
         """
@@ -467,7 +450,6 @@ class Parser:
 
     # -- SEMANTIC ACTIONS -----------------------
 
-    @semantic_action
     def p_add_function(self, p):
         """
         add_function :
@@ -486,7 +468,6 @@ class Parser:
             self.compiler_errors.append(possible_error)
         return possible_error
 
-    @semantic_action
     def p_validate_return(self, p):
         """
         set_return :
@@ -494,7 +475,6 @@ class Parser:
 
         self.handle_error(self.directory.set_return())
 
-    @semantic_action
     def p_end_function(self, p):
         """
         end_function :
@@ -503,7 +483,6 @@ class Parser:
         self.handle_error(self.quadGenerator.execute_remaining())
         self.handle_error(self.directory.end_function(memory=self.memory))
 
-    @semantic_action
     def p_add_constant(self, p):
         """
         add_constant :
@@ -511,14 +490,12 @@ class Parser:
         self.handle_error(self.constant_table.add(p[-1], self.memory))
         self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
 
-    @semantic_action
     def p_add_param(self, p):
         """
         add_param :
         """
         self.handle_error(self.directory.add_variable(p[-1], True))
 
-    @semantic_action
     def p_add_var(self, p):
         """
         add_var :
@@ -526,29 +503,24 @@ class Parser:
         # if self.should_run():
         self.handle_error(self.directory.add_variable(p[-1], False))
 
-    @semantic_action
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
         self.handle_error(self.quadGenerator.execute_if_possible(0))
 
-    @semantic_action
     def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
         """
         execute_builtin_call :
         """
         self.handle_error(self.quadGenerator.execute_builtin_call())
 
-    @semantic_action
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
-
         self.handle_error(self.quadGenerator.execute_if_possible(1))
 
-    @semantic_action
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
@@ -556,22 +528,18 @@ class Parser:
 
         self.handle_error(self.quadGenerator.execute_if_possible(2))
 
-    @semantic_action
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
         self.handle_error(self.quadGenerator.execute_if_possible(3))
 
-    @semantic_action
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
         """
-
         self.handle_error(self.quadGenerator.execute_if_possible(4))
 
-    @semantic_action
     def p_set_function_type(self, p):
         """
         set_function_type :
@@ -579,56 +547,48 @@ class Parser:
 
         self.handle_error(self.directory.set_function_type(p[-1]))
 
-    @semantic_action
     def p_get_conditional(self, p):
         """
         get_conditional :
         """
         self.quadGenerator.get_conditional()
 
-    @semantic_action
     def p_fill_and_goto(self, p):
         """
         fill_and_goto :
         """
         self.quadGenerator.fill_and_goto()
 
-    @semantic_action
     def p_fill_end(self, p):
         """
         fill_end :
         """
         self.quadGenerator.fill_end()
 
-    @semantic_action
     def p_fill_end_single(self, p):
         """
         fill_end_single :
         """
         self.quadGenerator.fill_end_single()
 
-    @semantic_action
     def p_save_loop_start(self, p):
         """
         save_loop_start :
         """
         self.quadGenerator.save_loop_start()
 
-    @semantic_action
     def p_set_loop_condition(self, p):
         """
         set_loop_condition :
         """
         self.quadGenerator.set_loop_condition()
 
-    @semantic_action
     def p_fill_and_reset_loop(self, p):
         """
         fill_and_reset_loop :
         """
         self.quadGenerator.fill_and_reset_loop()
 
-    @semantic_action
     def p_push_operator(self, p):
         """
         push_operator :
@@ -657,14 +617,12 @@ class Parser:
         operator = Operator(priority, type_)
         self.handle_error(self.quadGenerator.push_operator(operator))
 
-    @semantic_action
     def p_push_variable(self, p):
         """
          push_variable :
         """
         self.handle_error(self.quadGenerator.push_variable(p[-1]))
 
-    @semantic_action
     def p_set_variable_type(self, p):
         """
         set_variable_type :
