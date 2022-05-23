@@ -6,7 +6,6 @@ from src.semantic.conditional import ConditionalActions
 from src.semantic.expression import ExpressionActions, Operand, Operator
 from src.semantic.loop import LoopActions
 from src.semantic.quadruple import Quad
-from src.semantic.type import ActionResult
 from src.singleton.debug import Debug
 from src.utils.display import make_table, TableOptions
 from src.virtual.compilation import Scheduler
@@ -14,17 +13,19 @@ from src.virtual.compilation import Scheduler
 
 class QuadGenerator:
     def __init__(self, scheduler: Scheduler, directory: FunctionTable):
-        self.__operand_address_stack: List[Operand] = []  # stores the
-        # ed virtual address, not actual value
+        self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
-
         self.__quad_list: List[Quad] = []
+
         self.directory = directory
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
         self.loop_actions = LoopActions(self.__quad_list)
-        self.expression_actions = ExpressionActions(self.__operand_address_stack, self.__operator_stack)
+        self.expression_actions = ExpressionActions(self.__quad_list,
+                                                    self.__operand_address_stack,
+                                                    self.__operator_stack)
+
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
     # Expressions -------------------------------------------
@@ -33,39 +34,32 @@ class QuadGenerator:
         return len(self.__quad_list)
 
     def push_variable(self, id_):
-        result = self.expression_actions.push_variable(id_, self.directory)
-        return self.__handle_result(result)
+        return self.expression_actions.push_variable(id_, self.directory)
 
     def push_operator(self, operator):
-        results = self.expression_actions.push_operator(operator, self.scheduler)
-        return self.__handle_result(results)
+        return self.expression_actions.push_operator(operator, self.scheduler)
 
     def execute_if_possible(self, priority):
-        result = self.expression_actions.execute_if_possible(priority, self.scheduler)
-        return self.__handle_result(result)
+        return self.expression_actions.execute_if_possible(priority, self.scheduler)
 
     def push_constant(self, value, constant_table):
-        result = self.expression_actions.push_constant(value, constant_table)
-        return self.__handle_result(result)
+        return self.expression_actions.push_constant(value, constant_table)
 
     def execute_remaining(self):
-        results = self.expression_actions.execute_remaining(self.scheduler)
-        return self.__handle_result(results)
+        return self.expression_actions.execute_remaining(self.scheduler)
 
     # -------------------------------------------------------
 
     # Conditionals -------------------------------------------
 
     def fill_end_single(self):
-        self.conditional_actions.fill_end_single()
+        return self.conditional_actions.fill_end_single()
 
     def get_conditional(self):
-        result = self.conditional_actions.get_conditional(self.expression_actions.get_operands())
-        self.__handle_result(result)
+        return self.conditional_actions.get_conditional(self.__operand_address_stack)
 
     def fill_and_goto(self):
-        result = self.conditional_actions.fill_and_goto()
-        self.__handle_result(result)
+        return self.conditional_actions.fill_and_goto()
 
     def fill_end(self):
         self.conditional_actions.fill_end()
@@ -75,31 +69,17 @@ class QuadGenerator:
     # Loop -------------------------------------------
 
     def save_loop_start(self):
-        self.__handle_result(self.loop_actions.save_loop_start())
+        self.loop_actions.save_loop_start()
 
     def set_loop_condition(self):
-        self.__handle_result(self.loop_actions.set_loop_condition(self.expression_actions.get_operands().pop()))
+        self.loop_actions.set_loop_condition(self.__operand_address_stack)
 
     def fill_and_reset_loop(self):
-        self.__handle_result(self.loop_actions.fill_and_reset_loop())
+        return self.loop_actions.fill_and_reset_loop()
 
     # -------------------------------------------------------
 
     # Helpers
-
-    def __handle_result(self, results):
-        if type(results) is ActionResult:
-            if results.has_quad():
-                self.__push_quad(results.quad)
-            return results.error
-
-        errors = []
-        for result in results:
-            if result.has_quad():
-                self.__push_quad(result.quad)
-            elif result.has_error():
-                errors.append(result.error)
-        return errors
 
     def display(self):
         address_map = Debug.get_map()
