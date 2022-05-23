@@ -19,7 +19,7 @@ class Parser:
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
         self.memory = Scheduler()
-        self.directory = FunctionTable()  # potentially = Directory(memory, cube)
+        self.directory = FunctionTable()
         self.searchSymbol = "NLINE"
 
         self.lexer = lex
@@ -72,21 +72,13 @@ class Parser:
 
     def p_function(self, p):
         """
-        function : FUNC ID add_function params  set_void init_block end_function
+        function : FUNC ID add_function params set_void init_block end_function
                  | FUNC ID add_function params ARROW variable_primitive init_block end_function
         """
-
-        if p[5] != '-->':
-            self.directory.current_function().pending_type = False
 
     def p_function_error(self, p):
         """
         function : FUNC ID error init_block
-        """
-
-    def p_function_error(self, p):
-        """
-        function : FUNC error ARROW
         """
 
     def p_declaration(self, p):
@@ -127,12 +119,6 @@ class Parser:
         """
         self.compiler_errors[
             -1].message = f'Expected valid parameres such as: "some_func( an_id: Int, other_id: Bool...)" or "some_func()"'
-
-    # def p_params_error(self, p):
-    #     """
-    #     params : LPAREN params1 RPAREN
-    #            | LPAREN RPAREN
-    #     """
 
     def p_params1(self, p):
         """
@@ -502,7 +488,7 @@ class Parser:
         """
         set_void :
         """
-        self.directory.current_function().set_type("Void")
+        self.directory.current_function.set_type("Void")
 
     def handle_error(self, possible_error):
         if type(possible_error) == list:
