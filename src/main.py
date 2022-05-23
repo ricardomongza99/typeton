@@ -1,7 +1,6 @@
 from src.parser import Parser
 import os
-from config.definitions import PROGRAMS_DIR
-from src.singleton.debug import Debug
+from src.config.definitions import PROGRAMS_DIR
 
 FILENAME = 'albert.ty'
 
@@ -20,8 +19,6 @@ def main():
     # parser.constant_table.display()
     # parser.directory.display(debug=True)
 
-
-    # parser.parse(data)
     print('Done')
 
 
