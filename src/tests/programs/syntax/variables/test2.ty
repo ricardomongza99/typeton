@@ -1,7 +1,7 @@
 var a: Int
 var b: Float
 
-func main() {
+func main() -> Void {
     var a: Int
     var b: Float
 }
