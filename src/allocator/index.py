@@ -1,8 +1,8 @@
 # Stores Type Data
 from src.parser.errors import CompilerError
-from src.singleton.debug import Debug
 from src.allocator.helpers import get_available_address, print_stats, init_types, Layers
 from src.allocator.types import ValueType, DEFAULT_TYPES, MemoryType
+from src.utils.debug import Debug
 
 
 class Scheduler:
@@ -17,11 +17,10 @@ class Scheduler:
         new_address, error = get_available_address(resource)
 
         if error:
-            Debug.add_error(CompilerError("could not assign new address for specified range"))
-            return None, True
+            return None, CompilerError("could not assign new address for specified range")
 
         if layer == layer.TEMPORARY:
-            debug = Debug.get_instance().get_map()
+            debug = Debug.map()
             if debug.get(new_address) is None:
                 debug[new_address] = "T" + str(self.debug_t)
                 self.debug_t += 1

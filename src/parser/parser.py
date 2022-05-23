@@ -9,6 +9,7 @@ from src.ply import yacc
 from src.quad_generator.expression import Operator
 from src.quad_generator.index import QuadGenerator
 from src.quad_generator.type import OperationType
+from src.utils.debug import Debug
 
 
 class Parser:
@@ -28,8 +29,6 @@ class Parser:
         self.tokens = tokens
         self.parser = yacc.yacc(module=self, start="program", debug=True)
 
-    def should_run(self):
-        return not len(self.compiler_errors) > 1
 
     def print_compiler_errors(self):
         for err in self.compiler_errors:
@@ -662,8 +661,8 @@ class Parser:
             error_message += f': at token {p.type} ({p.value}) on line {p.lineno}'
         else:
             error_message += f': end of file'
-        self.syntax_error = error_message
-        self.parser.restart()
+            self.syntax_error = error_message
+            self.parser.restart()
 
     def display_debug(self):
         self.constant_table.display()

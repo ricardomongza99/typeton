@@ -6,7 +6,7 @@ from src.quad_generator.conditional import ConditionalActions
 from src.quad_generator.expression import ExpressionActions, Operand, Operator
 from src.quad_generator.loop import LoopActions
 from src.quad_generator.type import Quad
-from src.singleton.debug import Debug
+from src.utils.debug import Debug
 from src.utils.display import make_table, TableOptions
 from src.allocator.index import Scheduler
 
@@ -82,7 +82,7 @@ class QuadGenerator:
     # Helpers
 
     def display(self):
-        address_map = Debug.get_map()
+        address_map = Debug.map()
         table = make_table("Quadruples",
                            ["#", "Operator", "Left", "Right", "Result"],
                            map(lambda quad:

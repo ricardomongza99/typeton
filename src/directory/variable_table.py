@@ -1,12 +1,12 @@
 from typing import Dict
 
 from .variable import Variable
-from ..parser.errors import CompilerError
-from ..singleton.debug import Debug
-from ..utils.display import make_table
-from ..allocator.index import Scheduler
 from ..allocator.helpers import Layers
+from ..allocator.index import Scheduler
 from ..allocator.types import ValueType
+from ..parser.errors import CompilerError
+from ..utils.debug import Debug
+from ..utils.display import make_table
 
 
 class VariableTable:
@@ -30,10 +30,9 @@ class VariableTable:
         enum_value = ValueType(type_)
         address, error = memory.schedule_address(enum_value, layer)
         if error:  # TODO Create class to create compilation errors
-            Debug.add_error(CompilerError("Too many Variables"))
+            return CompilerError("Too many Variables")
 
-        debug: Debug = Debug.get_instance().get_map()
-        debug[address] = str(self.current_id)
+        Debug.map()[address] = str(self.current_id)
         self.current_variable.type_ = enum_value
         self.current_variable.address_ = address
 

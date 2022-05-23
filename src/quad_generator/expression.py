@@ -6,7 +6,7 @@ from src.parser.errors import CompilerError
 from src.validation.type_check import type_check as check_type
 from src.quad_generator.type import Quad, OperationType
 from src.quad_generator.type import Operand, Operator
-from src.singleton.debug import Debug
+from src.utils.debug import Debug
 from src.allocator.index import Scheduler
 from src.allocator.helpers import Layers
 from src.allocator.types import ValueType
@@ -69,7 +69,7 @@ class ExpressionActions:
         return False, None
 
     def __execute_assign(self, scheduler: Scheduler):
-        address_map = Debug.get_map()
+        address_map = Debug.map()
 
         operator = self.__operator_stack.pop()
         right = self.__operand_address_stack.pop()
@@ -101,7 +101,7 @@ class ExpressionActions:
         right: Operand = self.__operand_address_stack.pop()
         left: Operand = self.__operand_address_stack.pop()
 
-        address_map = Debug.get_map()
+        address_map = Debug.map()
         type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
 
         if type_match is None:

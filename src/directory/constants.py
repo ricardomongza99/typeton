@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.singleton.debug import Debug
+from src.utils.debug import Debug
 from src.utils.display import make_table
 from src.allocator.index import Scheduler
 from src.allocator.helpers import Layers
@@ -36,7 +36,7 @@ class ConstantTable:
 
         address, error = memory.schedule_address(type_, Layers.CONSTANT)
 
-        debug = Debug.get_instance().get_map()
+        debug = Debug.get_instance().map()
         debug[address] = str(value)
         if error:  # TODO error handling
             return
