@@ -650,6 +650,7 @@ class Parser:
 
         id_ = self.handle_error(self.directory.set_variable_type(p[-1], self.memory))
         if id_ is not None:
+            # TODO refactor
             self.handle_error(self.quadGenerator.push_variable(id_))
 
     # -- ERROR -----------------------

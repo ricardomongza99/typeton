@@ -1,6 +1,5 @@
 from typing import List, Dict
 
-from src.utils.display import make_table
 from src.allocator.types import ValueType
 
 
@@ -43,7 +42,6 @@ class FunctionData:
         if result == "":
             return "No Params"
         return result[:-1]
-
 
 
 class Directory:

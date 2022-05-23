@@ -1,11 +1,11 @@
 from typing import Dict
 
 from .function import Function
-from ..parser.errors import CompilerError
-from ..utils.display import make_table, TableOptions
 from ..allocator.allocator import Allocator
 from ..allocator.helpers import Layers
 from ..allocator.types import ValueType
+from ..parser.errors import CompilerError
+from ..utils.display import make_table, TableOptions
 from ..virtual_machine.types import FunctionData
 
 
@@ -15,7 +15,7 @@ class FunctionTable:
     def __init__(self):
         self.functions = {}
         self.function_data_table: Dict[str, FunctionData] = {}
-        self.current_function: Function = Function('placeholder')
+        self.current_function: Function = None
         self.global_function: Function = Function('placeholder')
 
         # We need this for global variable search
@@ -39,16 +39,16 @@ class FunctionTable:
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
-        self.current_function.vars_table.add(id_, is_param)
+        self.current_function.add_variable(id_, is_param)
 
     def set_function_type(self, type_):
         self.current_function.set_type(type_)
         self.function_data().type_ = ValueType(type_)
 
     def set_param_type(self, type_, memory: Allocator):
-        layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
+
         self.function_data().add_variable_size(ValueType(type_))
-        return self.current_function.vars_table.set_type(type_, layer, memory)
+        return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
 
     def function_data(self):
         return self.function_data_table[self.current_function.id_]
@@ -56,13 +56,13 @@ class FunctionTable:
     def set_variable_type(self, type_, memory: Allocator):
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
         self.function_data().add_variable_size(ValueType(type_))
-        id_ = self.current_function.vars_table.set_type(type_, layer, memory)
+        id_ = self.current_function.set_variable_type(type_, layer, memory)
 
         if self.current_function.is_pending_type():
             return self.set_function_type(type_)
 
         # TODO encapsulate methods in function to prevent so many dot operations
-        is_param = self.current_function.vars_table.current_variable.is_param
+        is_param = self.current_function.current_variable.is_param
         if is_param:
             return self.__add_parameter_signature(type_)
 
@@ -98,14 +98,14 @@ class FunctionTable:
 
         if debug:
             for id_, func in self.functions.items():
-                print(func.vars_table.display(id_))
+                print(func.display_variables(id_))
 
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
         error = self.__validate_return()
 
-        for key in self.current_function.vars_table.variables:
-            address = self.current_function.vars_table.variables[key].address_
+        for key in self.current_function.variables:
+            address = self.current_function.variables[key].address_
             memory.release_address(address)
 
         if error is not None:
@@ -115,12 +115,12 @@ class FunctionTable:
         return self.current_function.id_
 
     def find(self, id_):
-        variable_table = self.current_function.vars_table.variables
+        variable_table = self.current_function.variables
         if variable_table.get(id_) is not None:
             variable = variable_table[id_]
             return variable.address_, variable.type_
 
-        variable_table = self.global_function.vars_table.variables
+        variable_table = self.functions["global"]
         if variable_table.get(id_) is not None:
             variable = variable_table[id_]
             return variable.address_, variable.type_
