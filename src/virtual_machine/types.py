@@ -1,11 +1,12 @@
-from typing import List, Dict
+from typing import Dict
 
-from src.compiler.allocator.allocator import get_segment, get_resource
-from src.compiler.allocator.helpers import Layers, init_types
-from src.compiler.allocator.types import ValueType, MemoryType, DEFAULT_TYPES, TypeRange
+from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
 
 
 class SizeUnit:
+    """Used to store the variable count for each type inside a function"""
+
     def __init__(self):
         self.local = 0
         self.temp = 0
@@ -20,6 +21,7 @@ class SizeData:
      in recursion, could run out of max variables"""
 
     def __init__(self):
+        # Store in hash for easy access
         self.hash: Dict[str, SizeUnit] = {
             ValueType.INT.value: SizeUnit(),
             ValueType.FLOAT.value: SizeUnit(),
@@ -58,20 +60,6 @@ class FunctionData:
         if result == "":
             return "No Params"
         return result[:-1]
-
-
-class TypeUnit:
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
-
-
-class TypeData:
-    """Type """
-
-    def __init__(self, segment: TypeUnit, types: [TypeUnit]):
-        self.segment = segment
-        self.types: [] = types
 
 
 def init_storage(size):
