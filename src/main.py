@@ -11,12 +11,12 @@ def main():
     data = file.read()
     file.close()
 
-    parser = Compiler()
-    parser.parse(data)
+    compiler = Compiler()
+    compiler.parse(data)
 
-    parser.code_generator.display()
-    parser.print_compiler_errors()
-    parser.display_tables()
+    compiler.code_generator.display()
+    compiler.print_compiler_errors()
+    compiler.display_tables()
 
     print('Done')
 
