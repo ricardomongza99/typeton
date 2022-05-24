@@ -6,9 +6,9 @@ from src.directory.constants import ConstantTable
 from src.lexer import lex, tokens
 from src.compiler.errors import CompilerError
 from src.ply import yacc
-from src.quad_generator.expression import Operator
-from src.quad_generator.index import QuadGenerator
-from src.quad_generator.type import OperationType
+from src.code_generator.expression import Operator
+from src.code_generator.index import CodeGenerator
+from src.code_generator.type import OperationType
 from src.utils.debug import Debug
 
 
@@ -23,7 +23,7 @@ class Compiler:
         self.tokens = tokens
         self.lexer = lex
         self.parser = yacc.yacc(module=self, start="program", debug=True)
-        self.quadGenerator = QuadGenerator(scheduler=self.allocator, directory=self.function_table)
+        self.code_generator = CodeGenerator(scheduler=self.allocator, directory=self.function_table)
 
         # TODO: encapsulate in ErrorHandler
         self.compiler_errors: List[CompilerError] = []
@@ -477,7 +477,7 @@ class Compiler:
         """
         add_function :
         """
-        self.function_table.add(p[-1], self.quadGenerator.get_next_quad())
+        self.function_table.add(p[-1], self.code_generator.get_next_quad())
 
     def p_set_void(self, p):
         """
@@ -507,7 +507,7 @@ class Compiler:
         """
         end_function :
         """
-        self.handle_error(self.quadGenerator.execute_remaining())
+        self.handle_error(self.code_generator.execute_remaining())
         self.handle_error(self.function_table.end_function(memory=self.allocator))
 
     def p_add_constant(self, p):
@@ -515,7 +515,7 @@ class Compiler:
         add_constant :
         """
         self.handle_error(self.constant_table.add(p[-1], self.allocator))
-        self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
+        self.handle_error(self.code_generator.push_constant(p[-1], self.constant_table))
 
     def p_add_param(self, p):
         """
@@ -533,80 +533,80 @@ class Compiler:
         """
         execute_priority_0 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(0))
+        self.handle_error(self.code_generator.execute_if_possible(0))
 
     def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
         """
         execute_builtin_call :
         """
-        self.handle_error(self.quadGenerator.execute_builtin_call())
+        self.handle_error(self.code_generator.execute_builtin_call())
 
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(1))
+        self.handle_error(self.code_generator.execute_if_possible(1))
 
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
         """
 
-        self.handle_error(self.quadGenerator.execute_if_possible(2))
+        self.handle_error(self.code_generator.execute_if_possible(2))
 
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(3))
+        self.handle_error(self.code_generator.execute_if_possible(3))
 
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(4))
+        self.handle_error(self.code_generator.execute_if_possible(4))
 
     def p_get_conditional(self, p):
         """
         get_conditional :
         """
-        self.quadGenerator.get_conditional()
+        self.code_generator.get_conditional()
 
     def p_fill_and_goto(self, p):
         """
         fill_and_goto :
         """
-        self.quadGenerator.fill_and_goto()
+        self.code_generator.fill_and_goto()
 
     def p_fill_end(self, p):
         """
         fill_end :
         """
-        self.quadGenerator.fill_end()
+        self.code_generator.fill_end()
 
     def p_fill_end_single(self, p):
         """
         fill_end_single :
         """
-        self.quadGenerator.fill_end_single()
+        self.code_generator.fill_end_single()
 
     def p_save_loop_start(self, p):
         """
         save_loop_start :
         """
-        self.quadGenerator.save_loop_start()
+        self.code_generator.save_loop_start()
 
     def p_set_loop_condition(self, p):
         """
         set_loop_condition :
         """
-        self.quadGenerator.set_loop_condition()
+        self.code_generator.set_loop_condition()
 
     def p_fill_and_reset_loop(self, p):
         """
         fill_and_reset_loop :
         """
-        self.quadGenerator.fill_and_reset_loop()
+        self.code_generator.fill_and_reset_loop()
 
     def p_push_operator(self, p):
         """
@@ -634,13 +634,13 @@ class Compiler:
             priority = 4
 
         operator = Operator(priority, type_)
-        self.handle_error(self.quadGenerator.push_operator(operator))
+        self.handle_error(self.code_generator.push_operator(operator))
 
     def p_push_variable(self, p):
         """
          push_variable :
         """
-        self.handle_error(self.quadGenerator.push_variable(p[-1]))
+        self.handle_error(self.code_generator.push_variable(p[-1]))
 
     def p_set_variable_type(self, p):
         """
@@ -650,7 +650,7 @@ class Compiler:
         id_ = self.handle_error(self.function_table.set_variable_type(p[-1], self.allocator))
         if id_ is not None:
             # TODO refactor
-            self.handle_error(self.quadGenerator.push_variable(id_))
+            self.handle_error(self.code_generator.push_variable(id_))
 
     # -- ERROR -----------------------
 

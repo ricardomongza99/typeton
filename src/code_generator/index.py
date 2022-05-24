@@ -2,16 +2,16 @@ from typing import List
 
 from src.allocator.allocator import Allocator
 from src.directory.function_table import FunctionTable
-from src.quad_generator.built_in import Builtin_Function_Actions
-from src.quad_generator.conditional import ConditionalActions
-from src.quad_generator.expression import ExpressionActions, Operand, Operator
-from src.quad_generator.loop import LoopActions
-from src.quad_generator.type import Quad
+from src.code_generator.built_in import Builtin_Function_Actions
+from src.code_generator.conditional import ConditionalActions
+from src.code_generator.expression import ExpressionActions, Operand, Operator
+from src.code_generator.loop import LoopActions
+from src.code_generator.type import Quad
 from src.utils.debug import Debug
 from src.utils.display import make_table, TableOptions
 
 
-class QuadGenerator:
+class CodeGenerator:
     def __init__(self, scheduler: Allocator, directory: FunctionTable):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []

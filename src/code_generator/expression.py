@@ -4,8 +4,8 @@ from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
 from src.compiler.errors import CompilerError
 from src.validation.type_check import type_check as check_type
-from src.quad_generator.type import Quad, OperationType
-from src.quad_generator.type import Operand, Operator
+from src.code_generator.type import Quad, OperationType
+from src.code_generator.type import Operand, Operator
 from src.utils.debug import Debug
 from src.allocator.allocator import Allocator
 from src.allocator.helpers import Layers

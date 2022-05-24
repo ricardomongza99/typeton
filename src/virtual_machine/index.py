@@ -1,6 +1,6 @@
 from typing import List
 
-from src.quad_generator.quadruple import Quad, OperationType
+from src.code_generator.quadruple import Quad, OperationType
 from src.virtual_machine.types import ContextMemory
 
 

@@ -1,5 +1,5 @@
-from src.quad_generator.expression import Operand, Operator
-from src.quad_generator.type import Quad
+from src.code_generator.expression import Operand, Operator
+from src.code_generator.type import Quad
 
 """
 Conditional semantic actions

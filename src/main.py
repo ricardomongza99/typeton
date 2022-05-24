@@ -14,7 +14,7 @@ def main():
     parser = Compiler()
     parser.parse(data)
 
-    parser.quadGenerator.display()
+    parser.code_generator.display()
     parser.print_compiler_errors()
     parser.constant_table.display()
     parser.function_table.display(debug=True)

@@ -1,5 +1,5 @@
 from src.compiler.errors import CompilerError
-from src.quad_generator.type import Quad, OperationType, Operand
+from src.code_generator.type import Quad, OperationType, Operand
 from src.allocator.types import ValueType
 
 """
