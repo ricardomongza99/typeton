@@ -1,4 +1,4 @@
-from src.ply import lex
+from src.compiler.ply import lex
 
 reserved = {
     'class': 'CLASS',

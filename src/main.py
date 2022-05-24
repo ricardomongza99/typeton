@@ -1,4 +1,4 @@
-from src.parser import Parser
+from src.compiler import Compiler
 import os
 from src.config.definitions import PROGRAMS_DIR
 
@@ -11,13 +11,12 @@ def main():
     data = file.read()
     file.close()
 
-    parser = Parser()
-    parser.parse(data)
+    compiler = Compiler()
+    compiler.compile(data)
 
-    parser.quadGenerator.display()
-    parser.print_compiler_errors()
-    parser.constant_table.display()
-    parser.directory.display(debug=True)
+    compiler.display_quads()
+    compiler.display_tables()
+    compiler.display_errors()
 
     print('Done')
 

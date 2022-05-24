@@ -1,6 +1,6 @@
 from enum import Enum
 
-from src.allocator.types import ValueType
+from src.compiler.allocator.types import ValueType
 
 
 class OperationType(Enum):

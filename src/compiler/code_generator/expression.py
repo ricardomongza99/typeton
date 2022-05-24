@@ -1,15 +1,15 @@
 from typing import List
 
-from src.directory import FunctionTable
-from src.directory.constants import ConstantTable
-from src.parser.errors import CompilerError
-from src.validation.type_check import type_check as check_type
-from src.quad_generator.type import Quad, OperationType
-from src.quad_generator.type import Operand, Operator
+from src.compiler.symbol_table import FunctionTable
+from src.compiler.symbol_table.constant_table import ConstantTable
+from src.compiler.errors import CompilerError
+from src.compiler.validation.type_check import type_check as check_type
+from src.compiler.code_generator.type import Quad, OperationType
+from src.compiler.code_generator.type import Operand, Operator
 from src.utils.debug import Debug
-from src.allocator.allocator import Allocator
-from src.allocator.helpers import Layers
-from src.allocator.types import ValueType
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
 
 
 class ExpressionActions:

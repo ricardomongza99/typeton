@@ -33,14 +33,14 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------
 #
-# This implements an LR parser that is constructed from grammar rules defined
+# This implements an LR compiler that is constructed from grammar rules defined
 # as Python functions. The grammar is specified by supplying the BNF inside
 # Python documentation strings.  The inspiration for this technique was borrowed
 # from John Aycock's Spark parsing system.  PLY might be viewed as cross between
 # Spark and the GNU bison utility.
 #
 # The current implementation is only somewhat object-oriented. The
-# LR parser itself is defined in terms of an object (which allows multiple
+# LR compiler itself is defined in terms of an object (which allows multiple
 # parsers to co-exist).  However, most of the variables used during table
 # construction are defined in terms of global variables.  Users shouldn't
 # notice unless they are trying to define multiple parsers at the same
@@ -73,9 +73,9 @@ import inspect
 #-----------------------------------------------------------------------------
 
 yaccdebug   = False            # Debugging mode.  If set, yacc generates a
-                               # a 'parser.out' file in the current directory
+                               # a 'compiler.out' file in the current symbol_table
 
-debug_file  = 'parser.out'     # Default name of the debugging file
+debug_file  = 'compiler.out'     # Default name of the debugging file
 error_count = 3                # Number of symbols that must be shifted to leave recovery mode
 resultlimit = 40               # Size limit of results when running in debug mode.
 
@@ -83,7 +83,7 @@ MAXINT = sys.maxsize
 
 # This object is a stand-in for a logging object created by the
 # logging module.   PLY will use this by default to create things
-# such as the parser.out file.  If a user wants more detailed
+# such as the compiler.out file.  If a user wants more detailed
 # information, they can create their own logging object and pass
 # it into PLY.
 
@@ -116,7 +116,7 @@ class NullLogger(object):
 class YaccError(Exception):
     pass
 
-# Format the result message that the parser produces when running in debug mode.
+# Format the result message that the compiler produces when running in debug mode.
 def format_result(r):
     repr_str = repr(r)
     if '\n' in repr_str:
@@ -126,7 +126,7 @@ def format_result(r):
     result = '<%s @ 0x%x> (%s)' % (type(r).__name__, id(r), repr_str)
     return result
 
-# Format stack entries when the parser is running in debug mode
+# Format stack entries when the compiler is running in debug mode
 def format_stack_entry(r):
     repr_str = repr(r)
     if '\n' in repr_str:
@@ -139,7 +139,7 @@ def format_stack_entry(r):
 #-----------------------------------------------------------------------------
 #                        ===  LR Parsing Engine ===
 #
-# The following classes are used for the LR parser itself.  These are not
+# The following classes are used for the LR compiler itself.  These are not
 # used during table construction and are independent of the actual LR
 # table generation algorithm
 #-----------------------------------------------------------------------------
@@ -245,10 +245,10 @@ class LRParser:
         self.statestack.append(0)
 
     # Defaulted state support.
-    # This method identifies parser states where there is only one possible reduction action.
-    # For such states, the parser can make a choose to make a rule reduction without consuming
+    # This method identifies compiler states where there is only one possible reduction action.
+    # For such states, the compiler can make a choose to make a rule reduction without consuming
     # the next look-ahead token.  This delayed invocation of the tokenizer can be useful in
-    # certain kinds of advanced parsing situations where the lexer and parser interact with
+    # certain kinds of advanced parsing situations where the lexer and compiler interact with
     # each other or change states (i.e., manipulation of scope, lexer states, etc.).
     #
     # See:  http://www.gnu.org/software/bison/manual/html_node/Default-Reductions.html#Default-Reductions
@@ -292,7 +292,7 @@ class LRParser:
             from . import lex
             lexer = lex.lexer
 
-        # Set up the lexer and parser objects on pslice
+        # Set up the lexer and compiler objects on pslice
         pslice.lexer = lexer
         pslice.parser = self
 
@@ -578,7 +578,7 @@ class LRParser:
                 continue
 
             # If we'r here, something really bad happened
-            raise RuntimeError('yacc: internal parser error!!!\n')
+            raise RuntimeError('yacc: internal compiler error!!!\n')
 
 # -----------------------------------------------------------------------------
 #                          === Grammar Representation ===
@@ -1757,7 +1757,7 @@ class LRTable:
         C = self.lr0_items()
         self.add_lalr_lookaheads(C)
 
-        # Build the parser table, state by state
+        # Build the compiler table, state by state
         st = 0
         for I in C:
             # Loop over each production in I
@@ -1986,7 +1986,7 @@ def parse_grammar(doc, file, line):
 # -----------------------------------------------------------------------------
 # ParserReflect()
 #
-# This class represents information extracted for building a parser including
+# This class represents information extracted for building a compiler including
 # start symbol, error function, tokens, precedence list, action functions,
 # etc.
 # -----------------------------------------------------------------------------
@@ -2044,9 +2044,9 @@ class ParserReflect(object):
     # validate_modules()
     #
     # This method checks to see if there are duplicated p_rulename() functions
-    # in the parser module file.  Without this function, it is really easy for
+    # in the compiler module file.  Without this function, it is really easy for
     # users to make mistakes by cutting and pasting code fragments (and it's a real
-    # bugger to try and figure out why the resulting parser doesn't work).  Therefore,
+    # bugger to try and figure out why the resulting compiler doesn't work).  Therefore,
     # we just do a little regular expression pattern matching of def statements
     # to try and detect duplicates.
     # -----------------------------------------------------------------------------
@@ -2265,20 +2265,20 @@ class ParserReflect(object):
 # -----------------------------------------------------------------------------
 # yacc(module)
 #
-# Build a parser
+# Build a compiler
 # -----------------------------------------------------------------------------
 
 def yacc(*, debug=yaccdebug, module=None, start=None,
          check_recursion=True, optimize=False, debugfile=debug_file,
          debuglog=None, errorlog=None):
 
-    # Reference to the parsing method of the last built parser
+    # Reference to the parsing method of the last built compiler
     global parse
 
     if errorlog is None:
         errorlog = PlyLogger(sys.stderr)
 
-    # Get the module dictionary used for the parser
+    # Get the module dictionary used for the compiler
     if module:
         _items = [(k, getattr(module, k)) for k in dir(module)]
         pdict = dict(_items)
@@ -2296,12 +2296,12 @@ def yacc(*, debug=yaccdebug, module=None, start=None,
     if start is not None:
         pdict['start'] = start
 
-    # Collect parser information from the dictionary
+    # Collect compiler information from the dictionary
     pinfo = ParserReflect(pdict, log=errorlog)
     pinfo.get_all()
 
     if pinfo.error:
-        raise YaccError('Unable to build parser')
+        raise YaccError('Unable to build compiler')
 
     if debuglog is None:
         if debug:
@@ -2317,9 +2317,9 @@ def yacc(*, debug=yaccdebug, module=None, start=None,
 
     errors = False
 
-    # Validate the parser information
+    # Validate the compiler information
     if pinfo.validate_all():
-        raise YaccError('Unable to build parser')
+        raise YaccError('Unable to build compiler')
 
     if not pinfo.error_func:
         errorlog.warning('no p_error() function is defined')
@@ -2354,7 +2354,7 @@ def yacc(*, debug=yaccdebug, module=None, start=None,
         errors = True
 
     if errors:
-        raise YaccError('Unable to build parser')
+        raise YaccError('Unable to build compiler')
 
     # Verify the grammar structure
     undefined_symbols = grammar.undefined_symbols()
@@ -2428,7 +2428,7 @@ def yacc(*, debug=yaccdebug, module=None, start=None,
         errors = True
 
     if errors:
-        raise YaccError('Unable to build parser')
+        raise YaccError('Unable to build compiler')
 
     # Run the LRTable on the grammar
     lr = LRTable(grammar, debuglog)
@@ -2474,7 +2474,7 @@ def yacc(*, debug=yaccdebug, module=None, start=None,
                 errorlog.warning('Rule (%s) is never reduced', rejected)
                 warned_never.append(rejected)
 
-    # Build the parser
+    # Build the compiler
     lr.bind_callables(pinfo.pdict)
     parser = LRParser(lr, pinfo.error_func)
 

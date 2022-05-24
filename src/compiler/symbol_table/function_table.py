@@ -1,17 +1,16 @@
 from typing import Dict
 
 from .function import Function
-from ..allocator.allocator import Allocator
-from ..allocator.helpers import Layers
-from ..allocator.types import ValueType
-from ..parser.errors import CompilerError
-from ..utils.debug import Debug
-from ..utils.display import make_table, TableOptions
-from ..virtual_machine.types import FunctionData
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
+from src.compiler.errors import CompilerError
+from src.utils.display import make_table, TableOptions
+from src.virtual_machine.types import FunctionData
 
 
 class FunctionTable:
-    """ A directory of functions """
+    """ A symbol_table of functions """
 
     def __init__(self):
         self.functions = {}
@@ -71,7 +70,7 @@ class FunctionTable:
         self.function_data_table[self.current_function.id_].parameter_signature.append(ValueType(type_))
 
     def display(self, debug=False):
-        """ Displays directory of functions tables """
+        """ Displays symbol_table of functions tables """
 
         print(make_table("Function Directory", ["ID", "TYPE"],
                          map(lambda fun: [fun[0], fun[1].type_.value], self.functions.items())))

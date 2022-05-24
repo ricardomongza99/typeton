@@ -1,46 +1,43 @@
 from typing import List
-
-from src.allocator.allocator import Allocator
-from src.directory import FunctionTable
-from src.directory.constants import ConstantTable
-from src.lexer import lex, tokens
-from src.parser.errors import CompilerError
-from src.ply import yacc
-from src.quad_generator.expression import Operator
-from src.quad_generator.index import QuadGenerator
-from src.quad_generator.type import OperationType
-from src.utils.debug import Debug
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.lexer import lex, tokens
+from src.compiler.errors import CompilerError
+from src.compiler.ply import yacc
+from src.compiler.code_generator.expression import Operator
+from src.compiler.code_generator.code_generator import CodeGenerator
+from src.compiler.code_generator.type import OperationType
+from .symbol_table import SymbolTable
 
 
-class Parser:
+class Compiler:
     def __init__(self):
-        self.data = None
-        self.tokens = tokens
-        self.error_data = 1
-        self.compiler_errors: List[CompilerError] = []
-        self.syntax_error = None
-        self.memory = Allocator()
-        self.directory = FunctionTable()
-        self.searchSymbol = "NLINE"
+        self._allocator = Allocator()
+        self._symbol_table = SymbolTable()
 
+        self.tokens = tokens
         self.lexer = lex
-        self.constant_table = ConstantTable()
-        self.quadGenerator = QuadGenerator(scheduler=self.memory, directory=self.directory)
-        self.tokens = tokens
-        self.parser = yacc.yacc(module=self, start="program", debug=True)
+        self._parser = yacc.yacc(module=self, start="program", debug=True)
+        self._code_generator = CodeGenerator(scheduler=self._allocator, directory=self._symbol_table.function_table)
 
-    def print_compiler_errors(self):
-        for err in self.compiler_errors:
+        # TODO: encapsulate in ErrorHandler
+        self._compiler_errors: List[CompilerError] = []
+        self.syntax_error = None
+
+    def compile(self, data: str, debug=False):
+        self._parser.parse(data, self.lexer, debug=False)
+
+    def display_tables(self):
+        self._symbol_table.function_table.display(debug=True)
+        self._symbol_table.constant_table.display()
+
+    def display_quads(self):
+        self._code_generator.display()
+
+    def display_errors(self):
+        for err in self._compiler_errors:
             err.print()
 
-    def display_function_directory(self):
-        self.directory.display(debug=True)
-
-    def parse(self, data: str, debug=False):
-        self.data = data
-        self.parser.parse(data, self.lexer, debug=False)
-
-    # parser begin
+    # -- START -----------------------
     def p_program(self, p):
         """
         program : program1 program
@@ -90,7 +87,7 @@ class Parser:
         """
         declaration : variable error NLINE
         """
-        self.compiler_errors[-1].message = f'Invalid expression"'
+        self._compiler_errors[-1].message = f'Invalid expression"'
 
     def p_array(self, p):
         """
@@ -115,7 +112,7 @@ class Parser:
         """
         params : LPAREN error RPAREN
         """
-        self.compiler_errors[
+        self._compiler_errors[
             -1].message = f'Expected valid parameres such as: "some_func( an_id: Int, other_id: Bool...)" or "some_func()"'
 
     def p_params1(self, p):
@@ -148,10 +145,10 @@ class Parser:
     #         self.compiler_errors[-1].message = f'Invalid param declaration: "{p[1]}"'
     #
 
-    # self.parser.restart()
+    # self.compiler.restart()
 
     #     print('received ', p[1], p[2], p[3])
-    #     print(self.parser.token())
+    #     print(self.compiler.token())
     #     if p[2] != ':':
     #         print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
     #         self.recover("COMMA")
@@ -287,17 +284,17 @@ class Parser:
         """
         assign : ID push_variable error execute_priority_0
         """
-        self.compiler_errors.append(CompilerError(f'Invalid assigment after "{p[1]}"'))
+        self._compiler_errors.append(CompilerError(f'Invalid assigment after "{p[1]}"'))
 
     def p_assign_error(self, p):
         """
         assign : ID push_variable assign1 error execute_priority_0
         """
-        self.compiler_errors.append(CompilerError(f'Invalid Expression after "{p[1]} = "'))
+        self._compiler_errors.append(CompilerError(f'Invalid Expression after "{p[1]} = "'))
 
     def recover(self, token_set=None):  # Future error handling
         while True:
-            tok = self.parser.token()
+            tok = self._parser.token()
             if not tok or tok.type in token_set:
                 break
         return tok
@@ -353,7 +350,7 @@ class Parser:
                   | relational_exp execute_priority_1 OR push_operator bool_expr
         """
 
-    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent parser panic. fix this
+    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent compiler panic. fix this
         """
         relational_exp : expression execute_priority_2 comp relational_exp
                        | expression execute_priority_2
@@ -379,7 +376,7 @@ class Parser:
              | factor execute_priority_4 DIVIDE error push_operator term
 
         """
-        self.compiler_errors[-1].message = f'Expected valid expression after "{p[3]}"'
+        self._compiler_errors[-1].message = f'Expected valid expression after "{p[3]}"'
 
     def p_factor(self, p):
         """
@@ -391,7 +388,7 @@ class Parser:
         """
         factor : LPAREN push_operator error RPAREN push_operator
         """
-        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_call_array(self, p):
         """
@@ -436,13 +433,13 @@ class Parser:
         """
         variable : VAR ID error type
         """
-        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_variable_error_1(self, p):
         """
         variable : VAR ID add_var COLON error NLINE
         """
-        self.compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
+        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
@@ -478,136 +475,136 @@ class Parser:
         """
         add_function :
         """
-        self.directory.add(p[-1], self.quadGenerator.get_next_quad())
+        self._symbol_table.function_table.add(p[-1], self._code_generator.get_next_quad())
 
     def p_set_void(self, p):
         """
         set_void :
         """
-        self.directory.current_function.set_type("Void")
+        self._symbol_table.function_table.current_function.set_type("Void")
 
     def handle_error(self, possible_error):
         if type(possible_error) == list:
             for err in possible_error:
                 if err is not None and type(err) is CompilerError:
-                    err.trace = self.directory.current_trace()
-                    self.compiler_errors.append(err)
+                    err.trace = self._symbol_table.function_table.current_trace()
+                    self._compiler_errors.append(err)
         elif possible_error is not None and type(possible_error) is CompilerError:
             possible_error.trace = \
-                self.directory.current_trace() if possible_error.trace is None else possible_error.trace
-            self.compiler_errors.append(possible_error)
+                self._symbol_table.function_table.current_trace() if possible_error.trace is None else possible_error.trace
+            self._compiler_errors.append(possible_error)
         return possible_error
 
     def p_validate_return(self, p):
         """
         set_return :
         """
-        self.handle_error(self.directory.set_return())
+        self.handle_error(self._symbol_table.function_table.set_return())
 
     def p_end_function(self, p):
         """
         end_function :
         """
-        self.handle_error(self.quadGenerator.execute_remaining())
-        self.handle_error(self.directory.end_function(memory=self.memory))
+        self.handle_error(self._code_generator.execute_remaining())
+        self.handle_error(self._symbol_table.function_table.end_function(memory=self._allocator))
 
     def p_add_constant(self, p):
         """
         add_constant :
         """
-        self.handle_error(self.constant_table.add(p[-1], self.memory))
-        self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
+        self.handle_error(self._symbol_table.constant_table.add(p[-1], self._allocator))
+        self.handle_error(self._code_generator.push_constant(p[-1], self._symbol_table.constant_table))
 
     def p_add_param(self, p):
         """
         add_param :
         """
-        self.handle_error(self.directory.add_variable(p[-1], True))
+        self.handle_error(self._symbol_table.function_table.add_variable(p[-1], True))
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        self.handle_error(self.directory.add_variable(p[-1], False))
+        self.handle_error(self._symbol_table.function_table.add_variable(p[-1], False))
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(0))
+        self.handle_error(self._code_generator.execute_if_possible(0))
 
     def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
         """
         execute_builtin_call :
         """
-        self.handle_error(self.quadGenerator.execute_builtin_call())
+        self.handle_error(self._code_generator.execute_builtin_call())
 
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(1))
+        self.handle_error(self._code_generator.execute_if_possible(1))
 
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
         """
 
-        self.handle_error(self.quadGenerator.execute_if_possible(2))
+        self.handle_error(self._code_generator.execute_if_possible(2))
 
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(3))
+        self.handle_error(self._code_generator.execute_if_possible(3))
 
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
         """
-        self.handle_error(self.quadGenerator.execute_if_possible(4))
+        self.handle_error(self._code_generator.execute_if_possible(4))
 
     def p_get_conditional(self, p):
         """
         get_conditional :
         """
-        self.quadGenerator.get_conditional()
+        self._code_generator.get_conditional()
 
     def p_fill_and_goto(self, p):
         """
         fill_and_goto :
         """
-        self.quadGenerator.fill_and_goto()
+        self._code_generator.fill_and_goto()
 
     def p_fill_end(self, p):
         """
         fill_end :
         """
-        self.quadGenerator.fill_end()
+        self._code_generator.fill_end()
 
     def p_fill_end_single(self, p):
         """
         fill_end_single :
         """
-        self.quadGenerator.fill_end_single()
+        self._code_generator.fill_end_single()
 
     def p_save_loop_start(self, p):
         """
         save_loop_start :
         """
-        self.quadGenerator.save_loop_start()
+        self._code_generator.save_loop_start()
 
     def p_set_loop_condition(self, p):
         """
         set_loop_condition :
         """
-        self.quadGenerator.set_loop_condition()
+        self._code_generator.set_loop_condition()
 
     def p_fill_and_reset_loop(self, p):
         """
         fill_and_reset_loop :
         """
-        self.quadGenerator.fill_and_reset_loop()
+        self._code_generator.fill_and_reset_loop()
 
     def p_push_operator(self, p):
         """
@@ -635,23 +632,23 @@ class Parser:
             priority = 4
 
         operator = Operator(priority, type_)
-        self.handle_error(self.quadGenerator.push_operator(operator))
+        self.handle_error(self._code_generator.push_operator(operator))
 
     def p_push_variable(self, p):
         """
          push_variable :
         """
-        self.handle_error(self.quadGenerator.push_variable(p[-1]))
+        self.handle_error(self._code_generator.push_variable(p[-1]))
 
     def p_set_variable_type(self, p):
         """
         set_variable_type :
         """
 
-        id_ = self.handle_error(self.directory.set_variable_type(p[-1], self.memory))
+        id_ = self.handle_error(self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
         if id_ is not None:
             # TODO refactor
-            self.handle_error(self.quadGenerator.push_variable(id_))
+            self.handle_error(self._code_generator.push_variable(id_))
 
     # -- ERROR -----------------------
 
@@ -662,10 +659,10 @@ class Parser:
         else:
             error_message += f': end of file'
             self.syntax_error = error_message
-            self.parser.restart()
+            self._parser.restart()
 
     def display_debug(self):
-        self.constant_table.display()
+        self._symbol_table.constant_table.display()
 
     #
     # def p_error(self, p):
@@ -681,8 +678,8 @@ class Parser:
     #         self.compiler_errors.append(CompilerError(
     #             "Unexpected " + str(p.value),
     #             f'({p.lineno}:{col})',
-    #             self.directory.current_trace()
+    #             self.symbol_table.current_trace()
     #         ))
     #
     #         self.recover({"}"})
-    #         self.parser.errok()
+    #         self.compiler.errok()
