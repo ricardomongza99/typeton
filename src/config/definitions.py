@@ -10,3 +10,9 @@ PROGRAMS_DIR = os.path.join(ROOT_DIR, '../programs')
 
 """ typeton/tests/programs"""
 TEST_PROGRAMS_DIR = os.path.join(ROOT_DIR, 'tests/programs')
+
+""" Memory allocation spaces """
+INT_RANGE_SIZE = 499
+FLOAT_RANGE_SIZE = 499
+BOOL_RANGE_SIZE = 499
+STRING_RANGE_SIZE = 499
