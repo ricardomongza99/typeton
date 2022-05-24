@@ -26,6 +26,9 @@ class CodeGenerator:
 
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
+    def get_quads(self):
+        return self.__quad_list
+
     # Expressions -------------------------------------------
 
     def print_operand_stack(self):
