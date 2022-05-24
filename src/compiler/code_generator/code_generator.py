@@ -1,12 +1,12 @@
 from typing import List
 
-from src.allocator.allocator import Allocator
-from src.directory.function_table import FunctionTable
-from src.code_generator.built_in import Builtin_Function_Actions
-from src.code_generator.conditional import ConditionalActions
-from src.code_generator.expression import ExpressionActions, Operand, Operator
-from src.code_generator.loop import LoopActions
-from src.code_generator.type import Quad
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.directory.function_table import FunctionTable
+from src.compiler.code_generator.built_in import Builtin_Function_Actions
+from src.compiler.code_generator.conditional import ConditionalActions
+from src.compiler.code_generator.expression import ExpressionActions, Operand, Operator
+from src.compiler.code_generator.loop import LoopActions
+from src.compiler.code_generator.type import Quad
 from src.utils.debug import Debug
 from src.utils.display import make_table, TableOptions
 

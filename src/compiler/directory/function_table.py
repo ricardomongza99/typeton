@@ -1,13 +1,12 @@
 from typing import Dict
 
 from .function import Function
-from ..allocator.allocator import Allocator
-from ..allocator.helpers import Layers
-from ..allocator.types import ValueType
-from ..compiler.errors import CompilerError
-from ..utils.debug import Debug
-from ..utils.display import make_table, TableOptions
-from ..virtual_machine.types import FunctionData
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
+from src.compiler.errors import CompilerError
+from src.utils.display import make_table, TableOptions
+from src.virtual_machine.types import FunctionData
 
 
 class FunctionTable:

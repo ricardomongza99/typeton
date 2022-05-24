@@ -1,5 +1,4 @@
 import unittest
-from ..validation import type_check
 
 
 class TestCube(unittest.TestCase):

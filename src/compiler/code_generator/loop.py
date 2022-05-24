@@ -1,7 +1,7 @@
 from src.compiler.errors import CompilerError
-from src.code_generator.type import Operand
-from src.code_generator.type import Quad, OperationType
-from src.allocator.types import ValueType
+from src.compiler.code_generator.type import Operand
+from src.compiler.code_generator.type import Quad, OperationType
+from src.compiler.allocator.types import ValueType
 
 """
 Conditional semantic actions

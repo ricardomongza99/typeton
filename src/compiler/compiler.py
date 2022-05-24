@@ -1,15 +1,14 @@
 from typing import List
 
-from src.allocator.allocator import Allocator
-from src.directory import FunctionTable
-from src.directory.constants import ConstantTable
-from src.lexer import lex, tokens
+from src.compiler.allocator.allocator import Allocator
+from src.compiler.directory import FunctionTable
+from src.compiler.directory.constants import ConstantTable
+from src.compiler.lexer import lex, tokens
 from src.compiler.errors import CompilerError
-from src.ply import yacc
-from src.code_generator.expression import Operator
-from src.code_generator.code_generator import CodeGenerator
-from src.code_generator.type import OperationType
-from src.utils.debug import Debug
+from src.compiler.ply import yacc
+from src.compiler.code_generator.expression import Operator
+from src.compiler.code_generator.code_generator import CodeGenerator
+from src.compiler.code_generator.type import OperationType
 
 
 class Compiler:
