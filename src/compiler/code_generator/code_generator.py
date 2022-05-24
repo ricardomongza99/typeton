@@ -26,7 +26,13 @@ class CodeGenerator:
 
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
-    # Expressions -------------------------------------------
+    # Helpers -------------------------------------------
+
+    def get_current_quad(self):
+        return self.__quad_list[-1]
+
+    def peek_operands(self):
+        return self.__operand_address_stack[-1]
 
     def print_operand_stack(self):
         a = Debug.map()
@@ -41,6 +47,8 @@ class CodeGenerator:
         for operator in self.__operator_stack:
             r += operator.type_.value + " "
         print(r)
+
+    # Expressions---------------------------------------------
 
     def get_next_quad(self):
         return len(self.__quad_list)

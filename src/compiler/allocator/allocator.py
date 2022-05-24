@@ -30,6 +30,10 @@ class Allocator(Publisher):
 
         return new_address
 
+    def get_type(self, address):
+        resource = self.get_resource(address, self.get_segment(address))
+        return resource.type
+
     def get_segment(self, address):
         for key in self.__segments:
             segment = self.__segments[key]

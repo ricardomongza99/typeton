@@ -40,9 +40,12 @@ class ExpressionActions(Publisher):
         last_operator: Operator = self.__peek_operators()
 
         if last_operator is not None and last_operator.priority == priority:
-            if priority == 0:
-                return self.__execute_assign(scheduler)
-            return self.__execute_arithmetic(scheduler)
+            if priority == -1:
+                return self.execute_return()
+            elif priority == 0:
+                self.__execute_assign(scheduler)
+            else:
+                return self.__execute_arithmetic(scheduler)
 
     def push_operator(self, new_operator: Operator, scheduler: Allocator):
         is_parenthesis = self.__handle_parenthesis(new_operator, scheduler)
@@ -101,7 +104,7 @@ class ExpressionActions(Publisher):
         quad = Quad(
             left_address=right.address,
             right_address=None,
-            operation=OperationType.ASSIGN,
+            operation=operator.type_,
             result_address=left.address)
 
         self.quad_list.append(quad)
@@ -134,10 +137,10 @@ class ExpressionActions(Publisher):
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
 
         quad = (Quad(
-                left_address=left.address,
-                right_address=right.address,
-                operation=OperationType(operator.type_.value),  # convert to type for easy identification in vm
-                result_address=result))
+            left_address=left.address,
+            right_address=right.address,
+            operation=operator.type_,  # convert to type for easy identification in vm
+            result_address=result))
 
         self.quad_list.append(quad)
 
@@ -151,3 +154,11 @@ class ExpressionActions(Publisher):
         if len(self.__operator_stack) - 1 < self.parenthesis_start[-1]:
             return None
         return self.__operator_stack[-1]
+
+    def execute_return(self):
+        operator = self.next_operator()
+        return_expression = self.next_operand()
+
+        quad = Quad(operation=operator.type_, result_address=return_expression.address)
+
+        self.quad_list.append(quad)

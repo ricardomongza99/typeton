@@ -1,5 +1,4 @@
 import sys
-from typing import List
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.code_generator.code_generator import CodeGenerator
@@ -36,11 +35,13 @@ class Compiler(Subscriber):
     def handle_event(self, event):
         if event.type_ is CompilerEvent.STOP_COMPILE:
             self.p_error(event.payload)
+            sys.exit()
 
     def compile(self, data: str, debug=False):
         return self._parser.parse(data, self.lexer, debug=False)
 
     def display_tables(self):
+        self._code_generator.display()
         self._symbol_table.function_table.display(debug=True)
         self._symbol_table.constant_table.display()
 
@@ -276,7 +277,7 @@ class Compiler(Subscriber):
     def p_return(self, p):
         """
         return : RETURN
-               | RETURN push_operator bool_expr set_return
+               | RETURN push_operator bool_expr execute_priority_function
         """
 
     def p_assign(self, p):
@@ -361,7 +362,6 @@ class Compiler(Subscriber):
              | factor execute_priority_4 TIMES push_operator term
              | factor execute_priority_4 DIVIDE push_operator term
         """
-
 
     def p_factor(self, p):
         """
@@ -462,12 +462,6 @@ class Compiler(Subscriber):
         """
         self._symbol_table.function_table.current_function.set_type("Void")
 
-    def p_validate_return(self, p):
-        """
-        set_return :
-        """
-        (self._symbol_table.function_table.set_return())
-
     def p_end_function(self, p):
         """
         end_function :
@@ -494,42 +488,53 @@ class Compiler(Subscriber):
         """
         (self._symbol_table.function_table.add_variable(p[-1], False))
 
+    def p_execute_priority_function(self, p):  # used to check on stack and execute quad operations
+        """
+        execute_priority_function :
+        """
+        return_address = self._code_generator.peek_operands().address
+        return_type = self._allocator.get_type(address=return_address)
+        print(return_address)
+        # print(return_type)
+        self._symbol_table.function_table.check_return(return_type)
+        self._code_generator.execute_if_possible(-1)
+
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
-        (self._code_generator.execute_if_possible(0))
+        self._code_generator.execute_if_possible(0)
 
     def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
         """
         execute_builtin_call :
         """
-        (self._code_generator.execute_builtin_call())
+        self._code_generator.execute_builtin_call()
 
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
-        (self._code_generator.execute_if_possible(1))
+        self._code_generator.execute_if_possible(1)
 
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
         """
 
-        (self._code_generator.execute_if_possible(2))
+        self._code_generator.execute_if_possible(2)
 
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
-        (self._code_generator.execute_if_possible(3))
+        self._code_generator.execute_if_possible(3)
 
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
         """
-        (self._code_generator.execute_if_possible(4))
+        self._code_generator.execute_if_possible(4)
 
     def p_get_conditional(self, p):
         """
@@ -580,9 +585,9 @@ class Compiler(Subscriber):
 
         # TODO move all this garbage into a helper function
         type_ = OperationType(p[-1])
-        priority = 0
+        priority = -1
 
-        if type_ is {OperationType.ASSIGN}:
+        if type_ in {OperationType.ASSIGN}:
             priority = 0
         elif type_ in {OperationType.AND, OperationType.OR}:
             priority = 1
@@ -599,29 +604,29 @@ class Compiler(Subscriber):
             priority = 4
 
         operator = Operator(priority, type_)
-        (self._code_generator.push_operator(operator))
+        self._code_generator.push_operator(operator)
 
     def p_push_variable(self, p):
         """
          push_variable :
         """
         address, type_ = self._symbol_table.function_table.find(p[-1])
-        (self._code_generator.push_variable(p[-1], type_, address))
+        self._code_generator.push_variable(p[-1], type_, address)
 
     def p_set_variable_type(self, p):
         """
         set_variable_type :
         """
 
-        id_ = (self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
+        id_ = self._symbol_table.function_table.set_variable_type(p[-1], self._allocator)
         if id_ is not None:
-            # TODO refactor
             address, type_ = self._symbol_table.function_table.find(id_)
-            (self._code_generator.push_variable(id_, type_, address))
+            self._code_generator.push_variable(id_, type_, address)
 
     # -- ERROR -----------------------
 
     def p_error(self, p):
+        self.display_tables()
         error_message = 'Syntax error'
         if p:
             if type(p) is CompilerError:
@@ -634,11 +639,9 @@ class Compiler(Subscriber):
         else:
             error_message += f': end of file'
             self.syntax_error = error_message
-        sys.exit()
 
     def display_debug(self):
-        self._symbol_table.constant_table.display()
-
+        self.display_tables()
     #
     # def p_error(self, p):
     #     if p is None:

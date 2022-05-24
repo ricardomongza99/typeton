@@ -141,7 +141,13 @@ class FunctionTable(Publisher, Subscriber):
 
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
 
-    def set_return(self):
+    def check_return(self, type_):
+
+        func_type = self.current_function.type_
+        if func_type is not ValueType.VOID:
+            if func_type is not type_:
+                error = CompilerError(f'Function should return {func_type.value}, ')
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
         self.current_function.has_return = True
 
     def __validate_return(self):
