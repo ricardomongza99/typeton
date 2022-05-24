@@ -1,20 +1,7 @@
-
 var x: Int  = 10 + 3 * 5
 var y: Bool  = x + 10.5 * 3 < (200 + 5) / 3
 
-func duck(name: String, age: Int, adult: Bool) -> Bool {
-
+func main() {
     var x: Int  = 10 + 3 * 5
     var y: Bool  = x + 10.5 * 3 < (200 + 5) / 3
-    return adult && age > 20
 }
-
-func man(name: String, age: Int, adult: Bool) -> Bool {
-    var x: Int  = 10 + 3 * 5
-    var y: Bool  = x + 10.5 * 3 < (200 + 5) / 3
-    return adult && age > 20
-}
-
-
-
-
