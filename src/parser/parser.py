@@ -71,7 +71,7 @@ class Parser:
     def p_function(self, p):
         """
         function : FUNC ID add_function params set_void init_block end_function
-                 | FUNC ID add_function params ARROW variable_primitive init_block end_function
+                 | FUNC ID add_function params ARROW primitive init_block end_function
         """
 
     def p_function_error(self, p):
@@ -131,14 +131,14 @@ class Parser:
 
     def p_param(self, p):
         """
-        param : ID add_param COLON variable_primitive
+        param : ID add_param COLON primitive
         """
 
     # def p_param_error(self, p):
     #     """
-    #     param : ID error variable_primitive
-    #           | error COLON variable_primitive
-    #           | error variable_primitive
+    #     param : ID error primitive
+    #           | error COLON primitive
+    #           | error primitive
     #     """
     #     if p[2] == ':':
     #         self.compiler_errors[-1].message = f'Missing identifier before colon "{p[1]}"'
@@ -163,8 +163,8 @@ class Parser:
 
     def p_param_error(self, p):
         """
-        param : ID error variable_primitive
-              | error COLON variable_primitive
+        param : ID error primitive
+              | error COLON primitive
         """
 
         if p[2] != ':':
@@ -447,17 +447,17 @@ class Parser:
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
         """
-            type : variable_primitive
-                 | LBRACK variable_primitive RBRACK
+            type : primitive
+                 | LBRACK primitive RBRACK
                  | LBRACK ID RBRACK
             """
 
-    def p_variable_primitive(self, p):
+    def p_primitive(self, p):
         """
-        variable_primitive : INT    set_variable_type
-                  | FLOAT           set_variable_type
-                  | STRING          set_variable_type
-                  | BOOL            set_variable_type
+        primitive : INT     set_variable_type
+                  | FLOAT   set_variable_type
+                  | STRING  set_variable_type
+                  | BOOL    set_variable_type
         """
 
     def p_string(self, p):
