@@ -185,12 +185,12 @@ func main() {
     - [x] Variable tables
     - [x] Semantics cube
 - [ ] 🏭 Code generation 
-    - [x] For arithmetic expressions
-    - [x] For sequential blocks (ASSIGN, INPUT, ETC.)
-    - [x] For conditional blocks (IF, ELSE, WHILE, WHILE)
-    - [ ] For functions
-    - [ ] For arrays
-    - [ ] For objects
+    - [x] Arithmetic expressions
+    - [x] Sequential blocks (ASSIGN, INPUT, ETC.)
+    - [x] Conditional blocks (IF, ELSE, WHILE, WHILE)
+    - [ ] Functions
+    - [ ] Arrays
+    - [ ] Classes
 - [ ] 🖥 Virtual Machine
     - [x] Memory for execution (Global memory, temporal memory, execution stack)
     - [ ] Arithmetic expressions execution
