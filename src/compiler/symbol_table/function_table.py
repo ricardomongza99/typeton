@@ -1,12 +1,12 @@
 from typing import Dict
 
-from .function import Function
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
 from src.compiler.allocator.types import ValueType
 from src.compiler.errors import CompilerError
 from src.utils.display import make_table, TableOptions
 from src.virtual_machine.types import FunctionData
+from .function import Function
 
 
 class FunctionTable:
@@ -53,17 +53,18 @@ class FunctionTable:
 
     def set_variable_type(self, type_, memory: Allocator):
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
-        self.function_data().add_variable_size(ValueType(type_))
-        id_ = self.current_function.set_variable_type(type_, layer, memory)
 
         if self.current_function.is_pending_type():
+            # TODO encapsulate methods in function to prevent so many dot operations
+            variable = self.current_function.current_variable
+            if variable.is_param and variable.type_ is None:
+                self.current_function.set_variable_type(type_, layer, memory)
+                self.function_data().add_variable_size(ValueType(type_))
+                return self.__add_parameter_signature(type_)
             return self.set_function_type(type_)
 
-        # TODO encapsulate methods in function to prevent so many dot operations
-        is_param = self.current_function.current_variable.is_param
-        if is_param:
-            return self.__add_parameter_signature(type_)
-
+        self.function_data().add_variable_size(ValueType(type_))
+        id_ = self.current_function.set_variable_type(type_, layer, memory)
         return id_
 
     def __add_parameter_signature(self, type_):
