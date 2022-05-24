@@ -1,7 +1,7 @@
 # Static Helpers
 from enum import Enum
 
-from src.compiler.allocator.types import TypeResource, MemoryType
+from src.compiler.allocator.types import TypeResource, MemoryType, TypeRange
 
 
 def is_between_range(start: int, value: int, end: int):
@@ -19,7 +19,6 @@ def get_available_address(resource: TypeResource):
             resource.pointer += 1
             return address, False
         else:
-            raise SyntaxError("Hello world")
             return None, True
 
     # if all addressed were freed, reset pointer and empty queue
@@ -31,17 +30,6 @@ def get_available_address(resource: TypeResource):
         return initial_point, False
 
     return resource.free_addresses_list.get(), False
-
-
-def print_stats(resource: TypeResource):
-    cap = (resource.end - resource.start)
-    use = (resource.pointer - resource.start) - resource.free_addresses_list.qsize()
-    per = (use / cap) * 100
-    print("-----------------------")
-    print("Stats for", resource.type)
-    print("Capacity: ", cap)
-    print("Current Use:", use, "(", per, "%)")
-    print("Freed Addresses", resource.free_addresses_list.qsize())
 
 
 class Layers(Enum):
@@ -59,7 +47,27 @@ class Segment:
         self.resources = {}
 
 
-def init_types(memory_types: [MemoryType]):
+def get_segment(address, segments):
+    for key in segments:
+        segment = segments[key]
+        if segment.start <= address <= segment.end:
+            return segment
+
+
+def is_segment(address, segments, type_: Layers):
+    segment = get_segment(segments, address)
+    return segment.type_ == type_
+
+
+def get_resource(address, segment):
+    resources = segment.resources
+    for key in resources:
+        resource = resources[key]
+        if resource.start <= address <= resource.end:
+            return resource
+
+
+def init_types(memory_types: [MemoryType], is_runtime: bool):
     """Initializes segment types for each type"""
     segments = {}
     current_start = 0
@@ -68,8 +76,13 @@ def init_types(memory_types: [MemoryType]):
         segment = Segment(type_=layer)
         for memory_type in memory_types:
             new_end = current_start + memory_type.size
-            segment.resources[memory_type.type.value] = TypeResource(start=current_start,
-                                                                     end=new_end, resource_type=memory_type.type)
+            # Only take what we need
+            if is_runtime:
+                resource = TypeRange(current_start, new_end, memory_type.type)
+            else:
+                resource = TypeResource(current_start, new_end, memory_type.type)
+
+            segment.resources[memory_type.type.value] = resource
             current_start = new_end + 1
         segment.end = current_start - 1
         segments[layer.value] = segment

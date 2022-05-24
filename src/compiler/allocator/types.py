@@ -11,13 +11,19 @@ class ValueType(Enum):
     BOOL = "Bool"
 
 
-class TypeResource:
+class TypeRange:
     def __init__(self, start, end, resource_type: ValueType):
         self.type = resource_type
         self.start = start
         self.end = end
-        self.pointer = start
+
+
+class TypeResource(TypeRange):
+    def __init__(self, start, end, resource_type: ValueType):
+        super().__init__(start, end, resource_type)
         self.free_addresses_list = Queue()
+        self.pointer = start
+
 
 
 class MemoryType:
