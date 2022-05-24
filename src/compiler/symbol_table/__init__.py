@@ -1,2 +1,2 @@
 from .symbol_table import SymbolTable
-from .function_table import FunctionTable
+from src.compiler.symbol_table.function_table.function_table import FunctionTable

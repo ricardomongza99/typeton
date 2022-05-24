@@ -1,7 +1,7 @@
 from typing import List
 
 from src.compiler.allocator.allocator import Allocator
-from src.compiler.symbol_table.function_table import FunctionTable
+from src.compiler.symbol_table.function_table.function_table import FunctionTable
 from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
 from src.compiler.code_generator.expression import ExpressionActions, Operand, Operator

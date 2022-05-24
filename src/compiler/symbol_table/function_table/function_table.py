@@ -1,5 +1,4 @@
 from typing import Dict
-
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
 from src.compiler.allocator.types import ValueType
