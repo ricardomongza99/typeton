@@ -1,6 +1,5 @@
 import sys
-from typing import List
-
+import json
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.expression import Operator
@@ -38,19 +37,47 @@ class Compiler(Subscriber):
             self.p_error(event.payload)
 
     def compile(self, data: str, debug=False):
-        return self._parser.parse(data, self.lexer, debug=False)
+        """
+        Compiles a program.
 
-    def display_tables(self):
+        :param data: program to be compiled
+        :param debug: shows compiled programs inner workings if true
+        :return: output json file (ready to be executed by the Virtual Machine)
+        """
+        self._parser.parse(data, self.lexer, debug=False)
+
+        if debug:
+            self._display_tables()
+            self._display_quads()
+
+        return self._make_json()
+
+    def _make_json(self):
+        """ Makes output json with all the necessary data for execution in the Virtual Machine"""
+
+        constant_table = self._symbol_table.constant_table.get_output_values_dict()
+        quads = self._code_generator.get_output_quads()
+        function_data = self._symbol_table.function_table.get_output_function_data()
+
+        data = {
+            'constant_table': constant_table,
+            'quads': quads,
+            'function_data': function_data
+        }
+
+        json_data = json.dumps(data, indent=4)
+
+        return json_data
+
+    def _display_tables(self):
         self._symbol_table.function_table.display(debug=True)
         self._symbol_table.constant_table.display()
 
-    def display_quads(self):
+    def _display_quads(self):
         self._code_generator.display()
 
-    def get_quads(self):
-        return self._code_generator.get_quads()
-
     # -- START -----------------------
+
     def p_program(self, p):
         """
         program : program1 program
