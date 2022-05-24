@@ -12,7 +12,7 @@ def main():
     file.close()
 
     compiler = Compiler()
-    compiler.parse(data)
+    compiler.compile(data)
 
     compiler.display_quads()
     compiler.display_tables()

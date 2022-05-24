@@ -25,7 +25,7 @@ class Compiler:
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
 
-    def parse(self, data: str, debug=False):
+    def compile(self, data: str, debug=False):
         self.parser.parse(data, self.lexer, debug=False)
 
     def display_tables(self):
