@@ -25,9 +25,8 @@ class Compiler:
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
 
-    def print_compiler_errors(self):
-        for err in self.compiler_errors:
-            err.print()
+    def parse(self, data: str, debug=False):
+        self.parser.parse(data, self.lexer, debug=False)
 
     def display_tables(self):
         self.symbol_table.function_table.display(debug=True)
@@ -36,8 +35,9 @@ class Compiler:
     def display_quads(self):
         self.code_generator.display()
 
-    def parse(self, data: str, debug=False):
-        self.parser.parse(data, self.lexer, debug=False)
+    def display_errors(self):
+        for err in self.compiler_errors:
+            err.print()
 
     # compiler begin
     def p_program(self, p):
