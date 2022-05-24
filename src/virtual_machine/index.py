@@ -1,11 +1,7 @@
 from typing import List
 
-from src.compiler.code_generator import Quad, OperationType
-from src.virtual_machine.types import ContextMemory
-
-
-class MemoryAllocator:
-    print("hello")
+from src.compiler.code_generator.type import Quad, OperationType
+from src.virtual_machine.types import ContextMemory, SizeData
 
 
 # TODO separate  functions (and make static) into a different files
@@ -13,10 +9,10 @@ class MemoryAllocator:
 class VirtualMachine:
     def __init__(self):
         self.quad_pointer = 0
-        self.memory_allocator = MemoryAllocator()  # controls limits
+        self.memory_allocator = SizeData(0, 0, 0, 0)  # controls limits
 
         self.quad_list: List[Quad] = []
-        self.directory = None
+        self.function_data_list = []
         self.global_memory = None
         self.constant_memory = None
         self.context_memory_stack: List[ContextMemory] = []
