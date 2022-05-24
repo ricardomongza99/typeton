@@ -17,7 +17,7 @@ class FunctionTable(Publisher, Subscriber):
         super().__init__()
         self.functions = {}
         # keep track of them so we don't add repeat numbers to function size
-        self.temporal_variables = {}
+        self.temporal_variables = {'empty'}
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
 
@@ -33,13 +33,15 @@ class FunctionTable(Publisher, Subscriber):
             self.__handle_add_temporal(type_, address)
 
     def __handle_add_temporal(self, type_, address):
-        if address not in self.temporal_variables:
-            self.function_data().add_variable_size(ValueType(type_))
-            self.temporal_variables[address] = 1
+        if address in self.temporal_variables:
+            return
+        self.function_data().add_variable_size(ValueType(type_), Layers.TEMPORARY)
+        self.temporal_variables.add(address)
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
         if self.functions.get(id_) is None:
+            self.temporal_variables = {'empty'}
             reference = Function(id_=id_)
             self.functions[id_] = reference
             self.current_function = reference
@@ -71,15 +73,17 @@ class FunctionTable(Publisher, Subscriber):
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
 
         if self.current_function.is_pending_type():
-            # TODO encapsulate methods in function to prevent so many dot operations
             variable = self.current_function.current_variable
             if variable.is_param and variable.type_ is None:
+                # handle param
                 self.current_function.set_variable_type(type_, layer, memory)
-                self.function_data().add_variable_size(ValueType(type_))
+                self.function_data().add_variable_size(ValueType(type_), layer)
                 return self.__add_parameter_signature(type_)
+            # handle function type
             return self.set_function_type(type_)
 
-        self.function_data().add_variable_size(ValueType(type_))
+        # handle regular local variables
+        self.function_data().add_variable_size(ValueType(type_), layer)
         id_ = self.current_function.set_variable_type(type_, layer, memory)
         return id_
 
@@ -92,6 +96,7 @@ class FunctionTable(Publisher, Subscriber):
         print(make_table("Function Directory", ["ID", "TYPE"],
                          map(lambda fun: [fun[0], fun[1].type_.value], self.functions.items())))
 
+        # TODO refactor size data lambda
         print(make_table("VM Directory Data",
                          [
                              "Id",
@@ -104,18 +109,16 @@ class FunctionTable(Publisher, Subscriber):
                                  fun[1].type_.value,
                                  fun[1].start_quad,
                                  fun[1].print_signature(),
-                                 fun[1].size_data.int_count,
-                                 fun[1].size_data.float_count,
-                                 fun[1].size_data.bool_count,
-                                 fun[1].size_data.string_count,
+                                 fun[1].size_data.get_data(ValueType.INT).total,
+                                 fun[1].size_data.get_data(ValueType.FLOAT).total,
+                                 fun[1].size_data.get_data(ValueType.BOOL).total,
+                                 fun[1].size_data.get_data(ValueType.STRING).total,
                              ],
                              self.function_data_table.items()), TableOptions(25, 50)))
 
         if debug:
             for id_, func in self.functions.items():
                 func.display_variables(id_)
-
-        # print(Debug.map()[3000])
 
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
@@ -161,15 +164,28 @@ class FunctionTable(Publisher, Subscriber):
 
         data = {}
         for id_, function_data in self.function_data_table.items():
+            size_data = function_data.size_data
             data[id_] = {
                 'start': function_data.start_quad,
                 'type': function_data.type_.value,
                 'param_types': function_data.parameter_signature,
                 'ranges': {
-                    'int': function_data.size_data.int_count,
-                    'float': function_data.size_data.float_count,
-                    'bool': function_data.size_data.bool_count,
-                    'string': function_data.size_data.string_count
+                    ValueType.INT.value: {
+                        "local": size_data.get_data(ValueType.INT).local,
+                        "temp": size_data.get_data(ValueType.INT).temp
+                    },
+                    ValueType.FLOAT.value: {
+                        "local": size_data.get_data(ValueType.FLOAT).local,
+                        "temp": size_data.get_data(ValueType.FLOAT).temp
+                    },
+                    ValueType.BOOL.value: {
+                        "local": size_data.get_data(ValueType.BOOL).local,
+                        "temp": size_data.get_data(ValueType.BOOL).temp
+                    },
+                    ValueType.STRING.value: {
+                        "local": size_data.get_data(ValueType.STRING).local,
+                        "temp": size_data.get_data(ValueType.STRING).temp
+                    },
                 }
             }
 

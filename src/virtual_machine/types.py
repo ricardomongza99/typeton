@@ -1,31 +1,40 @@
 from typing import List, Dict
 
-from src.compiler.allocator.types import ValueType
+from src.compiler.allocator.allocator import get_segment, get_resource
+from src.compiler.allocator.helpers import Layers, init_types
+from src.compiler.allocator.types import ValueType, MemoryType, DEFAULT_TYPES, TypeRange
+
+
+class SizeUnit:
+    def __init__(self):
+        self.local = 0
+        self.temp = 0
+
+    @property
+    def total(self):
+        return self.local + self.temp
 
 
 class SizeData:
     """Size data for a function, could also be used to keep track of global amount of each type,
      in recursion, could run out of max variables"""
 
-    def __init__(self, int_count, float_count, bool_count, string_count):
-        self.int_count = int_count
-        self.float_count = float_count
-        self.bool_count = bool_count
-        self.string_count = string_count
+    def __init__(self):
+        self.hash: Dict[str, SizeUnit] = {
+            ValueType.INT.value: SizeUnit(),
+            ValueType.FLOAT.value: SizeUnit(),
+            ValueType.BOOL.value: SizeUnit(),
+            ValueType.STRING.value: SizeUnit()}
 
-    # TODO function to subtract variables once context memory is removed from stack
-    def add_variable_size(self, type_: ValueType):
-        if type_ is ValueType.INT:
-            self.int_count += 1
-        elif type_ is ValueType.FLOAT:
-            self.float_count += 1
-        elif type_ is ValueType.BOOL:
-            self.bool_count += 1
-        elif type_ is ValueType.STRING:
-            self.string_count += 1
+    def get_data(self, type_: ValueType):
+        return self.hash[type_.value]
+
+    # TODO function to subtract variables once context memory is removed from stack, or maybe make another class
+    def add_variable_size(self, type_: ValueType, segment: Layers):
+        if segment is Layers.TEMPORARY:
+            self.hash[type_.value].temp += 1
         else:
-            print("Error unknown type")
-
+            self.hash[type_.value].local += 1
 
 
 class FunctionData:
@@ -33,13 +42,13 @@ class FunctionData:
 
     def __init__(self, id_: str, start_quad: int = 0):
         self.id_ = id_
-        self.size_data = SizeData(0, 0, 0, 0)
+        self.size_data = SizeData()
         self.start_quad = start_quad
         self.type_ = None
         self.parameter_signature = []
 
-    def add_variable_size(self, type_: ValueType):
-        self.size_data.add_variable_size(type_)
+    def add_variable_size(self, type_: ValueType, segment: Layers):
+        self.size_data.add_variable_size(type_, segment)
 
     def print_signature(self):
         result = ""
@@ -51,82 +60,86 @@ class FunctionData:
         return result[:-1]
 
 
-class TypeData:
-    """Type """
-
-    def __init__(self, start, end, type_, segment):
-        self.segment = segment
-        self.type_ = type_
+class TypeUnit:
+    def __init__(self, start, end):
         self.start = start
         self.end = end
 
 
-class Storage:
-    """Exact storage for each type of variable"""
+class TypeData:
+    """Type """
 
-    def __init__(self, size: int):
-        self.data = [None] * size
-        self.pointer = 0
-        self.size = size
+    def __init__(self, segment: TypeUnit, types: [TypeUnit]):
+        self.segment = segment
+        self.types: [] = types
+
+
+def init_storage(size):
+    return [None] * size
 
 
 class ContextMemory:
     """Memory stores exact amount of needed spaces for a specific function"""
+    # # TODO move size_data init_types to outside of ContextMemory
+    #
+    # def __init__(self, size_data: SizeData, constant_data: "ContextMemory", global_data: "ContextMemory",
+    #              type_data: List[MemoryType]):
+    #     self.type_data = init_types(DEFAULT_TYPES, is_runtime=True)
+    #     self.size_data = size_data
+    #     self.type_data = type_data
+    #
+    #     # TODO removed double mapping and use offset from known segment ranges
+    #     self.data_storage: Dict[ValueType, List] = {}
+    #
+    #     # Needed because these two are global
+    #     self.global_data = global_data
+    #     self.constant_data = constant_data
+    #
+    #     self.__init_storage()
+    #
+    # def __init_storage(self):
+    #     """Only for local variables"""
+    #     self.data_storage[ValueType.INT] = init_storage(self.size_data.get_data(ValueType.INT).total)
+    #     self.data_storage[ValueType.FLOAT] = init_storage(self.size_data.get_data(ValueType.FLOAT).total)
+    #     self.data_storage[ValueType.BOOL] = init_storage(self.size_data.get_data(ValueType.BOOL).total)
+    #     self.data_storage[ValueType.STRING] = init_storage(self.size_data.get_data(ValueType.STRING).total)
+    #
+    # def get_offset(self, address, segment, type_data):
+    #     offset = address - segment.start
+    #     if segment.type_ is Layers.TEMPORARY:
+    #         offset + self.size_data.get_data(type_data.type)
+    #     return offset
+    #
+    # def __save_global(self, address, value):
+    #     if self.global_data is None:
+    #         return
+    #     self.global_data.save(address, value)
+    #
+    # def save(self, address, value):
+    #     segment = get_segment(address, self.type_data)
+    #     type_data: TypeRange = get_resource(address, segment)
+    #     slot = self.data_storage[type_data.type]
+    #
+    #     index = self.get_offset(address, segment, type_data)
+    #     slot[index] = value
+    #
+    # def get(self, address):
+    #     segment = get_segment(address, self.type_data)
+    #     resource = get_resource(address, segment)
+    #     if segment.type_ is Layers.GLOBAL and self.global_data is not None:
+    #         return self.global_data.get(address)
+    #
+    #     if segment.type_ is Layers.CONSTANT:
+    #         # TODO define constant table
+    #         return None
+    #
+    #     slot = self.data_storage[resource.type_.value]
+    #     return slot[self.get_offset(address, segment, resource)]
 
-    def __init__(self, size_data: SizeData, constant_data: "ContextMemory", global_data: "ContextMemory",
-                 type_data: List[TypeData]):
-
-        self.size_data = size_data
-        self.type_data = type_data
-
-        # TODO removed double mapping and use offset from known segment ranges
-        self.data_storage: Dict[ValueType, any] = {}
-        self.memory_map: Dict[int, int] = {}
-        self.storage_map = Dict[ValueType, List]
-
-        # Needed because these two are global
-        self.global_data = global_data
-        self.constant_data = constant_data
-
-        self.__init_storage()
-
-    def __init_storage(self):
-        """Only for local variables"""
-        self.data_storage[ValueType.INT] = Storage(self.size_data.int_count)
-        self.data_storage[ValueType.FLOAT] = Storage(self.size_data.int_count)
-        self.data_storage[ValueType.BOOL] = Storage(self.size_data.int_count)
-        self.data_storage[ValueType.STRING] = Storage(self.size_data.int_count)
-
-    def save(self, address, value):
-        type_ = self.__decode_type(address)
-        # check segment hash (Int, Float, etc..)
-        segment: Storage = self.data_storage[type_]
-        if address not in self.memory_map:
-            # TODO calculate offset to know what index to place value in based on segment and type range
-            segment.data[segment.pointer] = value
-            self.memory_map[address] = segment.pointer
-            segment.pointer += 1
-            return
-
-        index = self.memory_map[address]
-        segment.data[index] = value
-
-    def get(self, address):
-        # TODO if segment is global, get from global, if from constant same thing, else from local
-        type_ = self.__decode_type(address)
-        segment: Storage = self.data_storage[type_]
-
-        if address not in self.memory_map:
-            return self.global_data.get(address)
-
-        index = self.memory_map[address]
-        return segment.data[index]
-
-    # TODO decode segment
-
-    def __decode_type(self, address: int):
-        for type_data in self.type_data:
-            if type_data.start <= address <= type_data.end:
-                return type_data.type_
-
-        return None
+    # segment: Storage = self.data_storage[type_]
+    #
+    # if address not in self.memory_map:
+    #     return self.global_data.get(address)
+    #
+    # index = self.memory_map[address]
+    # return segment.data[index]

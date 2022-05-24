@@ -19,7 +19,7 @@ class VirtualMachine:
             self._pointer += 1
 
     def _execute(self, quad):
-        #print(f'{quad.operation.value}\t{quad.left_address}\t{quad.right_address}\t{quad.result_address}')
+        # print(f'{quad.operation.value}\t{quad.left_address}\t{quad.right_address}\t{quad.result_address}')
         operation = quad.operation
 
         if operation is OperationType.ADD:
