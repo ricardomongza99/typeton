@@ -59,8 +59,6 @@ class CodeGenerator:
 
     def execute_remaining(self):
         self.expression_actions.execute_remaining(self.scheduler)
-        self.print_operator_stack()
-        self.print_operand_stack()
 
     # -------------------------------------------------------
 

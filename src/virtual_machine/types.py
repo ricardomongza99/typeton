@@ -13,18 +13,19 @@ class SizeData:
         self.bool_count = bool_count
         self.string_count = string_count
 
-    # # TODO function to subtract variables once context memory is removed from stack
-    # def add_variable_size(self, type_: ValueType):
-    #     if type_ is ValueType.INT:
-    #         self.int_count += 1
-    #     elif type_ is ValueType.FLOAT:
-    #         self.float_count += 1
-    #     elif type_ is ValueType.BOOL:
-    #         self.bool_count += 1
-    #     elif type_ is ValueType.STRING:
-    #         self.string_count += 1
-    #     else:
-    #         print("Error unknown type")
+    # TODO function to subtract variables once context memory is removed from stack
+    def add_variable_size(self, type_: ValueType):
+        if type_ is ValueType.INT:
+            self.int_count += 1
+        elif type_ is ValueType.FLOAT:
+            self.float_count += 1
+        elif type_ is ValueType.BOOL:
+            self.bool_count += 1
+        elif type_ is ValueType.STRING:
+            self.string_count += 1
+        else:
+            print("Error unknown type")
+
 
 
 class FunctionData:
@@ -38,8 +39,7 @@ class FunctionData:
         self.parameter_signature = []
 
     def add_variable_size(self, type_: ValueType):
-        print("hello")
-        # self.size_data.add_variable_size(type_)
+        self.size_data.add_variable_size(type_)
 
     def print_signature(self):
         result = ""
