@@ -14,8 +14,6 @@ from .symbol_table import SymbolTable
 class Compiler:
     def __init__(self):
         self.allocator = Allocator()
-
-        # TODO: encapsulate in SymbolTable
         self.symbol_table = SymbolTable()
 
         self.tokens = tokens
