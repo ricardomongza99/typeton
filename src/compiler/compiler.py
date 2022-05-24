@@ -29,8 +29,9 @@ class Compiler:
         for err in self.compiler_errors:
             err.print()
 
-    def display_function_table(self):
+    def display_tables(self):
         self.symbol_table.function_table.display(debug=True)
+        self.symbol_table.constant_table.display()
 
     def parse(self, data: str, debug=False):
         self.parser.parse(data, self.lexer, debug=False)
