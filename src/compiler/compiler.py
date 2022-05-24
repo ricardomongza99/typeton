@@ -1,8 +1,6 @@
 from typing import List
 
 from src.compiler.allocator.allocator import Allocator
-from src.compiler.symbol_table import FunctionTable
-from src.compiler.symbol_table.constant_table import ConstantTable
 from src.compiler.lexer import lex, tokens
 from src.compiler.errors import CompilerError
 from src.compiler.ply import yacc
