@@ -18,7 +18,6 @@ class CodeGenerator:
         self.__quad_list: List[Quad] = []
 
         # TODO rename to function symbol_table
-        self.directory = directory
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
@@ -34,8 +33,8 @@ class CodeGenerator:
     def get_next_quad(self):
         return len(self.__quad_list)
 
-    def push_variable(self, id_):
-        return self.expression_actions.push_variable(id_, self.directory)
+    def push_variable(self, id_, type_, address):
+        return self.expression_actions.push_variable(id_, type_, address)
 
     def push_operator(self, operator):
         return self.expression_actions.push_operator(operator, self.scheduler)

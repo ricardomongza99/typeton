@@ -638,7 +638,8 @@ class Compiler:
         """
          push_variable :
         """
-        self.handle_error(self._code_generator.push_variable(p[-1]))
+        address, type_ = self._symbol_table.function_table.find(p[-1])
+        self.handle_error(self._code_generator.push_variable(p[-1], type_, address))
 
     def p_set_variable_type(self, p):
         """
@@ -648,7 +649,8 @@ class Compiler:
         id_ = self.handle_error(self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
         if id_ is not None:
             # TODO refactor
-            self.handle_error(self._code_generator.push_variable(id_))
+            address, type_ = self._symbol_table.function_table.find(id_)
+            self.handle_error(self._code_generator.push_variable(id_, type_, address))
 
     # -- ERROR -----------------------
 

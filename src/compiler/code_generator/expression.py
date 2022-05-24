@@ -1,6 +1,5 @@
 from typing import List
 
-from src.compiler.symbol_table import FunctionTable
 from src.compiler.symbol_table.constant_table.constant_table import ConstantTable
 from src.compiler.errors import CompilerError
 from src.compiler.validation.type_check import type_check as check_type
@@ -20,8 +19,7 @@ class ExpressionActions:
         self.__operator_stack: List[Operator] = operators
         self.parenthesis_start = [0]  # operators indexed before this value do not exist
 
-    def push_variable(self, id_, directory: FunctionTable):
-        address, type_ = directory.find(id_)
+    def push_variable(self, id_, type_, address):
         if address is None:
             return CompilerError(f'Variable "{id_}" not found')
 
