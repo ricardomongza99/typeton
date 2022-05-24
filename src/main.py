@@ -14,8 +14,7 @@ def main():
     compiler = Compiler()
     compiler.parse(data)
 
-    compiler.code_generator.display()
-    compiler.print_compiler_errors()
+    compiler.display_quads()
     compiler.display_tables()
 
     print('Done')

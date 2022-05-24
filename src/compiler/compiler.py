@@ -33,6 +33,9 @@ class Compiler:
         self.symbol_table.function_table.display(debug=True)
         self.symbol_table.constant_table.display()
 
+    def display_quads(self):
+        self.code_generator.display()
+
     def parse(self, data: str, debug=False):
         self.parser.parse(data, self.lexer, debug=False)
 
