@@ -52,6 +52,7 @@ class VirtualMachine:
     # -- EXECUTION methods  ----------------------------
 
     def _execute(self, quad):
+        # print(f'{quad.operation.value}\t{quad.left_address}\t{quad.right_address}\t{quad.result_address}')
         operation = quad.operation
         left_address = quad.left_address
         right_address = quad.right_address
