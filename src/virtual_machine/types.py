@@ -38,7 +38,8 @@ class FunctionData:
         self.parameter_signature = []
 
     def add_variable_size(self, type_: ValueType):
-        self.size_data.add_variable_size(type_)
+        print("hello")
+        # self.size_data.add_variable_size(type_)
 
     def print_signature(self):
         result = ""
