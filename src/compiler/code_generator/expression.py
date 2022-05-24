@@ -1,7 +1,7 @@
 from typing import List
 
-from src.compiler.directory import FunctionTable
-from src.compiler.directory.constants import ConstantTable
+from src.compiler.symbol_table import FunctionTable
+from src.compiler.symbol_table.constant_table import ConstantTable
 from src.compiler.errors import CompilerError
 from src.compiler.validation.type_check import type_check as check_type
 from src.compiler.code_generator.type import Quad, OperationType

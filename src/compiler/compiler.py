@@ -1,28 +1,27 @@
 from typing import List
 
 from src.compiler.allocator.allocator import Allocator
-from src.compiler.directory import FunctionTable
-from src.compiler.directory.constants import ConstantTable
+from src.compiler.symbol_table import FunctionTable
+from src.compiler.symbol_table.constant_table import ConstantTable
 from src.compiler.lexer import lex, tokens
 from src.compiler.errors import CompilerError
 from src.compiler.ply import yacc
 from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.type import OperationType
-
+from .symbol_table import SymbolTable
 
 class Compiler:
     def __init__(self):
         self.allocator = Allocator()
 
         # TODO: encapsulate in SymbolTable
-        self.function_table = FunctionTable()
-        self.constant_table = ConstantTable()
+        self.symbol_table = SymbolTable()
 
         self.tokens = tokens
         self.lexer = lex
         self.parser = yacc.yacc(module=self, start="program", debug=True)
-        self.code_generator = CodeGenerator(scheduler=self.allocator, directory=self.function_table)
+        self.code_generator = CodeGenerator(scheduler=self.allocator, directory=self.symbol_table.function_table)
 
         # TODO: encapsulate in ErrorHandler
         self.compiler_errors: List[CompilerError] = []
@@ -32,8 +31,8 @@ class Compiler:
         for err in self.compiler_errors:
             err.print()
 
-    def display_function_directory(self):
-        self.function_table.display(debug=True)
+    def display_function_table(self):
+        self.symbol_table.function_table.display(debug=True)
 
     def parse(self, data: str, debug=False):
         self.parser.parse(data, self.lexer, debug=False)
@@ -476,23 +475,23 @@ class Compiler:
         """
         add_function :
         """
-        self.function_table.add(p[-1], self.code_generator.get_next_quad())
+        self.symbol_table.function_table.add(p[-1], self.code_generator.get_next_quad())
 
     def p_set_void(self, p):
         """
         set_void :
         """
-        self.function_table.current_function.set_type("Void")
+        self.symbol_table.function_table.current_function.set_type("Void")
 
     def handle_error(self, possible_error):
         if type(possible_error) == list:
             for err in possible_error:
                 if err is not None and type(err) is CompilerError:
-                    err.trace = self.function_table.current_trace()
+                    err.trace = self.symbol_table.function_table.current_trace()
                     self.compiler_errors.append(err)
         elif possible_error is not None and type(possible_error) is CompilerError:
             possible_error.trace = \
-                self.function_table.current_trace() if possible_error.trace is None else possible_error.trace
+                self.symbol_table.function_table.current_trace() if possible_error.trace is None else possible_error.trace
             self.compiler_errors.append(possible_error)
         return possible_error
 
@@ -500,33 +499,33 @@ class Compiler:
         """
         set_return :
         """
-        self.handle_error(self.function_table.set_return())
+        self.handle_error(self.symbol_table.function_table.set_return())
 
     def p_end_function(self, p):
         """
         end_function :
         """
         self.handle_error(self.code_generator.execute_remaining())
-        self.handle_error(self.function_table.end_function(memory=self.allocator))
+        self.handle_error(self.symbol_table.function_table.end_function(memory=self.allocator))
 
     def p_add_constant(self, p):
         """
         add_constant :
         """
-        self.handle_error(self.constant_table.add(p[-1], self.allocator))
-        self.handle_error(self.code_generator.push_constant(p[-1], self.constant_table))
+        self.handle_error(self.symbol_table.constant_table.add(p[-1], self.allocator))
+        self.handle_error(self.code_generator.push_constant(p[-1], self.symbol_table.constant_table))
 
     def p_add_param(self, p):
         """
         add_param :
         """
-        self.handle_error(self.function_table.add_variable(p[-1], True))
+        self.handle_error(self.symbol_table.function_table.add_variable(p[-1], True))
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        self.handle_error(self.function_table.add_variable(p[-1], False))
+        self.handle_error(self.symbol_table.function_table.add_variable(p[-1], False))
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
@@ -646,7 +645,7 @@ class Compiler:
         set_variable_type :
         """
 
-        id_ = self.handle_error(self.function_table.set_variable_type(p[-1], self.allocator))
+        id_ = self.handle_error(self.symbol_table.function_table.set_variable_type(p[-1], self.allocator))
         if id_ is not None:
             # TODO refactor
             self.handle_error(self.code_generator.push_variable(id_))
@@ -663,7 +662,7 @@ class Compiler:
             self.parser.restart()
 
     def display_debug(self):
-        self.constant_table.display()
+        self.symbol_table.constant_table.display()
 
     #
     # def p_error(self, p):
@@ -679,7 +678,7 @@ class Compiler:
     #         self.compiler_errors.append(CompilerError(
     #             "Unexpected " + str(p.value),
     #             f'({p.lineno}:{col})',
-    #             self.directory.current_trace()
+    #             self.symbol_table.current_trace()
     #         ))
     #
     #         self.recover({"}"})

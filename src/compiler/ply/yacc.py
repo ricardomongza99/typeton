@@ -73,7 +73,7 @@ import inspect
 #-----------------------------------------------------------------------------
 
 yaccdebug   = False            # Debugging mode.  If set, yacc generates a
-                               # a 'compiler.out' file in the current directory
+                               # a 'compiler.out' file in the current symbol_table
 
 debug_file  = 'compiler.out'     # Default name of the debugging file
 error_count = 3                # Number of symbols that must be shifted to leave recovery mode

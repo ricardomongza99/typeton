@@ -5,12 +5,7 @@ from src.utils.display import make_table
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
 from src.compiler.allocator.types import ValueType
-
-
-class Constant:
-    def __init__(self, address, type_):
-        self.address = address
-        self.type_ = type_
+from .constant import Constant
 
 
 class ConstantTable:
