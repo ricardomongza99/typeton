@@ -1,5 +1,6 @@
 var x: Int  = 10 + 3 * 5
 var y: Bool  = x + 10.5 * 3 < (200 + 5) / 3
+var z: Bool = false
 
 func main() {
     var x: Int  = 10 + 3 * 5
