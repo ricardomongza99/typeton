@@ -26,9 +26,6 @@ class CodeGenerator:
 
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
-    def get_quads(self):
-        return self.__quad_list
-
     # Expressions -------------------------------------------
 
     def print_operand_stack(self):
@@ -121,3 +118,17 @@ class CodeGenerator:
 
     def execute_builtin_call(self):
         self.builtin_actions.execute_call(self.__operator_stack, self.__operand_address_stack)
+
+    def get_output_quads(self):
+        """ Returns quads list of types [str, str, str, str] used by the output file """
+
+        quads = []
+        for quad in self.__quad_list:
+            operation = quad.operation
+            left_address = str(quad.left_address)
+            right_address = str(quad.right_address)
+            result_address = str(quad.result_address)
+
+            quads.append([operation.value, left_address, right_address, result_address])
+        return quads
+

@@ -155,3 +155,23 @@ class FunctionTable(Publisher, Subscriber):
             )
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
         return None
+
+    def get_output_function_data(self):
+        """ Returns function_data dictionary used in output file """
+
+        data = {}
+        for id_, function_data in self.function_data_table.items():
+            print(id_)
+            data[id_] = {
+                'start': function_data.start_quad,
+                'type': function_data.type_.value,
+                'param_types': function_data.parameter_signature,
+                'ranges': {
+                    'int': function_data.size_data.int_count,
+                    'float': function_data.size_data.float_count,
+                    'bool': function_data.size_data.bool_count,
+                    'string': function_data.size_data.string_count
+                }
+            }
+
+        return data

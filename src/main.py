@@ -12,10 +12,10 @@ def main():
     file.close()
 
     compiler = Compiler()
-    compiler.compile(data)
+    json_data = compiler.compile(data, debug=True)
 
-    compiler.display_quads()
-    compiler.display_tables()
+    print("Will execute this")
+    print(json_data)
 
     print('Done')
 

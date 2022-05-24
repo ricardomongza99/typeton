@@ -52,3 +52,11 @@ class ConstantTable:
         if self.table.get(key) is None:
             return False
         return True
+
+    def get_output_values_dict(self):
+        """ Returns { address: value } dictionary used by the output file"""
+
+        values = {}
+        for value, constant in self.table.items():
+            values[constant.address] = value
+        return values
