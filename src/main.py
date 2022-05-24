@@ -1,4 +1,4 @@
-from src.parser import Parser
+from src.compiler import Compiler
 import os
 from src.config.definitions import PROGRAMS_DIR
 
@@ -11,7 +11,7 @@ def main():
     data = file.read()
     file.close()
 
-    parser = Parser()
+    parser = Compiler()
     parser.parse(data)
 
     parser.quadGenerator.display()

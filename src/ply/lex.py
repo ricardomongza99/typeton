@@ -679,7 +679,7 @@ class LexerReflect(object):
     # validate_module()
     #
     # This checks to see if there are duplicated t_rulename() functions or strings
-    # in the parser input file.  This is done using a simple regular expression
+    # in the compiler input file.  This is done using a simple regular expression
     # match on each line in the source code of the given module.
     # -----------------------------------------------------------------------------
 
@@ -735,7 +735,7 @@ def lex(*, module=None, object=None, debug=False,
     if object:
         module = object
 
-    # Get the module dictionary used for the parser
+    # Get the module dictionary used for the compiler
     if module:
         _items = [(k, getattr(module, k)) for k in dir(module)]
         ldict = dict(_items)
@@ -745,7 +745,7 @@ def lex(*, module=None, object=None, debug=False,
     else:
         ldict = get_caller_module_dict(2)
 
-    # Collect parser information from the dictionary
+    # Collect compiler information from the dictionary
     linfo = LexerReflect(ldict, log=errorlog, reflags=reflags)
     linfo.get_all()
     if linfo.validate_all():

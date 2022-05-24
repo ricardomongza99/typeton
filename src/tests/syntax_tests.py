@@ -1,9 +1,9 @@
 import unittest
-from ..parser import Parser
+from ..compiler import Compiler
 import os
 from ..config.definitions import TEST_PROGRAMS_DIR
 
-parser = Parser()
+parser = Compiler()
 
 
 def test_files(test_case, directory):

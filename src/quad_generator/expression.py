@@ -2,7 +2,7 @@ from typing import List
 
 from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
-from src.parser.errors import CompilerError
+from src.compiler.errors import CompilerError
 from src.validation.type_check import type_check as check_type
 from src.quad_generator.type import Quad, OperationType
 from src.quad_generator.type import Operand, Operator

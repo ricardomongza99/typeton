@@ -4,7 +4,7 @@ from src.allocator.allocator import Allocator
 from src.directory import FunctionTable
 from src.directory.constants import ConstantTable
 from src.lexer import lex, tokens
-from src.parser.errors import CompilerError
+from src.compiler.errors import CompilerError
 from src.ply import yacc
 from src.quad_generator.expression import Operator
 from src.quad_generator.index import QuadGenerator
@@ -12,9 +12,8 @@ from src.quad_generator.type import OperationType
 from src.utils.debug import Debug
 
 
-class Parser:
+class Compiler:
     def __init__(self):
-        self.data = None
         self.tokens = tokens
         self.error_data = 1
         self.compiler_errors: List[CompilerError] = []
@@ -37,10 +36,9 @@ class Parser:
         self.directory.display(debug=True)
 
     def parse(self, data: str, debug=False):
-        self.data = data
         self.parser.parse(data, self.lexer, debug=False)
 
-    # parser begin
+    # compiler begin
     def p_program(self, p):
         """
         program : program1 program
@@ -148,10 +146,10 @@ class Parser:
     #         self.compiler_errors[-1].message = f'Invalid param declaration: "{p[1]}"'
     #
 
-    # self.parser.restart()
+    # self.compiler.restart()
 
     #     print('received ', p[1], p[2], p[3])
-    #     print(self.parser.token())
+    #     print(self.compiler.token())
     #     if p[2] != ':':
     #         print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
     #         self.recover("COMMA")
@@ -353,7 +351,7 @@ class Parser:
                   | relational_exp execute_priority_1 OR push_operator bool_expr
         """
 
-    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent parser panic. fix this
+    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent compiler panic. fix this
         """
         relational_exp : expression execute_priority_2 comp relational_exp
                        | expression execute_priority_2
@@ -685,4 +683,4 @@ class Parser:
     #         ))
     #
     #         self.recover({"}"})
-    #         self.parser.errok()
+    #         self.compiler.errok()

@@ -1,4 +1,4 @@
-from src.parser.errors import CompilerError
+from src.compiler.errors import CompilerError
 from src.quad_generator.type import Operand
 from src.quad_generator.type import Quad, OperationType
 from src.allocator.types import ValueType

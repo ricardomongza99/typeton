@@ -4,7 +4,7 @@ from .variable import Variable
 from ..allocator.allocator import Allocator
 from ..allocator.helpers import Layers
 from ..allocator.types import ValueType
-from ..parser.errors import CompilerError
+from ..compiler.errors import CompilerError
 from ..utils.debug import Debug
 from ..utils.display import make_table
 

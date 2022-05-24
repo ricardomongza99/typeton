@@ -1,7 +1,7 @@
 # Stores Type Data
 from src.allocator.helpers import get_available_address, print_stats, init_types, Layers
 from src.allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
-from src.parser.errors import CompilerError
+from src.compiler.errors import CompilerError
 from src.utils.debug import Debug
 
 
