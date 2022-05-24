@@ -16,7 +16,6 @@ def main():
 
     compiler.display_quads()
     compiler.display_tables()
-    compiler.display_errors()
 
     print('Done')
 

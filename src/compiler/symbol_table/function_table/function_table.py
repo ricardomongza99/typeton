@@ -1,24 +1,41 @@
 from typing import Dict
+
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
 from src.compiler.allocator.types import ValueType
-from src.compiler.errors import CompilerError
+from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.display import make_table, TableOptions
+from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
 from .function import Function
 
 
-class FunctionTable:
+class FunctionTable(Publisher, Subscriber):
     """ A symbol_table of functions """
 
     def __init__(self):
+        super().__init__()
         self.functions = {}
+        # keep track of them so we don't add repeat numbers to function size
+        self.temporal_variables = {}
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
 
         # We need this for global variable search
         self.add("global", 0)
         self.current_function.set_type("Void")
+
+    def handle_event(self, event: Event):
+        """Receive all subscribed events here"""
+        from src.compiler.code_generator.expression import ExpressionEvents
+        if event.type_ is ExpressionEvents.ADD_TEMP:
+            type_, address = event.payload
+            self.__handle_add_temporal(type_, address)
+
+    def __handle_add_temporal(self, type_, address):
+        if address not in self.temporal_variables:
+            self.function_data().add_variable_size(ValueType(type_))
+            self.temporal_variables[address] = 1
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
@@ -32,7 +49,8 @@ class FunctionTable:
             self.function_data_table[id_].type_ = ValueType.VOID
             return
 
-        return CompilerError(f'Function {id_} redeclared')
+        error = CompilerError(f'Function {id_} redeclared')
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
@@ -43,7 +61,6 @@ class FunctionTable:
         self.function_data().type_ = ValueType(type_)
 
     def set_param_type(self, type_, memory: Allocator):
-
         self.function_data().add_variable_size(ValueType(type_))
         return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
 
@@ -102,14 +119,11 @@ class FunctionTable:
 
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
-        error = self.__validate_return()
+        self.__validate_return()
 
         for key in self.current_function.variables:
             address = self.current_function.variables[key].address_
             memory.release_address(address)
-
-        if error is not None:
-            return error
 
     def current_trace(self):
         return self.current_function.id_
@@ -120,7 +134,7 @@ class FunctionTable:
             variable = variable_table[id_]
             return variable.address_, variable.type_
 
-        variable_table = self.functions["global"]
+        variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
             variable = variable_table[id_]
             return variable.address_, variable.type_
@@ -134,8 +148,10 @@ class FunctionTable:
         if not self.current_function.valid_function():
             void_error = f'Void function should not return a value'
             type_error = f'Function should return {self.current_function.type_.value}'
-            return CompilerError(
+
+            error = CompilerError(
                 void_error if self.current_function.type_ is ValueType.VOID else type_error,
                 trace=self.current_trace()
             )
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
         return None

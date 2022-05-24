@@ -1,15 +1,18 @@
+import sys
 from typing import List
+
 from src.compiler.allocator.allocator import Allocator
-from src.compiler.lexer import lex, tokens
-from src.compiler.errors import CompilerError
-from src.compiler.ply import yacc
-from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.code_generator import CodeGenerator
+from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.type import OperationType
+from src.compiler.errors import CompilerError, CompilerEvent
+from src.compiler.lexer import lex, tokens
+from src.compiler.ply import yacc
 from .symbol_table import SymbolTable
+from ..utils.observer import Subscriber
 
 
-class Compiler:
+class Compiler(Subscriber):
     def __init__(self):
         self._allocator = Allocator()
         self._symbol_table = SymbolTable()
@@ -19,12 +22,23 @@ class Compiler:
         self._parser = yacc.yacc(module=self, start="program", debug=True)
         self._code_generator = CodeGenerator(scheduler=self._allocator)
 
-        # TODO: encapsulate in ErrorHandler
-        self._compiler_errors: List[CompilerError] = []
+        # subscribe symbol table to expression generator events
+        self._code_generator.expression_actions.subscribe(self._symbol_table.function_table, {})
+
+        # subscribe compiler receive semantic errors
+        self._allocator.subscribe(self, {CompilerEvent.STOP_COMPILE})
+        self._code_generator.expression_actions.subscribe(self, {CompilerEvent.STOP_COMPILE})
+        self._symbol_table.function_table.subscribe(self, {CompilerEvent.STOP_COMPILE})
+
         self.syntax_error = None
 
+    # handle subscribed events (semantic errors)
+    def handle_event(self, event):
+        if event.type_ is CompilerEvent.STOP_COMPILE:
+            self.p_error(event.payload)
+
     def compile(self, data: str, debug=False):
-        self._parser.parse(data, self.lexer, debug=False)
+        return self._parser.parse(data, self.lexer, debug=False)
 
     def display_tables(self):
         self._symbol_table.function_table.display(debug=True)
@@ -32,10 +46,6 @@ class Compiler:
 
     def display_quads(self):
         self._code_generator.display()
-
-    def display_errors(self):
-        for err in self._compiler_errors:
-            err.print()
 
     # -- START -----------------------
     def p_program(self, p):
@@ -87,7 +97,6 @@ class Compiler:
         """
         declaration : variable error NLINE
         """
-        self._compiler_errors[-1].message = f'Invalid expression"'
 
     def p_array(self, p):
         """
@@ -249,11 +258,6 @@ class Compiler:
                   | return
         """
 
-    def p_statement_error(self, p):
-        """
-        statement : error
-        """
-
     def p_while(self, p):
         """
         while : WHILE LPAREN save_loop_start bool_expr set_loop_condition RPAREN block fill_and_reset_loop
@@ -279,18 +283,6 @@ class Compiler:
         """
         assign : ID push_variable assign1 bool_expr execute_priority_0
         """
-
-    def p_assign_error_1(self, p):
-        """
-        assign : ID push_variable error execute_priority_0
-        """
-        self._compiler_errors.append(CompilerError(f'Invalid assigment after "{p[1]}"'))
-
-    def p_assign_error(self, p):
-        """
-        assign : ID push_variable assign1 error execute_priority_0
-        """
-        self._compiler_errors.append(CompilerError(f'Invalid Expression after "{p[1]} = "'))
 
     def recover(self, token_set=None):  # Future error handling
         while True:
@@ -370,25 +362,12 @@ class Compiler:
              | factor execute_priority_4 DIVIDE push_operator term
         """
 
-    def p_term_error(self, p):
-        """
-        term : factor execute_priority_4 TIMES error push_operator term
-             | factor execute_priority_4 DIVIDE error push_operator term
-
-        """
-        self._compiler_errors[-1].message = f'Expected valid expression after "{p[3]}"'
 
     def p_factor(self, p):
         """
             factor : constant
                    | LPAREN push_operator bool_expr RPAREN push_operator
             """
-
-    def p_factor_error(self, p):
-        """
-        factor : LPAREN push_operator error RPAREN push_operator
-        """
-        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_call_array(self, p):
         """
@@ -483,86 +462,74 @@ class Compiler:
         """
         self._symbol_table.function_table.current_function.set_type("Void")
 
-    def handle_error(self, possible_error):
-        if type(possible_error) == list:
-            for err in possible_error:
-                if err is not None and type(err) is CompilerError:
-                    err.trace = self._symbol_table.function_table.current_trace()
-                    self._compiler_errors.append(err)
-        elif possible_error is not None and type(possible_error) is CompilerError:
-            possible_error.trace = \
-                self._symbol_table.function_table.current_trace() if possible_error.trace is None else possible_error.trace
-            self._compiler_errors.append(possible_error)
-        return possible_error
-
     def p_validate_return(self, p):
         """
         set_return :
         """
-        self.handle_error(self._symbol_table.function_table.set_return())
+        (self._symbol_table.function_table.set_return())
 
     def p_end_function(self, p):
         """
         end_function :
         """
-        self.handle_error(self._code_generator.execute_remaining())
-        self.handle_error(self._symbol_table.function_table.end_function(memory=self._allocator))
+        (self._code_generator.execute_remaining())
+        (self._symbol_table.function_table.end_function(memory=self._allocator))
 
     def p_add_constant(self, p):
         """
         add_constant :
         """
-        self.handle_error(self._symbol_table.constant_table.add(p[-1], self._allocator))
-        self.handle_error(self._code_generator.push_constant(p[-1], self._symbol_table.constant_table))
+        (self._symbol_table.constant_table.add(p[-1], self._allocator))
+        (self._code_generator.push_constant(p[-1], self._symbol_table.constant_table))
 
     def p_add_param(self, p):
         """
         add_param :
         """
-        self.handle_error(self._symbol_table.function_table.add_variable(p[-1], True))
+        (self._symbol_table.function_table.add_variable(p[-1], True))
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        self.handle_error(self._symbol_table.function_table.add_variable(p[-1], False))
+        (self._symbol_table.function_table.add_variable(p[-1], False))
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
         execute_priority_0 :
         """
-        self.handle_error(self._code_generator.execute_if_possible(0))
+        (self._code_generator.execute_if_possible(0))
 
     def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
         """
         execute_builtin_call :
         """
-        self.handle_error(self._code_generator.execute_builtin_call())
+        (self._code_generator.execute_builtin_call())
 
     def p_execute_priority_1(self, p):
         """
         execute_priority_1 :
         """
-        self.handle_error(self._code_generator.execute_if_possible(1))
+        (self._code_generator.execute_if_possible(1))
 
     def p_execute_priority_2(self, p):
         """
         execute_priority_2 :
         """
 
-        self.handle_error(self._code_generator.execute_if_possible(2))
+        (self._code_generator.execute_if_possible(2))
 
     def p_execute_priority_3(self, p):
         """
         execute_priority_3 :
         """
-        self.handle_error(self._code_generator.execute_if_possible(3))
+        (self._code_generator.execute_if_possible(3))
 
     def p_execute_priority_4(self, p):
         """
         execute_priority_4 :
         """
-        self.handle_error(self._code_generator.execute_if_possible(4))
+        (self._code_generator.execute_if_possible(4))
 
     def p_get_conditional(self, p):
         """
@@ -632,36 +599,42 @@ class Compiler:
             priority = 4
 
         operator = Operator(priority, type_)
-        self.handle_error(self._code_generator.push_operator(operator))
+        (self._code_generator.push_operator(operator))
 
     def p_push_variable(self, p):
         """
          push_variable :
         """
         address, type_ = self._symbol_table.function_table.find(p[-1])
-        self.handle_error(self._code_generator.push_variable(p[-1], type_, address))
+        (self._code_generator.push_variable(p[-1], type_, address))
 
     def p_set_variable_type(self, p):
         """
         set_variable_type :
         """
 
-        id_ = self.handle_error(self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
+        id_ = (self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
         if id_ is not None:
             # TODO refactor
             address, type_ = self._symbol_table.function_table.find(id_)
-            self.handle_error(self._code_generator.push_variable(id_, type_, address))
+            (self._code_generator.push_variable(id_, type_, address))
 
     # -- ERROR -----------------------
 
     def p_error(self, p):
         error_message = 'Syntax error'
         if p:
-            error_message += f': at token {p.type} ({p.value}) on line {p.lineno}'
+            if type(p) is CompilerError:
+                p.trace = self._symbol_table.function_table.current_trace()
+                p.print()
+
+            else:
+                error_message += f': at token {p.type} ({p.value}) on line {p.lineno}'
+                print(error_message)
         else:
             error_message += f': end of file'
             self.syntax_error = error_message
-            self._parser.restart()
+        sys.exit()
 
     def display_debug(self):
         self._symbol_table.constant_table.display()
@@ -675,7 +648,7 @@ class Compiler:
     #     else:
     #         line_start = self.data.rfind('\n', 0, p.lexpos) + 1
     #         col = (p.lexpos - line_start) + 1
-    #         # self.handle_error(
+    #         # (
     #         # self.recover({"RCURLY"})
     #         self.compiler_errors.append(CompilerError(
     #             "Unexpected " + str(p.value),

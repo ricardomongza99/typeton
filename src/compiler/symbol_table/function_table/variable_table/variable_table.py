@@ -24,9 +24,7 @@ class VariableTable:
     def set_type(self, type_, layer: Layers, memory: Allocator):
         """ Sets current var type """
         enum_value = ValueType(type_)
-        address, error = memory.allocate_address(enum_value, layer)
-        if error:  # TODO Create class to create compilation errors
-            return CompilerError("Too many Variables")
+        address = memory.allocate_address(enum_value, layer)
 
         Debug.map()[address] = str(self.current_variable.id_)
         self.current_variable.type_ = enum_value

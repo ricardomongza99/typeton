@@ -29,12 +29,11 @@ class ConstantTable:
             # TODO error handling
             return
 
-        address, error = memory.allocate_address(type_, Layers.CONSTANT)
+        address = memory.allocate_address(type_, Layers.CONSTANT)
 
         debug = Debug.get_instance().map()
         debug[address] = str(value)
-        if error:  # TODO error handling
-            return
+
         self.table[value] = Constant(address, type_)
         return address
 

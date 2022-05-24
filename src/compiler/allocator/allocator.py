@@ -1,12 +1,14 @@
 # Stores Type Data
 from src.compiler.allocator.helpers import get_available_address, print_stats, init_types, Layers
 from src.compiler.allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
-from src.compiler.errors import CompilerError
+from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.debug import Debug
+from src.utils.observer import Publisher, Event
 
 
-class Allocator:
+class Allocator(Publisher):
     def __init__(self, type_resources: [MemoryType] = DEFAULT_TYPES):
+        super().__init__()
         self.__segments = init_types(type_resources)
 
     # Compilation
@@ -17,7 +19,7 @@ class Allocator:
         new_address, error = get_available_address(resource)
 
         if error:
-            return None, CompilerError("could not assign new address for specified range")
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Too many variables")))
 
         if layer == layer.TEMPORARY:
             debug = Debug.map()
@@ -26,7 +28,7 @@ class Allocator:
                 temp_address = str(new_address - resource.start)
                 debug[new_address] = f'T{temp_address} ({temp_type})'
 
-        return new_address, None
+        return new_address
 
     def get_segment(self, address):
         for key in self.__segments:

@@ -1,7 +1,6 @@
 from typing import List
 
 from src.compiler.allocator.allocator import Allocator
-from src.compiler.symbol_table.function_table.function_table import FunctionTable
 from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
 from src.compiler.code_generator.expression import ExpressionActions, Operand, Operator
@@ -17,7 +16,6 @@ class CodeGenerator:
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
 
-        # TODO rename to function symbol_table
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
@@ -30,23 +28,39 @@ class CodeGenerator:
 
     # Expressions -------------------------------------------
 
+    def print_operand_stack(self):
+        a = Debug.map()
+        r = "Operands: "
+        for operand in self.__operand_address_stack:
+            r += a[operand.address] + " "
+        print(r)
+        print()
+
+    def print_operator_stack(self):
+        r = "Operators: "
+        for operator in self.__operator_stack:
+            r += operator.type_.value + " "
+        print(r)
+
     def get_next_quad(self):
         return len(self.__quad_list)
 
     def push_variable(self, id_, type_, address):
-        return self.expression_actions.push_variable(id_, type_, address)
+        self.expression_actions.push_variable(id_, type_, address)
 
     def push_operator(self, operator):
-        return self.expression_actions.push_operator(operator, self.scheduler)
+        self.expression_actions.push_operator(operator, self.scheduler)
 
     def execute_if_possible(self, priority):
-        return self.expression_actions.execute_if_possible(priority, self.scheduler)
+        self.expression_actions.execute_if_possible(priority, self.scheduler)
 
     def push_constant(self, value, constant_table):
-        return self.expression_actions.push_constant(value, constant_table)
+        self.expression_actions.push_constant(value, constant_table)
 
     def execute_remaining(self):
-        return self.expression_actions.execute_remaining(self.scheduler)
+        self.expression_actions.execute_remaining(self.scheduler)
+        self.print_operator_stack()
+        self.print_operand_stack()
 
     # -------------------------------------------------------
 
