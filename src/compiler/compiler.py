@@ -47,6 +47,9 @@ class Compiler(Subscriber):
     def display_quads(self):
         self._code_generator.display()
 
+    def get_quads(self):
+        return self._code_generator.get_quads()
+
     # -- START -----------------------
     def p_program(self, p):
         """
