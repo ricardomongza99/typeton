@@ -14,26 +14,27 @@ from src.utils.debug import Debug
 
 class Compiler:
     def __init__(self):
+        self.allocator = Allocator()
+
+        # TODO: encapsulate in SymbolTable
+        self.function_table = FunctionTable()
+        self.constant_table = ConstantTable()
+
         self.tokens = tokens
-        self.error_data = 1
+        self.lexer = lex
+        self.parser = yacc.yacc(module=self, start="program", debug=True)
+        self.quadGenerator = QuadGenerator(scheduler=self.allocator, directory=self.function_table)
+
+        # TODO: encapsulate in ErrorHandler
         self.compiler_errors: List[CompilerError] = []
         self.syntax_error = None
-        self.memory = Allocator()
-        self.directory = FunctionTable()
-        self.searchSymbol = "NLINE"
-
-        self.lexer = lex
-        self.constant_table = ConstantTable()
-        self.quadGenerator = QuadGenerator(scheduler=self.memory, directory=self.directory)
-        self.tokens = tokens
-        self.parser = yacc.yacc(module=self, start="program", debug=True)
 
     def print_compiler_errors(self):
         for err in self.compiler_errors:
             err.print()
 
     def display_function_directory(self):
-        self.directory.display(debug=True)
+        self.function_table.display(debug=True)
 
     def parse(self, data: str, debug=False):
         self.parser.parse(data, self.lexer, debug=False)
@@ -476,23 +477,23 @@ class Compiler:
         """
         add_function :
         """
-        self.directory.add(p[-1], self.quadGenerator.get_next_quad())
+        self.function_table.add(p[-1], self.quadGenerator.get_next_quad())
 
     def p_set_void(self, p):
         """
         set_void :
         """
-        self.directory.current_function.set_type("Void")
+        self.function_table.current_function.set_type("Void")
 
     def handle_error(self, possible_error):
         if type(possible_error) == list:
             for err in possible_error:
                 if err is not None and type(err) is CompilerError:
-                    err.trace = self.directory.current_trace()
+                    err.trace = self.function_table.current_trace()
                     self.compiler_errors.append(err)
         elif possible_error is not None and type(possible_error) is CompilerError:
             possible_error.trace = \
-                self.directory.current_trace() if possible_error.trace is None else possible_error.trace
+                self.function_table.current_trace() if possible_error.trace is None else possible_error.trace
             self.compiler_errors.append(possible_error)
         return possible_error
 
@@ -500,33 +501,33 @@ class Compiler:
         """
         set_return :
         """
-        self.handle_error(self.directory.set_return())
+        self.handle_error(self.function_table.set_return())
 
     def p_end_function(self, p):
         """
         end_function :
         """
         self.handle_error(self.quadGenerator.execute_remaining())
-        self.handle_error(self.directory.end_function(memory=self.memory))
+        self.handle_error(self.function_table.end_function(memory=self.allocator))
 
     def p_add_constant(self, p):
         """
         add_constant :
         """
-        self.handle_error(self.constant_table.add(p[-1], self.memory))
+        self.handle_error(self.constant_table.add(p[-1], self.allocator))
         self.handle_error(self.quadGenerator.push_constant(p[-1], self.constant_table))
 
     def p_add_param(self, p):
         """
         add_param :
         """
-        self.handle_error(self.directory.add_variable(p[-1], True))
+        self.handle_error(self.function_table.add_variable(p[-1], True))
 
     def p_add_var(self, p):
         """
         add_var :
         """
-        self.handle_error(self.directory.add_variable(p[-1], False))
+        self.handle_error(self.function_table.add_variable(p[-1], False))
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
@@ -646,7 +647,7 @@ class Compiler:
         set_variable_type :
         """
 
-        id_ = self.handle_error(self.directory.set_variable_type(p[-1], self.memory))
+        id_ = self.handle_error(self.function_table.set_variable_type(p[-1], self.allocator))
         if id_ is not None:
             # TODO refactor
             self.handle_error(self.quadGenerator.push_variable(id_))
