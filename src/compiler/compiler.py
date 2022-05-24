@@ -1,5 +1,4 @@
 from typing import List
-
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.lexer import lex, tokens
 from src.compiler.errors import CompilerError
@@ -8,6 +7,7 @@ from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.type import OperationType
 from .symbol_table import SymbolTable
+
 
 class Compiler:
     def __init__(self):
@@ -37,7 +37,7 @@ class Compiler:
         for err in self.compiler_errors:
             err.print()
 
-    # compiler begin
+    # -- START -----------------------
     def p_program(self, p):
         """
         program : program1 program
