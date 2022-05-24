@@ -161,7 +161,6 @@ class FunctionTable(Publisher, Subscriber):
 
         data = {}
         for id_, function_data in self.function_data_table.items():
-            print(id_)
             data[id_] = {
                 'start': function_data.start_quad,
                 'type': function_data.type_.value,
