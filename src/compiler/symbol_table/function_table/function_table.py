@@ -139,7 +139,7 @@ class FunctionTable(Publisher, Subscriber):
             variable = variable_table[id_]
             return variable.address_, variable.type_
 
-        return None, None
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
 
     def set_return(self):
         self.current_function.has_return = True
