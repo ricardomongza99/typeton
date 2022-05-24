@@ -17,7 +17,7 @@ class Compiler:
         self.tokens = tokens
         self.lexer = lex
         self._parser = yacc.yacc(module=self, start="program", debug=True)
-        self._code_generator = CodeGenerator(scheduler=self._allocator, directory=self._symbol_table.function_table)
+        self._code_generator = CodeGenerator(scheduler=self._allocator)
 
         # TODO: encapsulate in ErrorHandler
         self._compiler_errors: List[CompilerError] = []

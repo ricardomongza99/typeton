@@ -12,7 +12,7 @@ from src.utils.display import make_table, TableOptions
 
 
 class CodeGenerator:
-    def __init__(self, scheduler: Allocator, directory: FunctionTable):
+    def __init__(self, scheduler: Allocator):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
