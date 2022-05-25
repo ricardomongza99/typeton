@@ -48,3 +48,13 @@ class Quad:
         self.left_address = left_address
         self.right_address = right_address
         self.result_address = result_address
+
+    def display(self):
+        # unwrap None values
+        left_address = '----' if self.left_address is None else self.left_address
+        right_address = '----' if self.right_address is None else self.right_address
+
+        print('{:<5} {:<5} {:<5} {:<5}'.format(self.operation.value,
+                                               left_address,
+                                               right_address,
+                                               self.result_address))
