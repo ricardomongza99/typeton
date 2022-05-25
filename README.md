@@ -188,7 +188,7 @@ func main() {
     - [x] Arithmetic expressions
     - [x] Sequential blocks (ASSIGN, INPUT, ETC.)
     - [x] Conditional blocks (IF, ELSE, WHILE, WHILE)
-    - [ ] Functions
+    - [ ] Functions  -80% complete
     - [ ] Arrays
     - [ ] Classes
 - [ ] 🖥 Virtual Machine

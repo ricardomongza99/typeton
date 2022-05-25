@@ -80,7 +80,7 @@ class VirtualMachine:
         elif operation is OperationType.LESS_EQUAL:
             result = left_value <= right_value
         elif operation is OperationType.GREAT_THAN:
-            result = right_value > right_value
+            result = left_value > right_value
         elif operation is OperationType.GREAT_EQUAL:
             result = right_value >= right_value
         elif operation is OperationType.AND:
@@ -104,7 +104,7 @@ class VirtualMachine:
                 self._ip = result_address
 
         # if result has a value (ARITHMETIC), set value
-        if result:
+        if result is not None:
             self._set_value(result, result_address)
 
         # if instruction pointer has not changed, go to next instruction
