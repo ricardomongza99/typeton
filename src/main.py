@@ -1,4 +1,5 @@
 from src.compiler import Compiler
+from src.virtual_machine import VirtualMachine
 import os
 from src.config.definitions import PROGRAMS_DIR
 
@@ -12,10 +13,10 @@ def main():
     file.close()
 
     compiler = Compiler()
-    json_data = compiler.compile(data, debug=True)
+    json_data = compiler.compile(data, debug=False)
 
-    print("Will execute this")
-    print(json_data)
+    virtual_machine = VirtualMachine()
+    virtual_machine.run(json_data)
 
     print('Done')
 
