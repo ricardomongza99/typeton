@@ -1,5 +1,6 @@
-import sys
 import json
+import sys
+
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.expression import Operator
@@ -86,7 +87,13 @@ class Compiler(Subscriber):
 
     def p_program1(self, p):
         """
-        program1 : body NLINE
+        program1 : body more_lines
+                 | body
+        """
+
+    def p_more_lines(self, p):
+        """
+        more_lines : NLINE more_lines
                  | NLINE
         """
 
@@ -392,7 +399,6 @@ class Compiler(Subscriber):
              | factor execute_priority_4 DIVIDE push_operator term
         """
 
-
     def p_factor(self, p):
         """
             factor : constant
@@ -502,8 +508,8 @@ class Compiler(Subscriber):
         """
         end_function :
         """
-        (self._code_generator.execute_remaining())
-        (self._symbol_table.function_table.end_function(memory=self._allocator))
+        self._code_generator.execute_remaining()
+        self._symbol_table.function_table.end_function(memory=self._allocator)
 
     def p_add_constant(self, p):
         """
