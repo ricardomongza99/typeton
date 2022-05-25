@@ -192,10 +192,10 @@ func main() {
     - [ ] Arrays
     - [ ] Classes
 - [ ] 🖥 Virtual Machine
-    - [x] Memory for execution (Global memory, temporal memory, execution stack)
-    - [ ] Arithmetic expressions execution
-    - [ ] Sequential blocks execution
-    - [ ] Conditional blocks execution
+    - [ ] Memory for execution (Global memory, temporal memory, execution stack)
+    - [x] Arithmetic expressions execution
+    - [x] Sequential blocks execution
+    - [x] Conditional blocks execution
 - [ ] 🏁 Documentation review
 
 ## 🔍 SYNTAX DIAGRAM
