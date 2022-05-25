@@ -1,5 +1,6 @@
-from src.compiler import Compiler
 import os
+
+from src.compiler import Compiler
 from src.config.definitions import PROGRAMS_DIR
 
 FILENAME = 'albert.ty'

@@ -121,9 +121,12 @@ class FunctionTable(Publisher, Subscriber):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
 
-        for key in self.current_function.variables:
-            address = self.current_function.variables[key].address_
-            memory.release_address(address)
+        if self.current_function.id_ != "global":
+            for key in self.current_function.variables:
+                address = self.current_function.variables[key].address_
+                memory.release_address(address)
+
+        self.current_function = self.functions['global']
 
     def current_trace(self):
         return self.current_function.id_
