@@ -27,7 +27,7 @@ class ConditionalActions:
         if len(self.goto_jumps) > 0:
             self.__fill_goto()
 
-        goto_quad = Quad(operation=OperationType.GOTO, left_address=OperationType.GOTO, result_address=None)
+        goto_quad = Quad(operation=OperationType.GOTO, left_address=None, result_address=None)
         self.goto_jumps.append(len(self.quad_list))
         self.quad_list.append(goto_quad)
 
