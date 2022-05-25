@@ -82,7 +82,7 @@ class VirtualMachine:
         elif operation is OperationType.GREAT_THAN:
             result = left_value > right_value
         elif operation is OperationType.GREAT_EQUAL:
-            result = right_value >= right_value
+            result = left_value >= right_value
         elif operation is OperationType.AND:
             result = right_value and left_value
         elif operation is OperationType.OR:
