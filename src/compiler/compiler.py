@@ -28,6 +28,9 @@ class Compiler(Subscriber):
         self._allocator.subscribe(self, {CompilerEvent.STOP_COMPILE})
         self._code_generator.expression_actions.subscribe(self, {CompilerEvent.STOP_COMPILE})
         self._symbol_table.function_table.subscribe(self, {CompilerEvent.STOP_COMPILE})
+        self._symbol_table.function_table.current_function.get_variable_table.subscribe(
+            self,
+            {CompilerEvent.STOP_COMPILE})
 
         self.syntax_error = None
 

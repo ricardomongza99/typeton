@@ -1,12 +1,13 @@
-
 var x: Int = 500.20
-var y: Float = x + 20
+
 
 func duck(name: String, age: Int, adult: Bool) -> Int  {
     var z: Bool = ((10 < 3) && ((5 - (10 + x) == 1)) || 3 == x) || ((10 < 3) && ((5 - (10 + x) == 1)) || 3 == x)
+    var x: Int  = 200
 
     return 1
 }
+
 
 
 
