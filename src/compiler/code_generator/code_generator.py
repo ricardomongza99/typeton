@@ -125,8 +125,8 @@ class CodeGenerator:
         quads = []
         for quad in self.__quad_list:
             operation = quad.operation
-            left_address = str(quad.left_address)
-            right_address = str(quad.right_address)
+            left_address = None if quad.left_address is None else str(quad.left_address)
+            right_address = None if quad.right_address is None else str(quad.right_address)
             result_address = str(quad.result_address)
 
             quads.append([operation.value, left_address, right_address, result_address])
