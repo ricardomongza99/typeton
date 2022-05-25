@@ -5,4 +5,20 @@ var z: Bool = false
 func main() {
     var x: Int  = 10 + 3 * 5
     var y: Bool  = x + 10.5 * 3 < (200 + 5) / 3
+
+    print(y)
+
+    if (y) {
+        x = 2 + 4
+    } else {
+        x = 1 + 2
+    }
+
+    print(x)
+
+    var d: Bool = x * 3.2 - (3 * 2 + x) <= x * x * x * x
+    print(d)
+
+    var hola: String = "Hola, me llamo Albert Einstonk"
+    print(hola)
 }
