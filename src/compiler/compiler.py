@@ -114,21 +114,9 @@ class Compiler(Subscriber):
 
     def p_declaration(self, p):
         """
-        declaration : variable ASSIGN push_operator bool_expr execute_priority_0
-                    | variable ASSIGN array
-                    | variable
+        declaration : VAR ID add_variable COLON type
         """
 
-    def p_array(self, p):
-        """
-            array : LBRACK array1 RBRACK
-            """
-
-    def p_array1(self, p):
-        """
-        array1 : expression COMMA array1
-               | expression
-        """
 
     # -- PARAMS -----------------------
 
@@ -148,6 +136,8 @@ class Compiler(Subscriber):
         """
         param : ID add_param COLON primitive
         """
+
+    # -- TYPES -----------------------
 
     # -- BLOCKS -----------------------
 
@@ -234,7 +224,7 @@ class Compiler(Subscriber):
 
     def p_input(self, p):
         """
-        input : variable ASSIGN INPUT LPAREN string RPAREN
+        input : INPUT LPAREN string RPAREN
         """
 
     def p_display(self, p):
@@ -250,7 +240,8 @@ class Compiler(Subscriber):
 
     def p_assign(self, p):
         """
-        assign : ID push_variable assign1 bool_expr execute_priority_0
+        assign : ID push_variable ASSIGN input
+               | ID push_variable assign1 bool_expr execute_priority_0
         """
 
     def p_assign1(self, p):  # TODO add rest to semantic cube
@@ -363,11 +354,6 @@ class Compiler(Subscriber):
         """
 
     # -- VARIABLES -----------------------
-
-    def p_variable(self, p):
-        """
-        variable : VAR ID add_variable COLON type
-        """
 
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
