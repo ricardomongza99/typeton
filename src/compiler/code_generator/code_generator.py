@@ -104,11 +104,11 @@ class CodeGenerator:
                                    '{:^10}'.format(quad[0]),
                                    '{:^10}'.format(quad[1].operation.value),
                                    '{:<5} -->{:>5}'.format(address_map[quad[1].left_address], quad[1].left_address)
-                                   if address_map.get_from_value(quad[1].left_address) is not None else "." * 8,
+                                   if address_map.get(quad[1].left_address) is not None else "." * 8,
                                    '{:<5} --> {:<5}'.format(address_map[quad[1].right_address], quad[1].right_address)
-                                   if address_map.get_from_value(quad[1].right_address) is not None else "." * 15,
+                                   if address_map.get(quad[1].right_address) is not None else "." * 15,
                                    '{:<5} -->{:>5}'.format(address_map[quad[1].result_address], quad[1].result_address)
-                                   if address_map.get_from_value(quad[1].result_address) is not None else quad[1].result_address
+                                   if address_map.get(quad[1].result_address) is not None else quad[1].result_address
 
                                ], enumerate(self.__quad_list)),
                            options=TableOptions(20, 20)
