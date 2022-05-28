@@ -112,21 +112,11 @@ class Compiler(Subscriber):
                  | FUNC ID add_function params ARROW primitive init_block end_function
         """
 
-    def p_function_error(self, p):
-        """
-        function : FUNC ID error init_block
-        """
-
     def p_declaration(self, p):
         """
         declaration : variable ASSIGN push_operator bool_expr execute_priority_0
                     | variable ASSIGN array
                     | variable
-        """
-
-    def p_declaration_error(self, p):
-        """
-        declaration : variable error NLINE
         """
 
     def p_array(self, p):
