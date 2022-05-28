@@ -13,7 +13,7 @@ class ValueType(Enum):
 
 class TypeRange:
     def __init__(self, start, end, resource_type: ValueType):
-        self.type = resource_type
+        self.type_ = resource_type
         self.start = start
         self.end = end
 
