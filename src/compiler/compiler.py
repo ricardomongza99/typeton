@@ -284,6 +284,17 @@ class Compiler(Subscriber):
                 | DASSIGN
         """
 
+    def p_call_array(self, p):
+        """
+        call_array : ID call_array1
+        """
+
+    def p_call_array1(self, p):
+        """
+        call_array1 : LBRACK expression RBRACK
+                    | LBRACK expression RBRACK call_array1
+        """
+
     def p_call(self, p):
         """
         call : ID LPAREN call1 RPAREN
@@ -350,17 +361,6 @@ class Compiler(Subscriber):
         """
         factor : constant
                | LPAREN push_operator bool_expr RPAREN push_operator
-        """
-
-    def p_call_array(self, p):
-        """
-        call_array : ID call_array1
-        """
-
-    def p_call_array1(self, p):
-        """
-        call_array1 : LBRACK expression RBRACK
-                    | LBRACK expression RBRACK call_array1
         """
 
     def p_constant(self, p):
