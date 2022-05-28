@@ -139,12 +139,11 @@ class Compiler(Subscriber):
     # -- TYPE -----------------------
 
     def p_type(self, p):
-        # TODO: might need to remove the array of custom types
         """
-            type : ID
-                 | primitive
-                 | primitive array
-            """
+        type : ID
+             | primitive
+             | primitive array
+        """
 
     def p_primitive(self, p):
         """
@@ -266,18 +265,24 @@ class Compiler(Subscriber):
 
     def p_assign(self, p):
         """
-        assign : ID push_variable ASSIGN input
-               | ID push_variable assign1 bool_expr execute_priority_0
+        assign : assign1 ASSIGN input
+               | assign1 assign2 bool_expr execute_priority_0
         """
 
-    def p_assign1(self, p):  # TODO add rest to semantic cube
+    def p_assign1(self, p):
         """
-            assign1 : ASSIGN push_operator
-                    | PASSIGN
-                    | LASSIGN
-                    | MASSIGN
-                    | DASSIGN
-            """
+        assign1 : ID push_variable
+                | call_array
+        """
+
+    def p_assign2(self, p):  # TODO add rest to semantic cube
+        """
+        assign2 : ASSIGN push_operator
+                | PASSIGN
+                | LASSIGN
+                | MASSIGN
+                | DASSIGN
+        """
 
     def p_call(self, p):
         """
@@ -343,14 +348,20 @@ class Compiler(Subscriber):
 
     def p_factor(self, p):
         """
-            factor : constant
-                   | LPAREN push_operator bool_expr RPAREN push_operator
-            """
+        factor : constant
+               | LPAREN push_operator bool_expr RPAREN push_operator
+        """
 
     def p_call_array(self, p):
         """
-            call_array : ID LBRACK expression RBRACK
-            """
+        call_array : ID call_array1
+        """
+
+    def p_call_array1(self, p):
+        """
+        call_array1 : LBRACK expression RBRACK
+                    | LBRACK expression RBRACK call_array1
+        """
 
     def p_constant(self, p):
         """
