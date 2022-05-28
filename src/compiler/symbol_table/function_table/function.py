@@ -11,7 +11,7 @@ class Function:
         self.type_: ValueType = ValueType.VOID
         self._vars_table: VariableTable = VariableTable()
         self.has_return = False
-        self.pending_type = True
+        self._pending_type = True
 
     @property
     def variables(self):
@@ -31,10 +31,10 @@ class Function:
         self._vars_table.display(id_)
 
     def is_pending_type(self):
-        return self.pending_type
+        return self._pending_type
 
     def set_type(self, type_):
-        self.pending_type = False
+        self._pending_type = False
         self.type_: ValueType = ValueType(type_)
 
     def valid_function(self):
