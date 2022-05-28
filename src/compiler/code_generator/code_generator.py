@@ -1,5 +1,7 @@
 from typing import List
 
+import jsonpickle
+
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
@@ -102,11 +104,11 @@ class CodeGenerator:
                                    '{:^10}'.format(quad[0]),
                                    '{:^10}'.format(quad[1].operation.value),
                                    '{:<5} -->{:>5}'.format(address_map[quad[1].left_address], quad[1].left_address)
-                                   if address_map.get(quad[1].left_address) is not None else "." * 8,
+                                   if address_map.get_from_value(quad[1].left_address) is not None else "." * 8,
                                    '{:<5} --> {:<5}'.format(address_map[quad[1].right_address], quad[1].right_address)
-                                   if address_map.get(quad[1].right_address) is not None else "." * 15,
+                                   if address_map.get_from_value(quad[1].right_address) is not None else "." * 15,
                                    '{:<5} -->{:>5}'.format(address_map[quad[1].result_address], quad[1].result_address)
-                                   if address_map.get(quad[1].result_address) is not None else quad[1].result_address
+                                   if address_map.get_from_value(quad[1].result_address) is not None else quad[1].result_address
 
                                ], enumerate(self.__quad_list)),
                            options=TableOptions(20, 20)
@@ -122,13 +124,4 @@ class CodeGenerator:
     def get_output_quads(self):
         """ Returns quads list of types [str, str, str, str] used by the output file """
 
-        quads = []
-        for quad in self.__quad_list:
-            operation = quad.operation
-            left_address = None if quad.left_address is None else str(quad.left_address)
-            right_address = None if quad.right_address is None else str(quad.right_address)
-            result_address = str(quad.result_address)
-
-            quads.append([operation.value, left_address, right_address, result_address])
-        return quads
-
+        return jsonpickle.encode(self.__quad_list)

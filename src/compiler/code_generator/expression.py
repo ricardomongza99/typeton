@@ -56,7 +56,7 @@ class ExpressionActions(Publisher):
             self.__execute_arithmetic(scheduler)
 
     def push_constant(self, value, constant_table: ConstantTable):
-        constant = constant_table.get(value)
+        constant = constant_table.get_from_value(value)
         operand = Operand(constant.type_, constant.address)
         self.__operand_address_stack.append(operand)
 
