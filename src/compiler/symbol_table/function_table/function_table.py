@@ -58,7 +58,7 @@ class FunctionTable(Publisher, Subscriber):
         """ Add Var to the current function's vars table """
         self.current_function.add_variable(id_, is_param)
 
-    def set_variable_type(self, type_, memory: Allocator):
+    def set_type(self, type_, memory: Allocator):
         """
         Sets variable type for contexts:
             - function: return type
@@ -70,25 +70,30 @@ class FunctionTable(Publisher, Subscriber):
         if self.current_function.is_pending_type():
             variable = self.current_function.current_variable
             if variable.is_param and variable.type_ is None:
-                # handle param
-                self.current_function.set_variable_type(type_, layer, memory)
-                self.function_data().add_variable_size(ValueType(type_), layer)
-                return self.__add_parameter_signature(type_)
-            # handle function type
-            return self.set_function_type(type_)
+                # handle `param` type
+                self._set_param_type(type_, layer, memory)
+                return
+            # handle `function` type
+            self._set_function_type(type_)
+            return
 
-        # handle regular local variables
-        self.function_data().add_variable_size(ValueType(type_), layer)
-        id_ = self.current_function.set_variable_type(type_, layer, memory)
+        # handle `variable` type
+        id_ = self._set_variable_type(type_, layer, memory)
         return id_
 
-    def set_function_type(self, type_):
+    def _set_function_type(self, type_):
         self.current_function.set_type(type_)
         self.function_data().type_ = ValueType(type_)
 
-    def set_param_type(self, type_, memory: Allocator):
-        self.function_data().add_variable_size(ValueType(type_))
-        return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
+    def _set_param_type(self, type_, layer, memory: Allocator):
+        self.current_function.set_variable_type(type_, layer, memory)
+        self.function_data().add_variable_size(ValueType(type_), layer)
+        self.__add_parameter_signature(type_)
+
+    def _set_variable_type(self, type_, layer, memory: Allocator):
+        self.function_data().add_variable_size(ValueType(type_), layer)
+        id_ = self.current_function.set_variable_type(type_, layer, memory)
+        return id_
 
     def function_data(self):
         return self.function_data_table[self.current_function.id_]

@@ -395,10 +395,10 @@ class Compiler(Subscriber):
 
     def p_primitive(self, p):
         """
-        primitive : INT     set_variable_type
-                  | FLOAT   set_variable_type
-                  | STRING  set_variable_type
-                  | BOOL    set_variable_type
+        primitive : INT     set_type
+                  | FLOAT   set_type
+                  | STRING  set_type
+                  | BOOL    set_type
         """
 
     def p_string(self, p):
@@ -459,12 +459,12 @@ class Compiler(Subscriber):
         """
         self._symbol_table.function_table.add_variable(p[-1], is_param=False)
 
-    def p_set_variable_type(self, p):
+    def p_set_type(self, p):
         """
-        set_variable_type :
+        set_type :
         """
 
-        id_ = self._symbol_table.function_table.set_variable_type(p[-1], self._allocator)
+        id_ = self._symbol_table.function_table.set_type(p[-1], self._allocator)
         if id_ is not None:
             # TODO refactor
             address, type_ = self._symbol_table.function_table.find(id_)
