@@ -1,5 +1,7 @@
 from enum import Enum
 from typing import Dict
+import jsonpickle
+
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
@@ -7,7 +9,7 @@ from src.compiler.allocator.types import ValueType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
-from src.virtual_machine.types import FunctionData
+from src.virtual_machine.types import FunctionData, SizeData
 from .function import Function
 
 
@@ -179,33 +181,7 @@ class FunctionTable(Publisher, Subscriber):
 
     def get_output_function_data(self):
         """ Returns function_data dictionary used in output file """
-
         data = {}
         for id_, function_data in self.function_data_table.items():
-            size_data = function_data.size_data
-            param_types = [type_.value for type_ in function_data.parameter_signature]
-            data[id_] = {
-                'start': function_data.start_quad,
-                'type': function_data.type_.value,
-                'param_types': param_types,
-                'ranges': {
-                    ValueType.INT.value: {
-                        "local": size_data.get_data(ValueType.INT).local,
-                        "temp": size_data.get_data(ValueType.INT).temp
-                    },
-                    ValueType.FLOAT.value: {
-                        "local": size_data.get_data(ValueType.FLOAT).local,
-                        "temp": size_data.get_data(ValueType.FLOAT).temp
-                    },
-                    ValueType.BOOL.value: {
-                        "local": size_data.get_data(ValueType.BOOL).local,
-                        "temp": size_data.get_data(ValueType.BOOL).temp
-                    },
-                    ValueType.STRING.value: {
-                        "local": size_data.get_data(ValueType.STRING).local,
-                        "temp": size_data.get_data(ValueType.STRING).temp
-                    },
-                }
-            }
-
+            data[id_] = jsonpickle.encode(function_data)
         return data
