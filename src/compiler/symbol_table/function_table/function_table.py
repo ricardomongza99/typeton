@@ -171,10 +171,11 @@ class FunctionTable(Publisher, Subscriber):
         data = {}
         for id_, function_data in self.function_data_table.items():
             size_data = function_data.size_data
+            param_types = [type_.value for type_ in function_data.parameter_signature]
             data[id_] = {
                 'start': function_data.start_quad,
                 'type': function_data.type_.value,
-                'param_types': function_data.parameter_signature,
+                'param_types': param_types,
                 'ranges': {
                     ValueType.INT.value: {
                         "local": size_data.get_data(ValueType.INT).local,
