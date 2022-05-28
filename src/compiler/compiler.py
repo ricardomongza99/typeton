@@ -154,68 +154,16 @@ class Compiler(Subscriber):
                | LPAREN RPAREN
         """
 
-    def p_params_error(self, p):
-        """
-        params : LPAREN error RPAREN
-        """
-        self._compiler_errors[
-            -1].message = f'Expected valid parameres such as: "some_func( an_id: Int, other_id: Bool...)" or "some_func()"'
-
     def p_params1(self, p):
         """
         params1 : param
                 | param COMMA params1
         """
 
-    def p_params1_error(self, p):
-        """
-        params1 : error COMMA params1
-        """
-
     def p_param(self, p):
         """
         param : ID add_param COLON primitive
         """
-
-    # def p_param_error(self, p):
-    #     """
-    #     param : ID error primitive
-    #           | error COLON primitive
-    #           | error primitive
-    #     """
-    #     if p[2] == ':':
-    #         self.compiler_errors[-1].message = f'Missing identifier before colon "{p[1]}"'
-    #     elif type(p[1]) is str:
-    #         self.compiler_errors[-1].message = f'Missing Colon:  {p[1]} : <-- add here'
-    #     else:
-    #         self.compiler_errors[-1].message = f'Invalid param declaration: "{p[1]}"'
-    #
-
-    # self.compiler.restart()
-
-    #     print('received ', p[1], p[2], p[3])
-    #     print(self.compiler.token())
-    #     if p[2] != ':':
-    #         print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
-    #         self.recover("COMMA")
-    #     elif type(p[1]) is not str and p[1].value == ':':
-    #         print('error here')
-    #         # self.compiler_errors[
-    #         #     1].message = f' Missing identifier: Add id before colon " empty :" --> variable_name : ..."',
-    #
-
-    def p_param_error(self, p):
-        """
-        param : ID error primitive
-              | error COLON primitive
-        """
-
-        if p[2] != ':':
-            print(f' Missing type separator, add semicolon "{p[1]} {p[2].value}" --> "{p[1]} : {p[2].value}"')
-            self.recover("RCURLY")
-        elif type(p[1]) is not str and p[1].value == ':':
-            print(f' Missing identifier: Add id before colon " empty :" --> variable_name : ..."')
-            self.recover({"RCURLY"})
 
     # -- BLOCKS -----------------------
 
@@ -320,13 +268,6 @@ class Compiler(Subscriber):
         """
         assign : ID push_variable assign1 bool_expr execute_priority_0
         """
-
-    def recover(self, token_set=None):  # Future error handling
-        while True:
-            tok = self._parser.token()
-            if not tok or tok.type in token_set:
-                break
-        return tok
 
     def p_assign1(self, p):  # TODO add rest to semantic cube
         """
@@ -441,20 +382,8 @@ class Compiler(Subscriber):
 
     def p_variable(self, p):
         """
-        variable : VAR ID add_var COLON type
+        variable : VAR ID add_variable COLON type
         """
-
-    def p_variable_error(self, p):
-        """
-        variable : VAR ID error type
-        """
-        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
-
-    def p_variable_error_1(self, p):
-        """
-        variable : VAR ID add_var COLON error NLINE
-        """
-        self._compiler_errors[-1].message = f'Invalid expression near "{p[3].value}"'
 
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
@@ -522,13 +451,24 @@ class Compiler(Subscriber):
         """
         add_param :
         """
-        (self._symbol_table.function_table.add_variable(p[-1], True))
+        (self._symbol_table.function_table.add_variable(p[-1], is_param=True))
 
-    def p_add_var(self, p):
+    def p_add_variable(self, p):
         """
-        add_var :
+        add_variable :
         """
-        (self._symbol_table.function_table.add_variable(p[-1], False))
+        self._symbol_table.function_table.add_variable(p[-1], is_param=False)
+
+    def p_set_variable_type(self, p):
+        """
+        set_variable_type :
+        """
+
+        id_ = self._symbol_table.function_table.set_variable_type(p[-1], self._allocator)
+        if id_ is not None:
+            # TODO refactor
+            address, type_ = self._symbol_table.function_table.find(id_)
+            self._code_generator.push_variable(id_, type_, address)
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
@@ -644,17 +584,6 @@ class Compiler(Subscriber):
         address, type_ = self._symbol_table.function_table.find(p[-1])
         (self._code_generator.push_variable(p[-1], type_, address))
 
-    def p_set_variable_type(self, p):
-        """
-        set_variable_type :
-        """
-
-        id_ = (self._symbol_table.function_table.set_variable_type(p[-1], self._allocator))
-        if id_ is not None:
-            # TODO refactor
-            address, type_ = self._symbol_table.function_table.find(id_)
-            (self._code_generator.push_variable(id_, type_, address))
-
     # -- ERROR -----------------------
 
     def p_error(self, p):
@@ -674,23 +603,3 @@ class Compiler(Subscriber):
 
     def display_debug(self):
         self._symbol_table.constant_table.display()
-
-    #
-    # def p_error(self, p):
-    #     if p is None:
-    #         token = "end of file"
-    #         print("end of file")
-    #         return token
-    #     else:
-    #         line_start = self.data.rfind('\n', 0, p.lexpos) + 1
-    #         col = (p.lexpos - line_start) + 1
-    #         # (
-    #         # self.recover({"RCURLY"})
-    #         self.compiler_errors.append(CompilerError(
-    #             "Unexpected " + str(p.value),
-    #             f'({p.lineno}:{col})',
-    #             self.symbol_table.current_trace()
-    #         ))
-    #
-    #         self.recover({"}"})
-    #         self.compiler.errok()
