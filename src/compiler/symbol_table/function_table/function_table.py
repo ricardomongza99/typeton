@@ -77,7 +77,7 @@ class FunctionTable(Publisher, Subscriber):
         self.current_function.add_variable(id_, is_param)
 
     def set_type(self, type_, memory: Allocator):
-        """ Sets type for """
+        """ Sets type for function, parameter or variable """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
 
         if self._type_context == TypeContext.FUNCTION:
