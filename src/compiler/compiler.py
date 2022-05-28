@@ -1,5 +1,6 @@
-import json
 import sys
+
+import jsonpickle
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.code_generator.code_generator import CodeGenerator
@@ -8,6 +9,7 @@ from src.compiler.code_generator.type import OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
+from .output import OutputFile
 from .symbol_table import SymbolTable
 from ..utils.observer import Subscriber
 
@@ -55,20 +57,12 @@ class Compiler(Subscriber):
 
     def _make_json(self):
         """ Makes output json with all the necessary data for execution in the Virtual Machine"""
-
-        constant_table = self._symbol_table.constant_table.get_output_values_dict()
+        constant_table = self._symbol_table.constant_table
         quads = self._code_generator.get_output_quads()
         function_data = self._symbol_table.function_table.get_output_function_data()
 
-        data = {
-            'constant_table': constant_table,
-            'quads': quads,
-            'function_data': function_data
-        }
-
-        json_data = json.dumps(data, indent=4)
-
-        return json_data
+        output = OutputFile(constant_table, function_data, quads)
+        return jsonpickle.encode(output)
 
     def _display_tables(self):
         self._symbol_table.function_table.display(debug=True)

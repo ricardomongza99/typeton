@@ -1,19 +1,36 @@
-import json
+from typing import List, Dict
+
+import jsonpickle
+
 from src.compiler.code_generator.type import Quad, OperationType
+from src.compiler.output import OutputFile
+from src.compiler.symbol_table.constant_table import ConstantTable
+from src.virtual_machine.types import ContextMemory, FunctionData
 
 
 class VirtualMachine:
     def __init__(self):
-        self._ip = 0    # instruction pointer
+        self._ip = 0  # instruction pointer
 
-        self._constant_table = None
+        self._constant_table: ConstantTable = ConstantTable()
         self._quads = None
-        self._function_data = None
+        self._function_data: Dict[str, FunctionData] = {}
 
         self._memory = {}
+        self.context_memory: List[ContextMemory] = []
+        self.global_memory = None
+
+    def __init_global_function(self):
+        size_data = self._function_data["global"].size_data
+        self.global_memory = ContextMemory(size_data, self._constant_table, None)
+        self.context_memory = []
 
     def run(self, json_data):
+
         self._load(json_data)
+        self.__init_global_function()
+        self.context_memory.append(
+            ContextMemory(self._function_data["main"].size_data, self._constant_table, self.global_memory))
 
         print('🦭🦭🦭typeton🦭🦭🦭')
         while self._ip < len(self._quads):
@@ -24,30 +41,19 @@ class VirtualMachine:
     # -- LOAD DATA methods ----------------------------
 
     def _load(self, json_data):
-        data = json.loads(json_data)
+        compiled_program: OutputFile = jsonpickle.decode(
+            json_data,
+            classes=(FunctionData, Quad, ConstantTable),
+            keys=True
+        )
 
-        self._constant_table = self._get_constant_table(data)
-        self._quads = self._get_quads(data)
-        self._function_data = data['function_data']
+        # Note: Keys are turned into strings for dictionaries when using JSON decode
+        self._constant_table = compiled_program.constant_table
+        self._quads = jsonpickle.decode(compiled_program.quad_list)
 
-    @staticmethod
-    def _get_constant_table(data):
-        constant_table = {}
-        for key, value in data['constant_table'].items():
-            constant_table[int(key)] = value
-        return constant_table
-
-    @staticmethod
-    def _get_quads(data):
-        quads = []
-        for quad in data['quads']:
-            operation = OperationType(quad[0])
-            left_address = int(quad[1]) if quad[1] else None
-            right_address = int(quad[2]) if quad[2] else None
-            result_address = int(quad[3])
-
-            quads.append(Quad(operation, left_address, right_address, result_address))
-        return quads
+        # complex objects require additional decoding
+        for key, value in compiled_program.function_data.items():
+            self._function_data[key] = jsonpickle.decode(value)
 
     # -- EXECUTION methods  ----------------------------
 
@@ -93,7 +99,7 @@ class VirtualMachine:
             self._set_value(left_value, result_address)
         # PRINT
         elif operation is OperationType.PRINT:
-            print(f'{self._memory[result_address]}')
+            print(f'{self.context_memory[-1].get(result_address)}')
         # JUMPS
         elif operation is OperationType.GOTO:
             self._ip = result_address
@@ -115,20 +121,11 @@ class VirtualMachine:
     # -- MEMORY methods -----------------------
 
     def _get_value(self, address):
-        """ Gets value at specified address from either memory or constant table (depending of range) """
-        # TODO: get constant ranges, not hard-coded
-        if 0 <= address < 6000:
-            # is global, local or temp
-            return self._memory[address]
-        elif 6000 <= address < 8000:
-            # is constant
-            return self._constant_table[address]
+        return self.context_memory[-1].get(address)
 
     def _set_value(self, value, address):
         """ Sets value to specified address in memory """
-        if 0 <= address < 6000:
-            # is global, local or temp
-            self._memory[address] = value
+        self.context_memory[-1].save(address, value)
 
     # -- DEBUG methods ---------------------------
 
@@ -141,7 +138,6 @@ class VirtualMachine:
         print('    {:<5} {:<5} {:<5} {:<5}'.format('OP', 'LEFT', 'RIGHT', 'RESULT'))
         for index, quad in enumerate(self._quads):
             quad.display(index)
-
 
 # TODO separate  functions (and make static) into a different files
 #

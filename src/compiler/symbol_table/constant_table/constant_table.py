@@ -1,16 +1,19 @@
 from typing import Dict
 
-from src.utils.debug import Debug
-from src.utils.display import make_table
+import jsonpickle
+
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
 from src.compiler.allocator.types import ValueType
+from src.utils.debug import Debug
+from src.utils.display import make_table
 from .constant import Constant
 
 
 class ConstantTable:
     def __init__(self):
         self.table: Dict[str, Constant] = {}
+        self.inverse_hash: Dict[int, any] = {}
 
     def add(self, value, memory: Allocator):
         if self.exists(value):
@@ -35,9 +38,17 @@ class ConstantTable:
         debug[address] = str(value)
 
         self.table[value] = Constant(address, type_)
+        self.inverse_hash[address] = value
         return address
 
-    def get(self, value):
+    def get_from_address(self, address):
+        if self.inverse_hash.get(address) is None:
+            # TODO error handling
+            return
+
+        return self.inverse_hash[address]
+
+    def get_from_value(self, value):
         if self.table.get(value) is None:
             # TODO error handling
             return
@@ -55,8 +66,4 @@ class ConstantTable:
 
     def get_output_values_dict(self):
         """ Returns { address: value } dictionary used by the output file"""
-
-        values = {}
-        for value, constant in self.table.items():
-            values[constant.address] = value
-        return values
+        return jsonpickle.encode(self, keys=True)

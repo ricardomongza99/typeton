@@ -24,7 +24,7 @@ class Allocator(Publisher):
         if layer == layer.TEMPORARY:
             debug = Debug.map()
             if debug.get(new_address) is None:
-                temp_type = f'{resource.type.value[0].lower()}'
+                temp_type = f'{resource.type_.value[0].lower()}'
                 temp_address = str(new_address - resource.start)
                 debug[new_address] = f'T{temp_address} ({temp_type})'
 
