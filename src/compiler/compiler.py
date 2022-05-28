@@ -117,7 +117,6 @@ class Compiler(Subscriber):
         declaration : VAR ID add_variable COLON type
         """
 
-
     # -- PARAMS -----------------------
 
     def p_params(self, p):
@@ -137,7 +136,34 @@ class Compiler(Subscriber):
         param : ID add_param COLON primitive
         """
 
-    # -- TYPES -----------------------
+    # -- TYPE -----------------------
+
+    def p_type(self, p):
+        # TODO: might need to remove the array of custom types
+        """
+            type : ID
+                 | primitive
+                 | primitive array
+            """
+
+    def p_primitive(self, p):
+        """
+        primitive : INT     set_type
+                  | FLOAT   set_type
+                  | STRING  set_type
+                  | BOOL    set_type
+        """
+
+    def p_array(self, p):
+        """
+        array : LBRACK array1 RBRACK
+        """
+
+    def p_array1(self, p):
+        """
+        array1 : INTLIT
+               | INTLIT COMMA array1
+        """
 
     # -- BLOCKS -----------------------
 
@@ -351,24 +377,6 @@ class Compiler(Subscriber):
              | NEQUALS push_operator
              | LEQUALS push_operator
              | MEQUALS push_operator
-        """
-
-    # -- VARIABLES -----------------------
-
-    def p_type(self, p):
-        # TODO: might need to remove the array of custom types
-        """
-            type : ID
-                 | primitive
-                 | LBRACK primitive RBRACK
-            """
-
-    def p_primitive(self, p):
-        """
-        primitive : INT     set_type
-                  | FLOAT   set_type
-                  | STRING  set_type
-                  | BOOL    set_type
         """
 
     def p_string(self, p):
