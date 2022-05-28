@@ -1,7 +1,10 @@
 func main() {
 
-   var x: Int = 0
-   var message: String = ""
+   var x: Int
+   x = 0
+
+   var message: String
+   message = ""
 
    while (x < 10) {
 
