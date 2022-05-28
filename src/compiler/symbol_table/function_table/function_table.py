@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict
 
 from src.compiler.allocator.allocator import Allocator
@@ -8,6 +9,12 @@ from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
 from .function import Function
+
+
+class TypeContext(Enum):
+    FUNCTION = 0
+    PARAM = 1
+    VARIABLE = 2
 
 
 class FunctionTable(Publisher, Subscriber):
@@ -24,6 +31,17 @@ class FunctionTable(Publisher, Subscriber):
         # We need this for global variable search
         self.add("global", 0)
         self.current_function.set_type("Void")
+
+    @property
+    def _type_context(self) -> TypeContext:
+        if self.current_function.is_pending_type():
+            variable = self.current_function.current_variable
+            if variable.is_param and variable.type_ is None:
+                return TypeContext.PARAM
+            else:
+                return TypeContext.FUNCTION
+        else:
+            return TypeContext.VARIABLE
 
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
@@ -58,34 +76,34 @@ class FunctionTable(Publisher, Subscriber):
         """ Add Var to the current function's vars table """
         self.current_function.add_variable(id_, is_param)
 
-    def set_function_type(self, type_):
+    def set_type(self, type_, memory: Allocator):
+        """ Sets type for function, parameter or variable """
+        layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
+
+        if self._type_context == TypeContext.FUNCTION:
+            self._set_function_type(type_)
+        elif self._type_context == TypeContext.PARAM:
+            self._set_param_type(type_, layer, memory)
+        elif self._type_context == TypeContext.VARIABLE:
+            id_ = self._set_variable_type(type_, layer, memory)
+            return id_
+
+    def _set_function_type(self, type_):
         self.current_function.set_type(type_)
         self.function_data().type_ = ValueType(type_)
 
-    def set_param_type(self, type_, memory: Allocator):
-        self.function_data().add_variable_size(ValueType(type_))
-        return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
+    def _set_param_type(self, type_, layer, memory: Allocator):
+        self.current_function.set_variable_type(type_, layer, memory)
+        self.function_data().add_variable_size(ValueType(type_), layer)
+        self.__add_parameter_signature(type_)
 
-    def function_data(self):
-        return self.function_data_table[self.current_function.id_]
-
-    def set_variable_type(self, type_, memory: Allocator):
-        layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
-
-        if self.current_function.is_pending_type():
-            variable = self.current_function.current_variable
-            if variable.is_param and variable.type_ is None:
-                # handle param
-                self.current_function.set_variable_type(type_, layer, memory)
-                self.function_data().add_variable_size(ValueType(type_), layer)
-                return self.__add_parameter_signature(type_)
-            # handle function type
-            return self.set_function_type(type_)
-
-        # handle regular local variables
+    def _set_variable_type(self, type_, layer, memory: Allocator):
         self.function_data().add_variable_size(ValueType(type_), layer)
         id_ = self.current_function.set_variable_type(type_, layer, memory)
         return id_
+
+    def function_data(self):
+        return self.function_data_table[self.current_function.id_]
 
     def __add_parameter_signature(self, type_):
         self.function_data_table[self.current_function.id_].parameter_signature.append(ValueType(type_))
@@ -165,10 +183,11 @@ class FunctionTable(Publisher, Subscriber):
         data = {}
         for id_, function_data in self.function_data_table.items():
             size_data = function_data.size_data
+            param_types = [type_.value for type_ in function_data.parameter_signature]
             data[id_] = {
                 'start': function_data.start_quad,
                 'type': function_data.type_.value,
-                'param_types': function_data.parameter_signature,
+                'param_types': param_types,
                 'ranges': {
                     ValueType.INT.value: {
                         "local": size_data.get_data(ValueType.INT).local,

@@ -11,7 +11,7 @@ class Function:
         self.type_: ValueType = ValueType.VOID
         self._vars_table: VariableTable = VariableTable()
         self.has_return = False
-        self.pending_type = True
+        self._pending_type = True
 
     @property
     def variables(self):
@@ -24,17 +24,17 @@ class Function:
     def add_variable(self, id_, is_param):
         self._vars_table.add(id_, is_param)
 
-    def display_variables(self, id_):
-        self._vars_table.display(id_)
-
     def set_variable_type(self, type_, layer, memory):
         return self._vars_table.set_type(type_, layer, memory)
 
+    def display_variables(self, id_):
+        self._vars_table.display(id_)
+
     def is_pending_type(self):
-        return self.pending_type
+        return self._pending_type
 
     def set_type(self, type_):
-        self.pending_type = False
+        self._pending_type = False
         self.type_: ValueType = ValueType(type_)
 
     def valid_function(self):
