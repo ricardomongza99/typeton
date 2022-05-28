@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict
 
 from src.compiler.allocator.allocator import Allocator
@@ -8,6 +9,12 @@ from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
 from .function import Function
+
+
+class TypeContext(Enum):
+    FUNCTION = 0
+    PARAM = 1
+    VARIABLE = 2
 
 
 class FunctionTable(Publisher, Subscriber):
@@ -24,6 +31,17 @@ class FunctionTable(Publisher, Subscriber):
         # We need this for global variable search
         self.add("global", 0)
         self.current_function.set_type("Void")
+
+    @property
+    def _type_context(self) -> TypeContext:
+        if self.current_function.is_pending_type():
+            variable = self.current_function.current_variable
+            if variable.is_param and variable.type_ is None:
+                return TypeContext.PARAM
+            else:
+                return TypeContext.FUNCTION
+        else:
+            return TypeContext.VARIABLE
 
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
@@ -59,27 +77,16 @@ class FunctionTable(Publisher, Subscriber):
         self.current_function.add_variable(id_, is_param)
 
     def set_type(self, type_, memory: Allocator):
-        """
-        Sets variable type for contexts:
-            - function: return type
-            - param: type declaration
-            - variable: type declaration
-        """
+        """ Sets type for """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
 
-        if self.current_function.is_pending_type():
-            variable = self.current_function.current_variable
-            if variable.is_param and variable.type_ is None:
-                # handle `param` type
-                self._set_param_type(type_, layer, memory)
-                return
-            # handle `function` type
+        if self._type_context == TypeContext.FUNCTION:
             self._set_function_type(type_)
-            return
-
-        # handle `variable` type
-        id_ = self._set_variable_type(type_, layer, memory)
-        return id_
+        elif self._type_context == TypeContext.PARAM:
+            self._set_param_type(type_, layer, memory)
+        elif self._type_context == TypeContext.VARIABLE:
+            id_ = self._set_variable_type(type_, layer, memory)
+            return id_
 
     def _set_function_type(self, type_):
         self.current_function.set_type(type_)
