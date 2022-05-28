@@ -112,32 +112,9 @@ class Compiler(Subscriber):
                  | FUNC ID add_function params ARROW primitive init_block end_function
         """
 
-    def p_function_error(self, p):
-        """
-        function : FUNC ID error init_block
-        """
-
     def p_declaration(self, p):
         """
-        declaration : variable ASSIGN push_operator bool_expr execute_priority_0
-                    | variable ASSIGN array
-                    | variable
-        """
-
-    def p_declaration_error(self, p):
-        """
-        declaration : variable error NLINE
-        """
-
-    def p_array(self, p):
-        """
-            array : LBRACK array1 RBRACK
-            """
-
-    def p_array1(self, p):
-        """
-        array1 : expression COMMA array1
-               | expression
+        declaration : VAR ID add_variable COLON type
         """
 
     # -- PARAMS -----------------------
@@ -157,6 +134,34 @@ class Compiler(Subscriber):
     def p_param(self, p):
         """
         param : ID add_param COLON primitive
+        """
+
+    # -- TYPE -----------------------
+
+    def p_type(self, p):
+        """
+        type : ID
+             | primitive
+             | primitive array
+        """
+
+    def p_primitive(self, p):
+        """
+        primitive : INT     set_type
+                  | FLOAT   set_type
+                  | STRING  set_type
+                  | BOOL    set_type
+        """
+
+    def p_array(self, p):
+        """
+        array : LBRACK array1 RBRACK
+        """
+
+    def p_array1(self, p):
+        """
+        array1 : INTLIT
+               | INTLIT COMMA array1
         """
 
     # -- BLOCKS -----------------------
@@ -244,7 +249,7 @@ class Compiler(Subscriber):
 
     def p_input(self, p):
         """
-        input : variable ASSIGN INPUT LPAREN string RPAREN
+        input : INPUT LPAREN string RPAREN
         """
 
     def p_display(self, p):
@@ -260,17 +265,35 @@ class Compiler(Subscriber):
 
     def p_assign(self, p):
         """
-        assign : ID push_variable assign1 bool_expr execute_priority_0
+        assign : assign1 ASSIGN input
+               | assign1 assign2 bool_expr execute_priority_0
         """
 
-    def p_assign1(self, p):  # TODO add rest to semantic cube
+    def p_assign1(self, p):
         """
-            assign1 : ASSIGN push_operator
-                    | PASSIGN
-                    | LASSIGN
-                    | MASSIGN
-                    | DASSIGN
-            """
+        assign1 : ID push_variable
+                | call_array
+        """
+
+    def p_assign2(self, p):  # TODO add rest to semantic cube
+        """
+        assign2 : ASSIGN push_operator
+                | PASSIGN
+                | LASSIGN
+                | MASSIGN
+                | DASSIGN
+        """
+
+    def p_call_array(self, p):
+        """
+        call_array : ID call_array1
+        """
+
+    def p_call_array1(self, p):
+        """
+        call_array1 : LBRACK expression RBRACK
+                    | LBRACK expression RBRACK call_array1
+        """
 
     def p_call(self, p):
         """
@@ -336,14 +359,9 @@ class Compiler(Subscriber):
 
     def p_factor(self, p):
         """
-            factor : constant
-                   | LPAREN push_operator bool_expr RPAREN push_operator
-            """
-
-    def p_call_array(self, p):
+        factor : constant
+               | LPAREN push_operator bool_expr RPAREN push_operator
         """
-            call_array : ID LBRACK expression RBRACK
-            """
 
     def p_constant(self, p):
         """
@@ -370,29 +388,6 @@ class Compiler(Subscriber):
              | NEQUALS push_operator
              | LEQUALS push_operator
              | MEQUALS push_operator
-        """
-
-    # -- VARIABLES -----------------------
-
-    def p_variable(self, p):
-        """
-        variable : VAR ID add_variable COLON type
-        """
-
-    def p_type(self, p):
-        # TODO: might need to remove the array of custom types
-        """
-            type : ID
-                 | primitive
-                 | LBRACK primitive RBRACK
-            """
-
-    def p_primitive(self, p):
-        """
-        primitive : INT     set_type
-                  | FLOAT   set_type
-                  | STRING  set_type
-                  | BOOL    set_type
         """
 
     def p_string(self, p):
