@@ -37,7 +37,7 @@ class ConstantTable:
         debug = Debug.get_instance().map()
         debug[address] = str(value)
 
-        self.table[value] = Constant(address, type_, None)
+        self.table[value] = Constant(address, type_)
         self.inverse_hash[address] = value
         return address
 

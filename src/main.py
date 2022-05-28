@@ -16,7 +16,7 @@ def main():
     json_data = compiler.compile(data, debug=False)
 
     virtual_machine = VirtualMachine()
-    #virtual_machine.run(json_data)
+    virtual_machine.run(json_data)
 
     print('Done')
 
