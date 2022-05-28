@@ -388,9 +388,9 @@ class Compiler(Subscriber):
     def p_type(self, p):
         # TODO: might need to remove the array of custom types
         """
-            type : primitive
+            type : ID
+                 | primitive
                  | LBRACK primitive RBRACK
-                 | LBRACK ID RBRACK
             """
 
     def p_primitive(self, p):
