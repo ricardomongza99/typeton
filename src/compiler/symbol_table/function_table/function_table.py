@@ -58,18 +58,13 @@ class FunctionTable(Publisher, Subscriber):
         """ Add Var to the current function's vars table """
         self.current_function.add_variable(id_, is_param)
 
-    def set_function_type(self, type_):
-        self.current_function.set_type(type_)
-        self.function_data().type_ = ValueType(type_)
-
-    def set_param_type(self, type_, memory: Allocator):
-        self.function_data().add_variable_size(ValueType(type_))
-        return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
-
-    def function_data(self):
-        return self.function_data_table[self.current_function.id_]
-
     def set_variable_type(self, type_, memory: Allocator):
+        """
+        Sets variable type for contexts:
+            - function: return type
+            - param: type declaration
+            - variable: type declaration
+        """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
 
         if self.current_function.is_pending_type():
@@ -86,6 +81,17 @@ class FunctionTable(Publisher, Subscriber):
         self.function_data().add_variable_size(ValueType(type_), layer)
         id_ = self.current_function.set_variable_type(type_, layer, memory)
         return id_
+
+    def set_function_type(self, type_):
+        self.current_function.set_type(type_)
+        self.function_data().type_ = ValueType(type_)
+
+    def set_param_type(self, type_, memory: Allocator):
+        self.function_data().add_variable_size(ValueType(type_))
+        return self.current_function.set_variable_type(type_, Layers.LOCAL, memory)
+
+    def function_data(self):
+        return self.function_data_table[self.current_function.id_]
 
     def __add_parameter_signature(self, type_):
         self.function_data_table[self.current_function.id_].parameter_signature.append(ValueType(type_))
