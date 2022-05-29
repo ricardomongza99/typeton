@@ -23,7 +23,7 @@ class Publisher:
     def __init__(self):
         self.__subscribers: List[(Subscriber, {})] = []
 
-    def subscribe(self, subscriber: Subscriber, events):
+    def add_subscriber(self, subscriber: Subscriber, events):
         """enable subscriber to receive messages"""
         self.__subscribers.append((subscriber, events))
 

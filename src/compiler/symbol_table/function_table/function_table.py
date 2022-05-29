@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict
-import jsonpickle
 
+import jsonpickle
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
@@ -9,7 +9,7 @@ from src.compiler.allocator.types import ValueType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
-from src.virtual_machine.types import FunctionData, SizeData
+from src.virtual_machine.types import FunctionData
 from .function import Function
 
 
@@ -29,6 +29,8 @@ class FunctionTable(Publisher, Subscriber):
         self.temporal_variables = {'empty'}
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
+        self.current_function_call_id_ = None
+        self.parameter_count = 0
 
         # We need this for global variable search
         self.add("global", 0)
@@ -73,6 +75,18 @@ class FunctionTable(Publisher, Subscriber):
 
         error = CompilerError(f'Function {id_} redeclared')
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
+
+    def verify_function_exists(self, id_):
+        if self.functions.get(id_) is None:
+            self.broadcast(Event(
+                CompilerEvent.STOP_COMPILE,
+                f'Invalid Function Call: Function with name {id_} does not exist'))
+        self.current_function_call_id_ = id_
+
+    def generate_are_memory(self):
+        self.broadcast(Event(CompilerEvent.GENERATE_ARE, self.current_function_call_id_))
+        # start counting param signature
+        self.parameter_count = 0
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
@@ -143,6 +157,9 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
+
+        # tell quad generator to generate end_func quad
+        self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
 
         for key in self.current_function.variables:
             address = self.current_function.variables[key].address_

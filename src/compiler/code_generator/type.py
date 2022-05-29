@@ -4,6 +4,9 @@ from src.compiler.allocator.types import ValueType
 
 
 class OperationType(Enum):
+    PARAM = 'param'
+    ARE = 'are'
+    GOTOMAIN = 'gotomain'
     MULTIPLY = '*'
     DIVIDE = '/'
     ADD = '+'
