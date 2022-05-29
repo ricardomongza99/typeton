@@ -15,5 +15,8 @@ class CompilerError:
 
 class CompilerEvent(Enum):
     STOP_COMPILE = 0
+    GEN_END_FUNC = 1
+    FREE_MEMORY = 2
+    GO_TO_MAIN = 3
 
 

@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Dict
-import jsonpickle
 
+import jsonpickle
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
@@ -9,7 +9,7 @@ from src.compiler.allocator.types import ValueType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
-from src.virtual_machine.types import FunctionData, SizeData
+from src.virtual_machine.types import FunctionData
 from .function import Function
 
 
@@ -69,6 +69,10 @@ class FunctionTable(Publisher, Subscriber):
             # persistent for vm
             self.function_data_table[id_] = FunctionData(id_, quad_start)
             self.function_data_table[id_].type_ = ValueType.VOID
+
+            if id_ == "main":
+                self.broadcast(Event(CompilerEvent.GO_TO_MAIN, None))
+
             return
 
         error = CompilerError(f'Function {id_} redeclared')
@@ -143,6 +147,9 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self, memory: Allocator):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
+
+        # tell quad generator to generate end_func quad
+        self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
 
         for key in self.current_function.variables:
             address = self.current_function.variables[key].address_
