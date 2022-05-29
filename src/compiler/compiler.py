@@ -11,11 +11,13 @@ from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
 from .output import OutputFile
 from .symbol_table import SymbolTable
-from ..utils.observer import Subscriber, Event
+from ..utils.observer import Subscriber, Event, Publisher
 
 
-class Compiler(Subscriber):
+class Compiler(Publisher, Subscriber):
     def __init__(self):
+        super().__init__()
+
         self._allocator = Allocator()
         self._symbol_table = SymbolTable()
 
@@ -28,6 +30,7 @@ class Compiler(Subscriber):
         self._code_generator.expression_actions.add_subscriber(self._symbol_table.function_table, {})
         # adds function actions as a subscriber to function table events.
         self._symbol_table.function_table.add_subscriber(self._code_generator.function_actions, {})
+        self.add_subscriber(self._code_generator.function_actions, {})
 
         # subscribe compiler receive semantic errors
         self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
@@ -49,10 +52,13 @@ class Compiler(Subscriber):
         :param debug: shows compiled programs inner workings if true
         :return: output json file (ready to be executed by the Virtual Machine)
         """
+
         self._parser.parse(data, self.lexer, debug=False)
 
         if self._symbol_table.function_table.function_data_table.get("main") is None:
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, "Main function is required"))
+
+        self.broadcast(Event(CompilerEvent.GO_TO_MAIN, None))
 
         if debug:
             self._display_tables()
@@ -300,16 +306,84 @@ class Compiler(Subscriber):
                     | LBRACK expression RBRACK call_array1
         """
 
+    # Function Call ----------------------------------------------------------------------------------------------------
+
+    # TODO update grammar diagram (added call_body, renamed call1 -> call_parameters
     def p_call(self, p):
         """
-        call : ID LPAREN call1 RPAREN
+        call : ID verify_function_existence LPAREN gen_are_memory call_parameters RPAREN verify_param_count generate_go_sub
+             | ID verify_function_existence LPAREN gen_are_memory RPAREN verify_param_count generate_go_sub
         """
 
-    def p_call1(self, p):
+    def p_call_parameters(self, p):
         """
-        call1 : expression
-              | expression COMMA call1
+        call_parameters : bool_expr verify_parameter_signature
+              | bool_expr verify_parameter_signature COMMA increment_parameter_count call_parameters
         """
+
+    # Call Actions ----------------------------------------------------------------
+
+    def p_verify_function_existence(self, p):
+        """
+        verify_function_existence :
+        """
+        self._symbol_table.function_table.verify_function_exists(p[-1])
+
+    def p_verify_param_count(self, p):
+        """
+        verify_param_count :
+        """
+        param_count = self._symbol_table.function_table.parameter_count + 1
+        signature_len = len(self._symbol_table.function_table.function_data_table[
+                                self._symbol_table.function_table.current_function_call_id_].parameter_signature)
+
+        if param_count != signature_len:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Function Call Parameter Mistmatch {param_count} != {signature_len}')))
+
+    def p_generate_go_sub(self, p):
+        """
+        generate_go_sub :
+        """
+        # TODO move to function table
+        id_ = self._symbol_table.function_table.current_function_call_id_
+        self._code_generator.function_actions.generate_go_sub(id_)
+
+        # reset
+        self._symbol_table.function_table.parameter_count = 0
+        self._symbol_table.function_table.current_function_call_id_ = None
+
+    def p_gen_are_memory(self, p):
+        """
+        gen_are_memory :
+        """
+        self._symbol_table.function_table.generate_are_memory()
+
+    def p_verify_parameter_signature(self, p):
+        """
+        verify_parameter_signature :
+        """
+        # Todo add this into function directory
+        func_table = self._symbol_table.function_table
+        current_func = func_table.function_data_table[func_table.current_function_call_id_]
+
+        if func_table.parameter_count >= len(current_func.parameter_signature):
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Too many parameters for function {func_table.current_function_call_id_}')))
+
+        param_type_ = current_func.parameter_signature[func_table.parameter_count]
+        self._code_generator.function_actions.verify_parameter_type(param_type_, func_table.parameter_count)
+
+    def p_increment_parameter_count(self, p):
+        """
+        increment_parameter_count :
+        """
+        func_table = self._symbol_table.function_table
+        func_table.parameter_count += 1
+
+    # --------------------------------------------------------------------------------
+
+    # -------------------------------------------------------------------------------------------------------------------
 
     def p_if(self, p):
         """
@@ -586,7 +660,6 @@ class Compiler(Subscriber):
             if type(p) is CompilerError:
                 p.trace = self._symbol_table.function_table.current_trace()
                 p.print()
-
             else:
                 error_message += f': at token {p.type} ({p.value}) on line {p.lineno}'
                 print(error_message)

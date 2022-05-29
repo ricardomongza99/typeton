@@ -18,5 +18,7 @@ class CompilerEvent(Enum):
     GEN_END_FUNC = 1
     FREE_MEMORY = 2
     GO_TO_MAIN = 3
+    GENERATE_ARE = 4
+
 
 

@@ -22,7 +22,7 @@ class CodeGenerator:
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
-        self.function_actions = FunctionActions(self.__quad_list)
+        self.function_actions = FunctionActions(self.__quad_list, self.__operand_address_stack)
         self.loop_actions = LoopActions(self.__quad_list)
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 

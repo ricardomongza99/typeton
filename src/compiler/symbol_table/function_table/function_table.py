@@ -29,6 +29,8 @@ class FunctionTable(Publisher, Subscriber):
         self.temporal_variables = {'empty'}
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
+        self.current_function_call_id_ = None
+        self.parameter_count = 0
 
         # We need this for global variable search
         self.add("global", 0)
@@ -69,14 +71,22 @@ class FunctionTable(Publisher, Subscriber):
             # persistent for vm
             self.function_data_table[id_] = FunctionData(id_, quad_start)
             self.function_data_table[id_].type_ = ValueType.VOID
-
-            if id_ == "main":
-                self.broadcast(Event(CompilerEvent.GO_TO_MAIN, None))
-
             return
 
         error = CompilerError(f'Function {id_} redeclared')
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, error))
+
+    def verify_function_exists(self, id_):
+        if self.functions.get(id_) is None:
+            self.broadcast(Event(
+                CompilerEvent.STOP_COMPILE,
+                f'Invalid Function Call: Function with name {id_} does not exist'))
+        self.current_function_call_id_ = id_
+
+    def generate_are_memory(self):
+        self.broadcast(Event(CompilerEvent.GENERATE_ARE, self.current_function_call_id_))
+        # start counting param signature
+        self.parameter_count = 0
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
