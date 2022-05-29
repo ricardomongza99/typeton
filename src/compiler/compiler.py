@@ -11,7 +11,7 @@ from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
 from .output import OutputFile
 from .symbol_table import SymbolTable
-from ..utils.observer import Subscriber
+from ..utils.observer import Subscriber, Event
 
 
 class Compiler(Subscriber):
@@ -24,13 +24,15 @@ class Compiler(Subscriber):
         self._parser = yacc.yacc(module=self, start="program", debug=True)
         self._code_generator = CodeGenerator(scheduler=self._allocator)
 
-        # subscribe symbol table to expression generator events
-        self._code_generator.expression_actions.subscribe(self._symbol_table.function_table, {})
+        # subscribe symbol table to  generator events
+        self._code_generator.expression_actions.add_subscriber(self._symbol_table.function_table, {})
+        # adds function actions as a subscriber to function table events.
+        self._symbol_table.function_table.add_subscriber(self._code_generator.function_actions, {})
 
         # subscribe compiler receive semantic errors
-        self._allocator.subscribe(self, {CompilerEvent.STOP_COMPILE})
-        self._code_generator.expression_actions.subscribe(self, {CompilerEvent.STOP_COMPILE})
-        self._symbol_table.function_table.subscribe(self, {CompilerEvent.STOP_COMPILE})
+        self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
+        self._code_generator.expression_actions.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
+        self._symbol_table.function_table.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
 
         self.syntax_error = None
 
@@ -48,6 +50,9 @@ class Compiler(Subscriber):
         :return: output json file (ready to be executed by the Virtual Machine)
         """
         self._parser.parse(data, self.lexer, debug=False)
+
+        if self._symbol_table.function_table.function_data_table.get("main") is None:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE, "Main function is required"))
 
         if debug:
             self._display_tables()
