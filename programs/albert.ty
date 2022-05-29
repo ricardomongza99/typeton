@@ -1,23 +1,28 @@
-func main() {
+var x: Int
+var y: Int
 
+
+
+func dog() {
+    print("bark")
+}
+
+func duck(age: Int) {
+    dog()
+    print("quack")
+}
+
+func main() {
+   y = 0
    var x: Int
    x = 0
 
-   var message: String
-   message = ""
 
-   while (x < 10) {
-
-        if (x < 10 && x > 7 ) {
-            message = "x is almost 10"
-        } else if (x == 5) {
-            message = "x is == to 5"
-        } else {
-            message = "x is growing up so fast :("
-        }
-        print(message)
+    while (x < 10) {
+        duck(x)
         x = x + 1
-   }
-
+    }
 
 }
+
+
