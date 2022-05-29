@@ -84,7 +84,8 @@ class ContextMemory:
 
     # TODO move size_data init_types to outside of ContextMemory
 
-    def __init__(self, size_data: SizeData, constant_data: ConstantTable, global_data: "ContextMemory" or None):
+    def __init__(self, size_data: SizeData, constant_data: ConstantTable,
+                 global_data):
         self.type_data = init_types(DEFAULT_TYPES, is_runtime=True)
         self.size_data = size_data
 
@@ -105,29 +106,46 @@ class ContextMemory:
         self.data_storage[ValueType.STRING] = init_storage(self.size_data.get_data(ValueType.STRING).total)
 
     def get_offset(self, address, segment: Segment, type_data: TypeRange):
+        """Get offset based on address segment range to store in exact array"""
         offset = address - type_data.start
         if segment.type_ is Layers.TEMPORARY:
-            offset += self.size_data.get_data(type_data.type_).local
+            offset += self.size_data.get_data(type_data.type_).local -1
         return offset
+
+    def is_global(self):
+        return self.global_data == None
 
     def __save_global(self, address, value):
         if self.global_data is None:
-            return
-        self.global_data.save(address, value)
+            self.global_data.save(address, value)
 
     def save(self, address, value):
+        """Deduce type and store in corresponding array slot"""
         segment = get_segment(address, self.type_data)
         type_data: TypeRange = get_resource(address, segment)
-        slot = self.data_storage[type_data.type_]
 
+        if segment.type_ is Layers.GLOBAL and not self.is_global():
+            self.global_data.save(address, value)
+            return
+
+        slot = self.data_storage[type_data.type_]
         offset = self.get_offset(address, segment, type_data)
         slot[offset] = value
 
+    def map_parameter(self, argument_value, argument_address, parameter_index):
+        """Map parameters from previous context to current local context"""
+        segment = get_segment(argument_address, self.type_data)
+        type_data: TypeRange = get_resource(argument_address, segment)
+
+        slot = self.data_storage[type_data.type_]
+        slot[parameter_index] = argument_value
+
     def get(self, address):
+        """Get from address origin, be it global, local, or constant table"""
         segment = get_segment(address, self.type_data)
         type_data: TypeRange = get_resource(address, segment)
-        if segment.type_ is Layers.GLOBAL and self.global_data is not None:
-            return self.global_data.get_from_value(address)
+        if segment.type_ is Layers.GLOBAL and not self.is_global():
+            return self.global_data.get(address)
 
         if segment.type_ is Layers.CONSTANT:
             const = self.constant_data.get_from_address(f'{address}')

@@ -37,7 +37,7 @@ class FunctionActions(Publisher, Subscriber):
         quad = Quad(operation=OperationType.GOSUB, result_address=id_)
         self.quad_list.append(quad)
 
-    def verify_parameter_type(self, type_: ValueType, param_index):
+    def verify_parameter_type(self, type_: ValueType, param_id):
         operand: Operand = self.operand_list[-1]
         if operand.type_ is not type_:
             self.broadcast(Event(
@@ -45,5 +45,5 @@ class FunctionActions(Publisher, Subscriber):
                 f'"Invalid function call signature: Type should be {type_.value} but its {operand.type_.value} instead'
             ))
 
-        quad = Quad(operation=OperationType.PARAM, left_address=operand.address, right_address=param_index)
+        quad = Quad(operation=OperationType.PARAM, left_address=operand.address, right_address=param_id)
         self.quad_list.append(quad)

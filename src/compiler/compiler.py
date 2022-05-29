@@ -58,8 +58,6 @@ class Compiler(Publisher, Subscriber):
         if self._symbol_table.function_table.function_data_table.get("main") is None:
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, "Main function is required"))
 
-        self.broadcast(Event(CompilerEvent.GO_TO_MAIN, None))
-
         if debug:
             self._display_tables()
             self._display_quads()
@@ -312,7 +310,7 @@ class Compiler(Publisher, Subscriber):
     def p_call(self, p):
         """
         call : ID verify_function_existence LPAREN gen_are_memory call_parameters RPAREN verify_param_count generate_go_sub
-             | ID verify_function_existence LPAREN gen_are_memory RPAREN verify_param_count generate_go_sub
+             | ID verify_function_existence LPAREN gen_are_memory RPAREN generate_go_sub
         """
 
     def p_call_parameters(self, p):
