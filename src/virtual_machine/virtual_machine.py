@@ -77,7 +77,7 @@ class VirtualMachine:
         while self._ip < len(self._quads):
             quad = self._quads[self._ip]
             self._execute(quad)
-            # self.operation_count += 1
+            self.operation_count += 1
         stop = timeit.default_timer()
         print('🦭🦭🦭🦭🦭🦭🦭🦭🦭')
         operations = "{:,}".format(self.operation_count)
@@ -119,8 +119,7 @@ class VirtualMachine:
             self._ip += 1
         else:
             print("Unknown Command")
-            # print(quad.operation, quad.left_address, quad.right_address, quad.result_address)
-            # self.__execute_assign()
+            self._ip = len(self._quads) + 1
 
     # -- EXECUTION methods  ----------------------------
 
@@ -207,7 +206,6 @@ class VirtualMachine:
         elif quad.operation is OperationType.RETURN:
             value = self._get_value(quad.result_address)
             self.pending_return.append(value)
-            # self.skip_to_end_func()
             self._ip += 1
         elif quad.operation is OperationType.CALL_ASSIGN:
             return_value = self.pending_return.pop()
@@ -257,12 +255,3 @@ class VirtualMachine:
         print('    {:<5} {:<5} {:<5} {:<5}'.format('OP', 'LEFT', 'RIGHT', 'RESULT'))
         for index, quad in enumerate(self._quads):
             quad.display(index)
-
-    def skip_to_end_func(self):
-        op = None
-        while op is not OperationType.ENDFUNC:
-            quad = self._quads[self._ip]
-            op = quad.operation
-            self._ip += 1
-
-        self._ip -= 1
