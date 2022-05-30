@@ -86,6 +86,7 @@ class ContextMemory:
 
     def __init__(self, size_data: SizeData, constant_data: ConstantTable,
                  global_data):
+        self.pending_return_value = None
         self.type_data = init_types(DEFAULT_TYPES, is_runtime=True)
         self.size_data = size_data
 
@@ -98,6 +99,12 @@ class ContextMemory:
 
         self.__init_storage()
 
+    def display(self):
+        print("Ints", self.data_storage[ValueType.INT])
+        print("Float", self.data_storage[ValueType.FLOAT])
+        print("Bool", self.data_storage[ValueType.BOOL])
+        print("String", self.data_storage[ValueType.STRING])
+
     def __init_storage(self):
         """Only for local variables"""
         self.data_storage[ValueType.INT] = init_storage(self.size_data.get_data(ValueType.INT).total)
@@ -109,7 +116,7 @@ class ContextMemory:
         """Get offset based on address segment range to store in exact array"""
         offset = address - type_data.start
         if segment.type_ is Layers.TEMPORARY:
-            offset += self.size_data.get_data(type_data.type_).local -1
+            offset += self.size_data.get_data(type_data.type_).local
         return offset
 
     def is_global(self):
@@ -126,6 +133,9 @@ class ContextMemory:
 
         if segment.type_ is Layers.GLOBAL and not self.is_global():
             self.global_data.save(address, value)
+            return
+
+        if segment.type_ is Layers.CONSTANT:
             return
 
         slot = self.data_storage[type_data.type_]

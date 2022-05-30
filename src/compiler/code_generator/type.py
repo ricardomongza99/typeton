@@ -4,6 +4,7 @@ from src.compiler.allocator.types import ValueType
 
 
 class OperationType(Enum):
+    CALL_ASSIGN = 'callassign'
     PARAM = 'param'
     ARE = 'are'
     GOTOMAIN = 'gotomain'
