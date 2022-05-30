@@ -1,7 +1,15 @@
 var A: Int[8]
-var B: Float[3]
-
+var x: Int
+var y: Int
 var M: Int[4][5]
+var z: Int
+
+var g: Float
+var B: Float[3]
+var h: Float
+var C: Float[2][3][4]
+var i: Float
+
 
 func main() {
     print("Hello world!")
