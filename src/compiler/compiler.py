@@ -164,13 +164,8 @@ class Compiler(Publisher, Subscriber):
 
     def p_array(self, p):
         """
-        array : LBRACK array1 RBRACK
-        """
-
-    def p_array1(self, p):
-        """
-        array1 : INTLIT
-               | INTLIT COMMA array1
+        array : LBRACK INTLIT RBRACK
+              | LBRACK INTLIT RBRACK array
         """
 
     # -- BLOCKS -----------------------

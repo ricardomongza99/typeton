@@ -1,0 +1,8 @@
+var A: Int[8]
+var B: Float[3]
+
+var M: Int[4][5]
+
+func main() {
+    print("Hello world!")
+}
