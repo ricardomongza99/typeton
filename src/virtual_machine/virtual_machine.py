@@ -72,14 +72,12 @@ class VirtualMachine:
         self._ip = self._function_data['main'].start_quad
 
         print('🦭🦭🦭typeton🦭🦭🦭')
+
         start = timeit.default_timer()
-
-
-
         while self._ip < len(self._quads):
             quad = self._quads[self._ip]
             self._execute(quad)
-            self.operation_count += 1
+            # self.operation_count += 1
         stop = timeit.default_timer()
         print('🦭🦭🦭🦭🦭🦭🦭🦭🦭')
         operations = "{:,}".format(self.operation_count)

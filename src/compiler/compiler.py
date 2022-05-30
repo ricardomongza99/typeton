@@ -69,9 +69,9 @@ class Compiler(Publisher, Subscriber):
         if self._symbol_table.function_table.function_data_table.get("main") is None:
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, "Main function is required"))
 
-        # if debug:
-        #     self._display_tables()
-        #     self._display_quads()
+        if debug:
+            self._display_tables()
+            self._display_quads()
 
         return self._make_json()
 
@@ -469,7 +469,6 @@ class Compiler(Publisher, Subscriber):
                  | call_array
                  | constant2
         """
-
 
     def p_add_call_operator(self, p):
         """
