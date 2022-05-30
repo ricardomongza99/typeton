@@ -2,7 +2,7 @@ var x: Int
 var y: Int
 
 func fib(n: Int) -> Int {
-   if (n <= 1)
+   if (n <= 1) {
        return n
    }
 
@@ -12,6 +12,6 @@ func fib(n: Int) -> Int {
 func main() {
    var x: Int
 
-   x = fib(30)
+   x = fib(20)
    print(x)
 }
