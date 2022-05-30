@@ -1,12 +1,12 @@
 import sys
 
 import jsonpickle
-from src.compiler.allocator.types import ValueType
 
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
 from src.compiler.code_generator.code_generator import CodeGenerator
-from src.compiler.code_generator.expression import Operator, ExpressionEvents
+from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.type import OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
@@ -374,6 +374,7 @@ class Compiler(Publisher, Subscriber):
         gen_are_memory :
         """
         self._symbol_table.function_table.generate_are_memory()
+        self.p_push_operator('(')
 
     def p_verify_parameter_signature(self, p):
         """
@@ -464,10 +465,11 @@ class Compiler(Publisher, Subscriber):
                  | FLOATLIT  add_constant
                  | BOOLLIT   add_constant
                  | string
-                 | call add_call_operator
+                 |  call add_call_operator
                  | call_array
                  | constant2
         """
+
 
     def p_add_call_operator(self, p):
         """
@@ -479,6 +481,7 @@ class Compiler(Publisher, Subscriber):
         address = self._allocator.allocate_address(type_, Layers.TEMPORARY)
 
         self._code_generator.expression_actions.add_call_assign(address, type_)
+        self.p_push_operator(')')
 
     def p_constant2(self, p):
         """
