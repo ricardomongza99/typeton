@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+import timeit
 import jsonpickle
 
 from src.compiler.code_generator.type import Quad, OperationType
@@ -43,6 +44,7 @@ FUNCTIONS = {
 class VirtualMachine:
     def __init__(self):
         self._ip = 0  # instruction pointer
+        self.operation_count = 0
 
         self._constant_table: ConstantTable = ConstantTable()
         self._quads = None
@@ -70,10 +72,19 @@ class VirtualMachine:
         self._ip = self._function_data['main'].start_quad
 
         print('🦭🦭🦭typeton🦭🦭🦭')
+        start = timeit.default_timer()
+
+
+
         while self._ip < len(self._quads):
             quad = self._quads[self._ip]
             self._execute(quad)
+            self.operation_count += 1
+        stop = timeit.default_timer()
         print('🦭🦭🦭🦭🦭🦭🦭🦭🦭')
+        operations = "{:,}".format(self.operation_count)
+        time = '{:.2f}'.format(stop)
+        print(f'{operations} operations in {time} seconds')
 
     # -- LOAD DATA methods ----------------------------
 
@@ -198,7 +209,8 @@ class VirtualMachine:
         elif quad.operation is OperationType.RETURN:
             value = self._get_value(quad.result_address)
             self.pending_return.append(value)
-            self.skip_to_end_func()
+            # self.skip_to_end_func()
+            self._ip += 1
         elif quad.operation is OperationType.CALL_ASSIGN:
             return_value = self.pending_return.pop()
             self.context_memory[-1].save(quad.result_address, return_value)

@@ -121,8 +121,8 @@ class ExpressionActions(Publisher, Subscriber):
                 f'Should be {type_.value}, but is {return_expression.type_.value} instead')))
 
         quad = Quad(operation=operator.type_.value, result_address=return_expression.address)
-
         self.quad_list.append(quad)
+        self.quad_list.append(Quad(operation=OperationType.ENDFUNC))
 
     def add_call_assign(self, address, function_return_type):
         quad = Quad(OperationType.CALL_ASSIGN, result_address=address)

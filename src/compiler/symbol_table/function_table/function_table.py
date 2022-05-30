@@ -55,7 +55,6 @@ class FunctionTable(Publisher, Subscriber):
         from src.compiler.code_generator.expression import ExpressionEvents
         if event.type_ is ExpressionEvents.ADD_TEMP:
             type_, address = event.payload
-            print('adding temp', address)
             self.__handle_add_temporal(type_, address)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
             self.end_function()
@@ -176,14 +175,7 @@ class FunctionTable(Publisher, Subscriber):
         for address in self.temporal_variables:
             delete_list.append(address)
 
-        print()
-        delete_list.sort()
-        print(delete_list)
-        print()
-
         self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
-        print('released')
-        print()
 
     def current_trace(self):
         return self.current_function.id_

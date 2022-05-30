@@ -54,7 +54,6 @@ class Allocator(Publisher, Subscriber):
         return segment.type_ == type_
 
     def release_address(self, address):
-        print('releasing addr', address)
         if address is None:
             return
         segment = self.get_segment(address)

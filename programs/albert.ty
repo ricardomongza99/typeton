@@ -12,7 +12,7 @@ func fib(n: Int) -> Int {
 func main() {
    var x: Int
 
-   x = fib(10)
+   x = fib(25)
    print(x)
 }
 
