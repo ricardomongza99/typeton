@@ -3,13 +3,28 @@ from src.compiler.allocator.helpers import get_available_address, init_types, La
 from src.compiler.allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.debug import Debug
-from src.utils.observer import Publisher, Event
+from src.utils.observer import Publisher, Event, Subscriber
 
 
-class Allocator(Publisher):
+class Allocator(Publisher, Subscriber):
     def __init__(self, type_resources: [MemoryType] = DEFAULT_TYPES):
         super().__init__()
         self.__segments = init_types(type_resources, is_runtime=False)
+
+    def handle_event(self, event: Event):
+        if event.type_ is CompilerEvent.RELEASE_MEM_IF_POSSIBLE:
+            self._release_memory_if_possible(event.payload)
+        elif event.type_ is CompilerEvent.FREE_MEMORY:
+            self.release_address_list(event.payload)
+
+    def _release_memory_if_possible(self, address_list):
+        for address in address_list:
+            if self.is_segment(address, Layers.TEMPORARY):
+                self.release_address(address)
+
+    def release_address_list(self, delete_list):
+        for address in delete_list:
+            self.release_address(address)
 
     # Compilation
     def allocate_address(self, value_type: ValueType, layer: Layers):
@@ -31,6 +46,7 @@ class Allocator(Publisher):
         return new_address
 
     def get_segment(self, address):
+
         return get_segment(address, self.__segments)
 
     def is_segment(self, address, type_: Layers):
@@ -38,6 +54,8 @@ class Allocator(Publisher):
         return segment.type_ == type_
 
     def release_address(self, address):
+        if address is None:
+            return
         segment = self.get_segment(address)
         resource = get_resource(address, segment)
         resource.free_addresses_list.put(address)

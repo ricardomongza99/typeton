@@ -38,7 +38,7 @@ class FunctionActions(Publisher, Subscriber):
         self.quad_list.append(quad)
 
     def verify_parameter_type(self, type_: ValueType, param_id):
-        operand: Operand = self.operand_list[-1]
+        operand: Operand = self.operand_list.pop()
         if operand.type_ is not type_:
             self.broadcast(Event(
                 CompilerEvent.STOP_COMPILE,

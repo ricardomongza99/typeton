@@ -1,5 +1,6 @@
 from typing import List, Dict
 
+import timeit
 import jsonpickle
 
 from src.compiler.code_generator.type import Quad, OperationType
@@ -7,7 +8,7 @@ from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
 from src.virtual_machine.types import ContextMemory, FunctionData
 
-EXPRESSIONS = {OperationType.ADD, OperationType.MULTIPLY, OperationType.MULTIPLY, OperationType.SUBTRACT}
+EXPRESSIONS = {OperationType.ADD, OperationType.DIVIDE, OperationType.MULTIPLY, OperationType.SUBTRACT}
 
 BOOLEAN_EXPRESSIONS = {
     OperationType.AND,
@@ -15,6 +16,7 @@ BOOLEAN_EXPRESSIONS = {
     OperationType.LESS_THAN,
     OperationType.LESS_THAN,
     OperationType.EQUAL,
+    OperationType.LESS_EQUAL,
     OperationType.GREAT_THAN,
     OperationType.GREAT_EQUAL
 }
@@ -33,20 +35,25 @@ FUNCTIONS = {
     OperationType.PARAM,
     OperationType.ENDFUNC,
     OperationType.ARE,
-    OperationType.GOSUB
+    OperationType.GOSUB,
+    OperationType.RETURN,
+    OperationType.CALL_ASSIGN
 }
 
 
 class VirtualMachine:
     def __init__(self):
         self._ip = 0  # instruction pointer
+        self.operation_count = 0
 
         self._constant_table: ConstantTable = ConstantTable()
         self._quads = None
         self._function_data: Dict[str, FunctionData] = {}
+        self.pending_return = []
 
         self._memory = {}
         self.context_memory: List[ContextMemory] = []
+        self.context_pending_assigment = []
         self.context_jump_locations = []
         self.global_memory = None
 
@@ -65,10 +72,17 @@ class VirtualMachine:
         self._ip = self._function_data['main'].start_quad
 
         print('🦭🦭🦭typeton🦭🦭🦭')
+
+        start = timeit.default_timer()
         while self._ip < len(self._quads):
             quad = self._quads[self._ip]
             self._execute(quad)
+            # self.operation_count += 1
+        stop = timeit.default_timer()
         print('🦭🦭🦭🦭🦭🦭🦭🦭🦭')
+        operations = "{:,}".format(self.operation_count)
+        time = '{:.2f}'.format(stop)
+        print(f'{operations} operations in {time} seconds')
 
     # -- LOAD DATA methods ----------------------------
 
@@ -105,7 +119,7 @@ class VirtualMachine:
             self._ip += 1
         else:
             print("Unknown Command")
-            print(quad.operation, quad.left_address, quad.right_address, quad.result_address)
+            # print(quad.operation, quad.left_address, quad.right_address, quad.result_address)
             # self.__execute_assign()
 
     # -- EXECUTION methods  ----------------------------
@@ -174,17 +188,31 @@ class VirtualMachine:
             self._map_argument_to_parameter(quad.left_address, quad.right_address)
             self._ip += 1
         elif quad.operation is OperationType.ENDFUNC:
-            if len(self.context_jump_locations) > 0:
-                self._ip = self.context_jump_locations.pop()
+            if len(self.context_jump_locations) == 0:
                 self._delete_context_memory()
-            else:
                 self._ip += 1
+                print("Main function ended")
+                return
+
+            self._ip = self.context_jump_locations.pop()
+            self._delete_context_memory()
         elif quad.operation is OperationType.ARE:
             self._assign_context_memory(quad.result_address)
             self._ip += 1
         elif quad.operation is OperationType.GOSUB:
+
+            self.context_memory.append(self.context_pending_assigment.pop())
             self.context_jump_locations.append(self._ip + 1)
             self._ip = self.get_function_start(quad.result_address)
+        elif quad.operation is OperationType.RETURN:
+            value = self._get_value(quad.result_address)
+            self.pending_return.append(value)
+            # self.skip_to_end_func()
+            self._ip += 1
+        elif quad.operation is OperationType.CALL_ASSIGN:
+            return_value = self.pending_return.pop()
+            self.context_memory[-1].save(quad.result_address, return_value)
+            self._ip += 1
 
     def __execute_assign(self, address, value):
         self.context_memory[-1].save(address, value)
@@ -200,16 +228,17 @@ class VirtualMachine:
     # -- DEBUG methods ---------------------------
 
     def _map_argument_to_parameter(self, argument_address, parameter_index):
-        previous_context = self.context_memory[-2]
+        previous_context = self.context_memory[-1]
         argument_value = previous_context.get(argument_address)
 
-        new_context = self.context_memory[-1]
+        new_context = self.context_pending_assigment[-1]
         new_context.map_parameter(argument_value, argument_address, parameter_index)
 
     def _assign_context_memory(self, id_):
         size_data = self._function_data[id_].size_data
         ctx = ContextMemory(size_data, self._constant_table, self.global_memory)
-        self.context_memory.append(ctx)
+        # don't assign until all parameters are calculated using previous era
+        self.context_pending_assigment.append(ctx)
 
     def get_function_start(self, id_):
         return self._function_data[id_].start_quad
@@ -228,3 +257,12 @@ class VirtualMachine:
         print('    {:<5} {:<5} {:<5} {:<5}'.format('OP', 'LEFT', 'RIGHT', 'RESULT'))
         for index, quad in enumerate(self._quads):
             quad.display(index)
+
+    def skip_to_end_func(self):
+        op = None
+        while op is not OperationType.ENDFUNC:
+            quad = self._quads[self._ip]
+            op = quad.operation
+            self._ip += 1
+
+        self._ip -= 1

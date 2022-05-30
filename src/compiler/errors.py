@@ -14,11 +14,15 @@ class CompilerError:
 
 
 class CompilerEvent(Enum):
+    RELEASE_FUNCTION = 7
     STOP_COMPILE = 0
     GEN_END_FUNC = 1
     FREE_MEMORY = 2
     GO_TO_MAIN = 3
     GENERATE_ARE = 4
+    SET_RETURN = 5
+    RELEASE_MEM_IF_POSSIBLE = 6
+
 
 
 
