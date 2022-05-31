@@ -296,7 +296,7 @@ class Compiler(Publisher, Subscriber):
     def p_assign1(self, p):
         """
         assign1 : ID push_variable
-                | ID push_variable get_dimensions call_array
+                | ID push_variable push_dimensions call_array
         """
 
     def p_assign2(self, p):  # TODO add rest to semantic cube
@@ -310,8 +310,8 @@ class Compiler(Publisher, Subscriber):
 
     def p_call_array(self, p):
         """
-        call_array : LBRACK push_dimension expression RBRACK
-                   | LBRACK push_dimension expression RBRACK call_array
+        call_array : LBRACK expression verify_dimension RBRACK
+                   | LBRACK expression verify_dimension RBRACK call_array
         """
 
     # Function Call ----------------------------------------------------------------------------------------------------
@@ -550,6 +550,7 @@ class Compiler(Publisher, Subscriber):
         """
         add_dimension :
         """
+        self._symbol_table.constant_table.add(p[-2], self._allocator)
         self._symbol_table.function_table.add_dimension(p[-2])
 
     def p_allocate_dimensions(self, p):
@@ -683,20 +684,20 @@ class Compiler(Publisher, Subscriber):
         variable = self._symbol_table.function_table.get_variable(p[-1])
         self._code_generator.push_variable(p[-1], variable.type_, variable.address_)
 
-    def p_get_dimensions(self, p):
+    def p_push_dimensions(self, p):
         """
-        get_dimensions :
+        push_dimensions :
         """
         operand = self._code_generator.peak_operand()
         id_ = self._symbol_table.function_table.get_id(operand.address)
         variable = self._symbol_table.function_table.get_variable(id_)
-        print(variable.dimensions)
+        # TODO: Code generator
 
-
-    def p_push_dimension(self, p):
+    def p_verify_dimension(self, p):
         """
-        push_dimension :
+        verify_dimension :
         """
+        # TODO: Code generator
 
     # -- ERROR -----------------------
 
