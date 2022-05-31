@@ -7,8 +7,9 @@ from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
 from src.compiler.code_generator.expression import Operand, Operator, ExpressionActions
 from src.compiler.code_generator.function import FunctionActions
+from src.compiler.code_generator.array import ArrayActions
 from src.compiler.code_generator.loop import LoopActions
-from src.compiler.code_generator.type import Quad
+from src.compiler.code_generator.type import Quad, OperationType
 from src.utils.debug import Debug
 from src.utils.display import make_table, TableOptions
 
@@ -22,6 +23,7 @@ class CodeGenerator:
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
+        self.array_actions = ArrayActions(self.__quad_list, self.__operand_address_stack)
         self.function_actions = FunctionActions(self.__quad_list, self.__operand_address_stack)
         self.loop_actions = LoopActions(self.__quad_list)
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
@@ -63,6 +65,19 @@ class CodeGenerator:
 
     def execute_remaining(self):
         self.expression_actions.execute_remaining(self.scheduler)
+
+    # -------------------------------------------------------
+
+    # Arrays -------------------------------------------
+
+    def push_dimensions(self, addresses):
+        self.array_actions.push_dimensions(addresses)
+
+    def verify_dimension(self):
+        self.array_actions.verify_dimensions()
+
+    def get_array_pointer(self):
+        self.array_actions.get_array_pointer(self.scheduler)
 
     # -------------------------------------------------------
 

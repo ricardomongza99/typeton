@@ -33,6 +33,10 @@ class Compiler(Publisher, Subscriber):
         expressions.add_subscriber(self._symbol_table.function_table, {})
         expressions.add_subscriber(self._allocator, {})
 
+        # subscribe to array actions
+        array_actions = self._code_generator.array_actions
+        array_actions.add_subscriber(self, {})
+
         # subscribers for function table
         functions = self._symbol_table.function_table
         functions.add_subscriber(self._code_generator.function_actions, {})
@@ -296,7 +300,7 @@ class Compiler(Publisher, Subscriber):
     def p_assign1(self, p):
         """
         assign1 : ID push_variable
-                | ID push_variable push_dimensions call_array
+                | call_array
         """
 
     def p_assign2(self, p):  # TODO add rest to semantic cube
@@ -310,8 +314,13 @@ class Compiler(Publisher, Subscriber):
 
     def p_call_array(self, p):
         """
-        call_array : LBRACK expression verify_dimension RBRACK
-                   | LBRACK expression verify_dimension RBRACK call_array
+        call_array : ID push_variable push_dimensions call_array1 get_array_pointer
+        """
+
+    def p_call_array1(self, p):
+        """
+        call_array1 : LBRACK expression verify_dimension RBRACK
+                    | LBRACK expression verify_dimension RBRACK call_array1
         """
 
     # Function Call ----------------------------------------------------------------------------------------------------
@@ -666,16 +675,29 @@ class Compiler(Publisher, Subscriber):
         """
         push_dimensions :
         """
+        # TODO: Clean this mess
         operand = self._code_generator.peak_operand()
         id_ = self._symbol_table.function_table.get_id(operand.address)
         variable = self._symbol_table.function_table.get_variable(id_)
-        # TODO: Code generator
+
+        dimension_addresses = []
+        for dimension in reversed(variable.dimensions):
+            constant = self._symbol_table.constant_table.get_from_value(dimension)
+            dimension_addresses.append(constant.address)
+
+        self._code_generator.push_dimensions(dimension_addresses)
 
     def p_verify_dimension(self, p):
         """
         verify_dimension :
         """
-        # TODO: Code generator
+        self._code_generator.verify_dimension()
+
+    def p_get_array_pointer(self, p):
+        """
+        get_array_pointer :
+        """
+        self._code_generator.get_array_pointer()
 
     # -- ERROR -----------------------
 
