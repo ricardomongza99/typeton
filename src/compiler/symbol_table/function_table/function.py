@@ -21,6 +21,10 @@ class Function:
     def current_variable(self):
         return self._vars_table.current_variable
 
+    @property
+    def vars_table(self):
+        return self._vars_table
+
     def add_variable(self, id_, is_param):
         self._vars_table.add(id_, is_param)
 

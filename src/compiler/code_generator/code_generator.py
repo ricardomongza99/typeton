@@ -97,6 +97,9 @@ class CodeGenerator:
 
     # Helpers
 
+    def peak_operand(self):
+        return self.__operand_address_stack[-1]
+
     def display(self):
         address_map = Debug.map()
         table = make_table("Quadruples",

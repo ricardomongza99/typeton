@@ -11,6 +11,7 @@ from src.utils.display import make_table
 class VariableTable:
     def __init__(self):
         self.variables: Dict[str, Variable] = {}
+        self.inverse_hash: Dict[int, any] = {}  # used to get dimensions
         self.current_variable = None
 
     def add(self, id_, is_param):
@@ -37,8 +38,15 @@ class VariableTable:
         Debug.map()[address] = str(self.current_variable.id_)
         self.current_variable.type_ = enum_value
         self.current_variable.address_ = address
+        self.inverse_hash[address] = self.current_variable.id_
 
         return self.current_variable.id_
+
+    def get_from_address(self, address):
+        if self.inverse_hash.get(address) is None:
+            return None
+
+        return self.inverse_hash[address]
 
     def display(self, id_):
         print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],

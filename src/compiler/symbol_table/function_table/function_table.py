@@ -203,6 +203,23 @@ class FunctionTable(Publisher, Subscriber):
         # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
 
+    def get_id(self, address):
+        # Try to find local first
+        variable_table = self.current_function.vars_table
+        variable = variable_table.get_from_address(address)
+        if variable is not None:
+            return variable
+
+        # Okay, maybe its global
+        variable_table = self.functions["global"].vars_table
+        variable = variable_table.get_from_address(address)
+        if variable is not None:
+            return variable
+
+        # Could not find
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable at address {address} is undefined')))
+
+
     def set_return(self):
         self.current_function.has_return = True
         self.broadcast(Event(CompilerEvent.SET_RETURN, self.current_function.type_))
