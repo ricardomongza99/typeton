@@ -12,6 +12,7 @@ var i: Float
 
 
 func main() {
-    print("Hello world!")
-    A[0] = 5
+    A[3] = 100
+    M[2][2] = 200
+    B[3 * (3 / 2)] = 300.0
 }
