@@ -566,8 +566,8 @@ class Compiler(Publisher, Subscriber):
         id_ = self._symbol_table.function_table.set_type(p[-1], self._allocator)
         if id_ is not None:
             # TODO refactor
-            address, type_ = self._symbol_table.function_table.find(id_)
-            self._code_generator.push_variable(id_, type_, address)
+            variable = self._symbol_table.function_table.get_variable(id_)
+            self._code_generator.push_variable(id_, variable.type_, variable.address_)
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
@@ -680,8 +680,8 @@ class Compiler(Publisher, Subscriber):
         """
         push_variable :
         """
-        address, type_ = self._symbol_table.function_table.find(p[-1])
-        self._code_generator.push_variable(p[-1], type_, address)
+        variable = self._symbol_table.function_table.get_variable(p[-1])
+        self._code_generator.push_variable(p[-1], variable.type_, variable.address_)
 
     # -- ERROR -----------------------
 
