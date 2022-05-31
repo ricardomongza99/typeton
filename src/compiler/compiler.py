@@ -306,10 +306,10 @@ class Compiler(Publisher, Subscriber):
     def p_assign2(self, p):  # TODO add rest to semantic cube
         """
         assign2 : ASSIGN push_operator
-                | PASSIGN
-                | LASSIGN
-                | MASSIGN
-                | DASSIGN
+                | PASSIGN push_operator
+                | LASSIGN push_operator
+                | MASSIGN push_operator
+                | DASSIGN push_operator
         """
 
     def p_call_array(self, p):
