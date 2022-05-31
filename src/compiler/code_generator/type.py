@@ -37,6 +37,7 @@ class OperationType(Enum):
     PASSIGN = '+='
     DASSIGN = '/='
     MASSIGN = '*='
+    VERIFY = 'verify'
 
 
 class Operator:

@@ -33,6 +33,10 @@ class Compiler(Publisher, Subscriber):
         expressions.add_subscriber(self._symbol_table.function_table, {})
         expressions.add_subscriber(self._allocator, {})
 
+        # subscribe to array actions
+        array_actions = self._code_generator.array_actions
+        array_actions.add_subscriber(self, {})
+
         # subscribers for function table
         functions = self._symbol_table.function_table
         functions.add_subscriber(self._code_generator.function_actions, {})
@@ -310,13 +314,13 @@ class Compiler(Publisher, Subscriber):
 
     def p_call_array(self, p):
         """
-        call_array : ID call_array1
+        call_array : ID push_variable push_dimensions call_array1 get_array_pointer
         """
 
     def p_call_array1(self, p):
         """
-        call_array1 : LBRACK expression RBRACK
-                    | LBRACK expression RBRACK call_array1
+        call_array1 : LBRACK expression verify_dimension RBRACK
+                    | LBRACK expression verify_dimension RBRACK call_array1
         """
 
     # Function Call ----------------------------------------------------------------------------------------------------
@@ -555,6 +559,7 @@ class Compiler(Publisher, Subscriber):
         """
         add_dimension :
         """
+        self._symbol_table.constant_table.add(p[-2], self._allocator)
         self._symbol_table.function_table.add_dimension(p[-2])
 
     def p_allocate_dimensions(self, p):
@@ -571,8 +576,8 @@ class Compiler(Publisher, Subscriber):
         id_ = self._symbol_table.function_table.set_type(p[-1], self._allocator)
         if id_ is not None:
             # TODO refactor
-            address, type_ = self._symbol_table.function_table.find(id_)
-            self._code_generator.push_variable(id_, type_, address)
+            variable = self._symbol_table.function_table.get_variable(id_)
+            self._code_generator.push_variable(id_, variable.type_, variable.address_)
 
     def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
         """
@@ -657,40 +662,42 @@ class Compiler(Publisher, Subscriber):
         """
         push_operator :
         """
-
-        # TODO move all this garbage into a helper function
-        type_ = OperationType(p[-1])
-        priority = 0
-
-        if type_ in {OperationType.LASSIGN,
-                     OperationType.ASSIGN,
-                     OperationType.PASSIGN,
-                     OperationType.MASSIGN,
-                     OperationType.DASSIGN}:
-            priority = 0
-        elif type_ in {OperationType.AND, OperationType.OR}:
-            priority = 1
-        elif type_ in {OperationType.GREAT_THAN,
-                       OperationType.EQUAL,
-                       OperationType.LESS_THAN,
-                       OperationType.LESS_EQUAL,
-                       OperationType.GREAT_EQUAL}:
-            priority = 2
-        elif type_ in {OperationType.ADD, OperationType.SUBTRACT}:
-            priority = 3
-
-        elif type_ in {OperationType.MULTIPLY, OperationType.DIVIDE}:
-            priority = 4
-
-        operator = Operator(priority, type_)
-        (self._code_generator.push_operator(operator))
+        self._code_generator.push_operator(p[-1])
 
     def p_push_variable(self, p):
         """
-         push_variable :
+        push_variable :
         """
-        address, type_ = self._symbol_table.function_table.find(p[-1])
-        (self._code_generator.push_variable(p[-1], type_, address))
+        variable = self._symbol_table.function_table.get_variable(p[-1])
+        self._code_generator.push_variable(p[-1], variable.type_, variable.address_)
+
+    def p_push_dimensions(self, p):
+        """
+        push_dimensions :
+        """
+        # TODO: Clean this mess
+        operand = self._code_generator.peak_operand()
+        id_ = self._symbol_table.function_table.get_id(operand.address)
+        variable = self._symbol_table.function_table.get_variable(id_)
+
+        dimension_addresses = []
+        for dimension in reversed(variable.dimensions):
+            constant = self._symbol_table.constant_table.get_from_value(dimension)
+            dimension_addresses.append(constant.address)
+
+        self._code_generator.push_dimensions(dimension_addresses)
+
+    def p_verify_dimension(self, p):
+        """
+        verify_dimension :
+        """
+        self._code_generator.verify_dimension()
+
+    def p_get_array_pointer(self, p):
+        """
+        get_array_pointer :
+        """
+        self._code_generator.get_array_pointer()
 
     # -- ERROR -----------------------
 

@@ -189,18 +189,36 @@ class FunctionTable(Publisher, Subscriber):
     def current_trace(self):
         return self.current_function.id_
 
-    def find(self, id_):
+    def get_variable(self, id_):
+        # Try to find local first
         variable_table = self.current_function.variables
         if variable_table.get(id_) is not None:
-            variable = variable_table[id_]
-            return variable.address_, variable.type_
+            return variable_table[id_]
 
+        # Okay, maybe its global
         variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
-            variable = variable_table[id_]
-            return variable.address_, variable.type_
+            return variable_table[id_]
 
+        # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
+
+    def get_id(self, address):
+        # Try to find local first
+        variable_table = self.current_function.vars_table
+        variable = variable_table.get_from_address(address)
+        if variable is not None:
+            return variable
+
+        # Okay, maybe its global
+        variable_table = self.functions["global"].vars_table
+        variable = variable_table.get_from_address(address)
+        if variable is not None:
+            return variable
+
+        # Could not find
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable at address {address} is undefined')))
+
 
     def set_return(self):
         self.current_function.has_return = True

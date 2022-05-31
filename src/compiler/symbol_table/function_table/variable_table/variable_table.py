@@ -11,8 +11,8 @@ from src.utils.display import make_table
 class VariableTable:
     def __init__(self):
         self.variables: Dict[str, Variable] = {}
+        self.inverse_hash: Dict[int, any] = {}  # used to get dimensions
         self.current_variable = None
-        self.current_dimensions = []
 
     def add(self, id_, is_param):
         """ Add Variable to `variables` dictionary if not existent """
@@ -22,15 +22,13 @@ class VariableTable:
             self.current_variable = self.variables[id_]
 
     def add_dimension(self, size):
-        """ Append dimension size to current dimensions list """
-        self.current_dimensions.append(size)
+        """ Append new dimension `size` to current variable's `dimensions` list """
+        self.current_variable.dimensions.append(size)
 
     def allocate_dimensions(self, layer: Layers, memory: Allocator):
-        """ Multiply all the current dimensions to allocate required space """
-        size = math.prod(self.current_dimensions)
+        """ Multiply all the dimensions of current variable to allocate required space """
+        size = math.prod(self.current_variable.dimensions)
         memory.allocate_space(self.current_variable.type_, layer, size)
-        # Empty current_dimensions for next use
-        self.current_dimensions = []
 
     def set_type(self, type_, layer: Layers, memory: Allocator):
         """ Sets current var type """
@@ -40,8 +38,15 @@ class VariableTable:
         Debug.map()[address] = str(self.current_variable.id_)
         self.current_variable.type_ = enum_value
         self.current_variable.address_ = address
+        self.inverse_hash[address] = self.current_variable.id_
 
         return self.current_variable.id_
+
+    def get_from_address(self, address):
+        if self.inverse_hash.get(address) is None:
+            return None
+
+        return self.inverse_hash[address]
 
     def display(self, id_):
         print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],

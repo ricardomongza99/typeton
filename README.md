@@ -195,7 +195,7 @@ func main() {
     - [ ] Arrays
     - [ ] Classes
     - [ ] Objects
-- [ ] 🖥 Virtual Machine
+- [x] 🖥 Virtual Machine
     - [x] Memory for execution (Global memory, temporal memory, execution stack)
     - [x] Arithmetic expressions execution
     - [x] Sequential blocks execution

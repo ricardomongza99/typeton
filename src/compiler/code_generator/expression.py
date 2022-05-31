@@ -60,12 +60,32 @@ class ExpressionActions(Publisher, Subscriber):
                 return self.__execute_assign()
             return self.__execute_arithmetic(scheduler)
 
-    def push_operator(self, new_operator: Operator, scheduler: Allocator):
-        is_parenthesis = self.__handle_parenthesis(new_operator, scheduler)
-        if is_parenthesis:
-            return
-        else:
-            self.__operator_stack.append(new_operator)
+    def push_operator(self, operator, scheduler: Allocator):
+        type_ = OperationType(operator)
+        priority = 0
+
+        if type_ is {OperationType.ASSIGN}:
+            priority = 0
+        elif type_ in {OperationType.AND, OperationType.OR}:
+            priority = 1
+        elif type_ in {OperationType.GREAT_THAN,
+                       OperationType.EQUAL,
+                       OperationType.LESS_THAN,
+                       OperationType.LESS_EQUAL,
+                       OperationType.GREAT_EQUAL}:
+            priority = 2
+        elif type_ in {OperationType.ADD, OperationType.SUBTRACT}:
+            priority = 3
+
+        elif type_ in {OperationType.MULTIPLY, OperationType.DIVIDE}:
+            priority = 4
+
+        operator = Operator(priority, type_)
+
+        is_parenthesis = self.__handle_parenthesis(operator, scheduler)
+
+        if not is_parenthesis:
+            self.__operator_stack.append(operator)
 
     def execute_remaining(self, scheduler: Allocator):
         while len(self.__operator_stack) > self.parenthesis_start[-1] and len(self.__operand_address_stack) > 2:

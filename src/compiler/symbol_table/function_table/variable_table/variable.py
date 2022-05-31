@@ -7,5 +7,6 @@ class Variable:
         self.id_ = id_
         self.type_ = None
         self.address_ = None
+        self.dimensions = []    # stays empty if not array
         self.isReturned = None
         self.is_param = is_param
