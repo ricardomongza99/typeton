@@ -190,16 +190,19 @@ class FunctionTable(Publisher, Subscriber):
         return self.current_function.id_
 
     def find(self, id_):
+        # Try to find local first
         variable_table = self.current_function.variables
         if variable_table.get(id_) is not None:
             variable = variable_table[id_]
             return variable.address_, variable.type_
 
+        # Okay, maybe its global
         variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
             variable = variable_table[id_]
             return variable.address_, variable.type_
 
+        # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
 
     def set_return(self):

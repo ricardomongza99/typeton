@@ -296,7 +296,7 @@ class Compiler(Publisher, Subscriber):
     def p_assign1(self, p):
         """
         assign1 : ID push_variable
-                | call_array
+                | ID push_variable call_array
         """
 
     def p_assign2(self, p):  # TODO add rest to semantic cube
@@ -310,13 +310,8 @@ class Compiler(Publisher, Subscriber):
 
     def p_call_array(self, p):
         """
-        call_array : ID call_array1
-        """
-
-    def p_call_array1(self, p):
-        """
-        call_array1 : LBRACK expression RBRACK
-                    | LBRACK expression RBRACK call_array1
+        call_array : LBRACK expression RBRACK
+                    | LBRACK expression RBRACK call_array
         """
 
     # Function Call ----------------------------------------------------------------------------------------------------
@@ -683,10 +678,10 @@ class Compiler(Publisher, Subscriber):
 
     def p_push_variable(self, p):
         """
-         push_variable :
+        push_variable :
         """
         address, type_ = self._symbol_table.function_table.find(p[-1])
-        (self._code_generator.push_variable(p[-1], type_, address))
+        self._code_generator.push_variable(p[-1], type_, address)
 
     # -- ERROR -----------------------
 
