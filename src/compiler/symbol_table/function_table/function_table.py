@@ -27,6 +27,7 @@ class FunctionTable(Publisher, Subscriber):
         self.functions = {}
         # keep track of them so we don't add repeat numbers to function size
         self.temporal_variables = {'empty'}
+        self.should_delete_temp = []
         self.function_data_table: Dict[str, FunctionData] = {}
         self.current_function: Function = None
         self.current_function_call_id_ = None
@@ -40,6 +41,8 @@ class FunctionTable(Publisher, Subscriber):
     def _type_context(self) -> TypeContext:
         if self.current_function.is_pending_type():
             variable = self.current_function.current_variable
+            if variable is None:
+                return
             if variable.is_param and variable.type_ is None:
                 return TypeContext.PARAM
             else:
@@ -53,17 +56,20 @@ class FunctionTable(Publisher, Subscriber):
         if event.type_ is ExpressionEvents.ADD_TEMP:
             type_, address = event.payload
             self.__handle_add_temporal(type_, address)
+        elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
+            self.end_function()
 
-    def __handle_add_temporal(self, type_, address):
+    def __handle_add_temporal(self, type_, address, should_delete=False):
         if address in self.temporal_variables:
             return
+
         self.function_data().add_variable_size(ValueType(type_), Layers.TEMPORARY)
-        self.temporal_variables.add(address)
+        self.temporal_variables.append(address)
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
         if self.functions.get(id_) is None:
-            self.temporal_variables = {'empty'}
+            self.temporal_variables = []
             reference = Function(id_=id_)
             self.functions[id_] = reference
             self.current_function = reference
@@ -80,7 +86,7 @@ class FunctionTable(Publisher, Subscriber):
         if self.functions.get(id_) is None:
             self.broadcast(Event(
                 CompilerEvent.STOP_COMPILE,
-                f'Invalid Function Call: Function with name {id_} does not exist'))
+                CompilerError(f'Invalid Function Call: Function with name {id_} does not exist')))
         self.current_function_call_id_ = id_
 
     def generate_are_memory(self):
@@ -163,16 +169,22 @@ class FunctionTable(Publisher, Subscriber):
             for id_, func in self.functions.items():
                 func.display_variables(id_)
 
-    def end_function(self, memory: Allocator):
+    def end_function(self):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
 
         # tell quad generator to generate end_func quad
         self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
 
+        delete_list = []
+
         for key in self.current_function.variables:
-            address = self.current_function.variables[key].address_
-            memory.release_address(address)
+            delete_list.append(self.current_function.variables[key].address_)
+
+        for address in self.temporal_variables:
+            delete_list.append(address)
+
+        self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
 
     def current_trace(self):
         return self.current_function.id_
@@ -192,6 +204,7 @@ class FunctionTable(Publisher, Subscriber):
 
     def set_return(self):
         self.current_function.has_return = True
+        self.broadcast(Event(CompilerEvent.SET_RETURN, self.current_function.type_))
 
     def __validate_return(self):
         if not self.current_function.valid_function():

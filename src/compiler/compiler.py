@@ -3,6 +3,8 @@ import sys
 import jsonpickle
 
 from src.compiler.allocator.allocator import Allocator
+from src.compiler.allocator.helpers import Layers
+from src.compiler.allocator.types import ValueType
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.type import OperationType
@@ -26,13 +28,22 @@ class Compiler(Publisher, Subscriber):
         self._parser = yacc.yacc(module=self, start="program", debug=True)
         self._code_generator = CodeGenerator(scheduler=self._allocator)
 
-        # subscribe symbol table to  generator events
-        self._code_generator.expression_actions.add_subscriber(self._symbol_table.function_table, {})
-        # adds function actions as a subscriber to function table events.
-        self._symbol_table.function_table.add_subscriber(self._code_generator.function_actions, {})
-        self.add_subscriber(self._code_generator.function_actions, {})
+        # subscribe to expression code generator
+        expressions = self._code_generator.expression_actions
+        expressions.add_subscriber(self._symbol_table.function_table, {})
+        expressions.add_subscriber(self._allocator, {})
 
-        # subscribe compiler receive semantic errors
+        # subscribers for function table
+        functions = self._symbol_table.function_table
+        functions.add_subscriber(self._code_generator.function_actions, {})
+        functions.add_subscriber(self._code_generator.expression_actions, {})
+        functions.add_subscriber(self._allocator, {})
+
+        # subscribe to compiler events
+        self.add_subscriber(self._code_generator.function_actions, {})
+        self.add_subscriber(self._symbol_table.function_table, {})
+
+        # subscribe compiler to error messages
         self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
         self._code_generator.expression_actions.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
         self._symbol_table.function_table.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
@@ -242,9 +253,18 @@ class Compiler(Publisher, Subscriber):
                   | while
                   | input
                   | assign
-                  | call
+                  | call return_type_warning
                   | return
         """
+
+    def p_return_type_warning(self, p):
+        """
+        return_type_warning :
+        """
+        id_ = self._symbol_table.function_table.current_function_call_id_
+        type_ = self._symbol_table.function_table.functions[id_].type_
+        if type_ is not ValueType.VOID:
+            print(f'Warning, function {id_} returns {type_.value}, but is not unused')
 
     def p_while(self, p):
         """
@@ -305,7 +325,7 @@ class Compiler(Publisher, Subscriber):
     def p_call(self, p):
         """
         call : ID verify_function_existence LPAREN gen_are_memory call_parameters RPAREN verify_param_count generate_go_sub
-             | ID verify_function_existence LPAREN gen_are_memory RPAREN generate_go_sub
+             | ID verify_function_existence LPAREN gen_are_memory RPAREN verify_param_count generate_go_sub
         """
 
     def p_call_parameters(self, p):
@@ -343,14 +363,13 @@ class Compiler(Publisher, Subscriber):
         self._code_generator.function_actions.generate_go_sub(id_)
 
         # reset
-        self._symbol_table.function_table.parameter_count = 0
-        self._symbol_table.function_table.current_function_call_id_ = None
 
     def p_gen_are_memory(self, p):
         """
         gen_are_memory :
         """
         self._symbol_table.function_table.generate_are_memory()
+        self.p_push_operator('(')
 
     def p_verify_parameter_signature(self, p):
         """
@@ -441,10 +460,22 @@ class Compiler(Publisher, Subscriber):
                  | FLOATLIT  add_constant
                  | BOOLLIT   add_constant
                  | string
-                 | call
+                 |  call add_call_operator
                  | call_array
                  | constant2
         """
+
+    def p_add_call_operator(self, p):
+        """
+        add_call_operator :
+        """
+
+        id_ = self._symbol_table.function_table.current_function_call_id_
+        type_ = self._symbol_table.function_table.functions[id_].type_
+        address = self._allocator.allocate_address(type_, Layers.TEMPORARY)
+
+        self._code_generator.expression_actions.add_call_assign(address, type_)
+        self.p_push_operator(')')
 
     def p_constant2(self, p):
         """
@@ -499,7 +530,7 @@ class Compiler(Publisher, Subscriber):
         end_function :
         """
         self._code_generator.execute_remaining()
-        self._symbol_table.function_table.end_function(memory=self._allocator)
+        self._symbol_table.function_table.end_function()
 
     def p_add_constant(self, p):
         """
@@ -660,8 +691,11 @@ class Compiler(Publisher, Subscriber):
     # -- ERROR -----------------------
 
     def p_error(self, p):
+        # self.display_debug()
+
         error_message = 'Syntax error'
         if p:
+
             if type(p) is CompilerError:
                 p.trace = self._symbol_table.function_table.current_trace()
                 p.print()
@@ -675,3 +709,4 @@ class Compiler(Publisher, Subscriber):
 
     def display_debug(self):
         self._symbol_table.constant_table.display()
+        self._code_generator.display()

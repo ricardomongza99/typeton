@@ -1,28 +1,17 @@
 var x: Int
 var y: Int
 
+func fib(n: Int) -> Int {
+   if (n <= 1) {
+       return n
+   }
 
-
-func dog() {
-    print("bark")
-}
-
-func duck(age: Int) {
-    dog()
-    print("quack")
+   return fib(n-1) + fib(n-2)
 }
 
 func main() {
-   y = 0
    var x: Int
-   x = 0
 
-
-    while (x < 10) {
-        duck(x)
-        x = x + 1
-    }
-
+   x = fib(20)
+   print(x)
 }
-
-

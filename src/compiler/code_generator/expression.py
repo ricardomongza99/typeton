@@ -10,14 +10,14 @@ from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.symbol_table.constant_table.constant_table import ConstantTable
 from src.compiler.validation.type_check import type_check as check_type
 from src.utils.debug import Debug
-from src.utils.observer import Publisher, Event
+from src.utils.observer import Publisher, Event, Subscriber
 
 
 class ExpressionEvents(Enum):
     ADD_TEMP = 0
 
 
-class ExpressionActions(Publisher):
+class ExpressionActions(Publisher, Subscriber):
     def __init__(self, quad_list, operands, operators):
         super().__init__()
         self.__operand_address_stack: List[Operand] = operands  # stores the
@@ -25,6 +25,10 @@ class ExpressionActions(Publisher):
         # ed virtual address, not actual value
         self.__operator_stack: List[Operator] = operators
         self.parenthesis_start = [0]  # operators indexed before this value do not exist
+
+    def handle_event(self, event: Event):
+        if event.type_ is CompilerEvent.SET_RETURN:
+            self.__execute_function_return(event.payload)
 
     def push_variable(self, id_, type_, address):
         if address is None:
@@ -41,7 +45,7 @@ class ExpressionActions(Publisher):
 
         if last_operator is not None and last_operator.priority == priority:
             if priority == 0:
-                return self.__execute_assign(scheduler)
+                return self.__execute_assign()
             return self.__execute_arithmetic(scheduler)
 
     def push_operator(self, new_operator: Operator, scheduler: Allocator):
@@ -81,7 +85,7 @@ class ExpressionActions(Publisher):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
         return self.__operand_address_stack.pop()
 
-    def __execute_assign(self, scheduler: Allocator):
+    def __execute_assign(self):
         address_map = Debug.map()
 
         operator = self.next_operator()
@@ -105,9 +109,27 @@ class ExpressionActions(Publisher):
             result_address=left.address)
 
         self.quad_list.append(quad)
+        # self.broadcast(Event(CompilerEvent.RELEASE_MEM_IF_POSSIBLE, [right.address]))
 
-        if not scheduler.is_segment(right.address, Layers.CONSTANT):
-            scheduler.release_address(right.address)
+    def __execute_function_return(self, type_: ValueType):
+        operator = self.next_operator()
+        return_expression = self.next_operand()
+
+        if return_expression.type_ is not type_:
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Function return type validation failed: '
+                f'Should be {type_.value}, but is {return_expression.type_.value} instead')))
+
+        quad = Quad(operation=operator.type_.value, result_address=return_expression.address)
+        self.quad_list.append(quad)
+        self.quad_list.append(Quad(operation=OperationType.ENDFUNC))
+
+    def add_call_assign(self, address, function_return_type):
+        quad = Quad(OperationType.CALL_ASSIGN, result_address=address)
+        self.quad_list.append(quad)
+
+        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (function_return_type, address)))
+        self.__operand_address_stack.append(Operand(function_return_type, address))
 
     def __execute_arithmetic(self, scheduler: Allocator):
         operator = self.next_operator()
@@ -133,19 +155,22 @@ class ExpressionActions(Publisher):
         # temps count towards function total size
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
 
+        if scheduler.is_segment(left.address, Layers.TEMPORARY):
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left.type_, left.address)))
+        if scheduler.is_segment(right.address, Layers.TEMPORARY):
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right.type_, right.address)))
+
         quad = (Quad(
-                left_address=left.address,
-                right_address=right.address,
-                operation=OperationType(operator.type_.value),  # convert to type for easy identification in vm
-                result_address=result))
+            left_address=left.address,
+            right_address=right.address,
+            operation=operator.type_,  # convert to type for easy identification in vm
+            result_address=result))
 
         self.quad_list.append(quad)
 
-        # Release temp addresses
-        if scheduler.is_segment(left.address, Layers.TEMPORARY):
-            scheduler.release_address(left.address)
-        if scheduler.is_segment(right.address, Layers.TEMPORARY):
-            scheduler.release_address(right.address)
+        # Release unused addresses
+        # self.broadcast(Event(CompilerEvent.RELEASE_MEM_IF_POSSIBLE,
+        #                      [left.address, right.address]))
 
     def __peek_operators(self):
         if len(self.__operator_stack) - 1 < self.parenthesis_start[-1]:
