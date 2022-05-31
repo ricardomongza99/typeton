@@ -1,9 +1,9 @@
 from enum import Enum
 from typing import List
 
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.helpers import Layers
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.type import Operand, Operator
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
@@ -48,7 +48,7 @@ class ExpressionActions(Publisher, Subscriber):
     def get_operands(self):
         return self.__operand_address_stack
 
-    def execute_if_possible(self, priority, scheduler: Allocator):
+    def execute_if_possible(self, priority, stack_allocator: StackAllocator):
         last_operator: Operator = self.__peek_operators()
 
         if last_operator is not None and last_operator.priority == priority:
@@ -56,11 +56,11 @@ class ExpressionActions(Publisher, Subscriber):
                 print(last_operator.type_)
                 if last_operator.type_ in SHORTHAND:
                     print("short_hand")
-                    return self.execute_shorthand_assign(scheduler)
+                    return self.execute_shorthand_assign(stack_allocator)
                 return self.__execute_assign()
-            return self.__execute_arithmetic(scheduler)
+            return self.__execute_arithmetic(stack_allocator)
 
-    def push_operator(self, operator, scheduler: Allocator):
+    def push_operator(self, operator, stack_allocator: StackAllocator):
         type_ = OperationType(operator)
         priority = 0
 
@@ -82,12 +82,12 @@ class ExpressionActions(Publisher, Subscriber):
 
         operator = Operator(priority, type_)
 
-        is_parenthesis = self.__handle_parenthesis(operator, scheduler)
+        is_parenthesis = self.__handle_parenthesis(operator, stack_allocator)
 
         if not is_parenthesis:
             self.__operator_stack.append(operator)
 
-    def execute_remaining(self, scheduler: Allocator):
+    def execute_remaining(self, scheduler: StackAllocator):
         while len(self.__operator_stack) > self.parenthesis_start[-1] and len(self.__operand_address_stack) > 2:
             self.__execute_arithmetic(scheduler)
 
@@ -97,7 +97,7 @@ class ExpressionActions(Publisher, Subscriber):
         self.__operand_address_stack.append(operand)
 
     # Helpers
-    def __handle_parenthesis(self, operator: Operator, scheduler: Allocator):
+    def __handle_parenthesis(self, operator: Operator, scheduler: StackAllocator):
         if operator.type_ == OperationType.LPAREN:
             self.parenthesis_start.append(len(self.__operator_stack))
             return True
@@ -143,7 +143,7 @@ class ExpressionActions(Publisher, Subscriber):
         self.quad_list.append(quad)
         # self.broadcast(Event(CompilerEvent.RELEASE_MEM_IF_POSSIBLE, [right.address]))
 
-    def execute_shorthand_assign(self, scheduler):
+    def execute_shorthand_assign(self, stack_allocator):
         address_map = Debug.map()
         operator = self.next_operator()
 
@@ -160,7 +160,7 @@ class ExpressionActions(Publisher, Subscriber):
                 f'({assignment.type_.value} and {expression.type_.value} are not compatible)')))
 
         # address needed to store operation (a += b) = (a + b = temp, a = temp)
-        temp_address = scheduler.allocate_address(ValueType(type_match), Layers.TEMPORARY)
+        temp_address = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, temp_address)))
         operator_type = None
 
@@ -204,7 +204,7 @@ class ExpressionActions(Publisher, Subscriber):
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (function_return_type, address)))
         self.__operand_address_stack.append(Operand(function_return_type, address))
 
-    def __execute_arithmetic(self, scheduler: Allocator):
+    def __execute_arithmetic(self, stack_allocator: StackAllocator):
         operator = self.next_operator()
 
         right: Operand = self.next_operand()
@@ -222,15 +222,15 @@ class ExpressionActions(Publisher, Subscriber):
 
             # broadcast add variable count to function data
 
-        result = scheduler.allocate_address(ValueType(type_match), Layers.TEMPORARY)
+        result = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
         self.__operand_address_stack.append(Operand(ValueType(type_match), result))
 
         # temps count towards function total size
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
 
-        if scheduler.is_segment(left.address, Layers.TEMPORARY):
+        if stack_allocator.is_segment(left.address, Layers.TEMPORARY):
             self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left.type_, left.address)))
-        if scheduler.is_segment(right.address, Layers.TEMPORARY):
+        if stack_allocator.is_segment(right.address, Layers.TEMPORARY):
             self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right.type_, right.address)))
 
         quad = (Quad(

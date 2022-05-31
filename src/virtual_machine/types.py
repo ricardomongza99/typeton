@@ -1,7 +1,7 @@
 from typing import Dict, List
 
-from src.compiler.allocator.helpers import Layers, init_types, get_segment, get_resource, Segment
-from src.compiler.allocator.types import ValueType, DEFAULT_TYPES, TypeRange
+from src.compiler.stack_allocator.helpers import Layers, init_types, get_segment, get_resource, Segment
+from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, TypeRange
 from src.compiler.symbol_table.constant_table import ConstantTable
 
 

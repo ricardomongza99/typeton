@@ -3,9 +3,9 @@ from typing import Dict
 
 import jsonpickle
 
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.helpers import Layers
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.types import ValueType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
@@ -102,12 +102,12 @@ class FunctionTable(Publisher, Subscriber):
         """ Adds dimension to current array """
         self.current_function.add_dimension(size)
 
-    def allocate_dimensions(self, memory: Allocator):
+    def allocate_dimensions(self, memory: StackAllocator):
         """ Allocates spaces for array (Moves pointer x spaces) """
         layer = Layers.GLOBAL if self.current_function.id_ == 'global' else Layers.LOCAL
         self.current_function.allocate_dimensions(layer, memory)
 
-    def set_type(self, type_, memory: Allocator):
+    def set_type(self, type_, memory: StackAllocator):
         """ Sets type for function, parameter or variable """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
 
@@ -123,12 +123,12 @@ class FunctionTable(Publisher, Subscriber):
         self.current_function.set_type(type_)
         self.function_data().type_ = ValueType(type_)
 
-    def _set_param_type(self, type_, layer, memory: Allocator):
+    def _set_param_type(self, type_, layer, memory: StackAllocator):
         self.current_function.set_variable_type(type_, layer, memory)
         self.function_data().add_variable_size(ValueType(type_), layer)
         self.__add_parameter_signature(type_)
 
-    def _set_variable_type(self, type_, layer, memory: Allocator):
+    def _set_variable_type(self, type_, layer, memory: StackAllocator):
         self.function_data().add_variable_size(ValueType(type_), layer)
         id_ = self.current_function.set_variable_type(type_, layer, memory)
         return id_

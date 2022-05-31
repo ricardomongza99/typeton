@@ -2,9 +2,9 @@ from typing import Dict
 
 import jsonpickle
 
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.helpers import Layers
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.types import ValueType
 from src.utils.debug import Debug
 from src.utils.display import make_table
 from .constant import Constant
@@ -15,7 +15,7 @@ class ConstantTable:
         self.table: Dict[str, Constant] = {}
         self.inverse_hash: Dict[int, any] = {}
 
-    def add(self, value, memory: Allocator):
+    def add(self, value, memory: StackAllocator):
         if self.exists(value):
             return
 

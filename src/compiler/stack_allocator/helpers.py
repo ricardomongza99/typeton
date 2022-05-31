@@ -1,7 +1,7 @@
 # Static Helpers
 from enum import Enum
 
-from src.compiler.allocator.types import TypeResource, MemoryType, TypeRange
+from src.compiler.stack_allocator.types import TypeResource, MemoryType, TypeRange
 
 
 def is_between_range(start: int, value: int, end: int):

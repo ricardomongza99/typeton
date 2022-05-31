@@ -2,9 +2,9 @@ import sys
 
 import jsonpickle
 
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.helpers import Layers
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.code_generator import CodeGenerator
 from src.compiler.code_generator.expression import Operator
 from src.compiler.code_generator.type import OperationType
@@ -20,7 +20,7 @@ class Compiler(Publisher, Subscriber):
     def __init__(self):
         super().__init__()
 
-        self._allocator = Allocator()
+        self._allocator = StackAllocator()
         self._symbol_table = SymbolTable()
 
         self.tokens = tokens
