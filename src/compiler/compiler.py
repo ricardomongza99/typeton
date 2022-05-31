@@ -162,7 +162,7 @@ class Compiler(Publisher, Subscriber):
         """
         type : ID
              | primitive
-             | primitive array
+             | primitive array allocate_dimensions
         """
 
     def p_primitive(self, p):
@@ -175,8 +175,8 @@ class Compiler(Publisher, Subscriber):
 
     def p_array(self, p):
         """
-        array : LBRACK INTLIT RBRACK
-              | LBRACK INTLIT RBRACK array
+        array : LBRACK INTLIT RBRACK add_dimension
+              | LBRACK INTLIT RBRACK add_dimension array
         """
 
     # -- BLOCKS -----------------------
@@ -550,6 +550,18 @@ class Compiler(Publisher, Subscriber):
         add_variable :
         """
         self._symbol_table.function_table.add_variable(p[-1], is_param=False)
+
+    def p_add_dimension(self, p):
+        """
+        add_dimension :
+        """
+        self._symbol_table.function_table.add_dimension(p[-2])
+
+    def p_allocate_dimensions(self, p):
+        """
+        allocate_dimensions :
+        """
+        self._symbol_table.function_table.allocate_dimensions(self._allocator)
 
     def p_set_type(self, p):
         """

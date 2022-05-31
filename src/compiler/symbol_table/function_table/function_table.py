@@ -98,6 +98,15 @@ class FunctionTable(Publisher, Subscriber):
         """ Add Var to the current function's vars table """
         self.current_function.add_variable(id_, is_param)
 
+    def add_dimension(self, size):
+        """ Adds dimension to current array """
+        self.current_function.add_dimension(size)
+
+    def allocate_dimensions(self, memory: Allocator):
+        """ Allocates spaces for array (Moves pointer x spaces) """
+        layer = Layers.GLOBAL if self.current_function.id_ == 'global' else Layers.LOCAL
+        self.current_function.allocate_dimensions(layer, memory)
+
     def set_type(self, type_, memory: Allocator):
         """ Sets type for function, parameter or variable """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL

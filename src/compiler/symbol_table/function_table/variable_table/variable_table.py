@@ -1,5 +1,5 @@
+import math
 from typing import Dict
-
 from .variable import Variable
 from src.compiler.allocator.allocator import Allocator
 from src.compiler.allocator.helpers import Layers
@@ -12,6 +12,7 @@ class VariableTable:
     def __init__(self):
         self.variables: Dict[str, Variable] = {}
         self.current_variable = None
+        self.current_dimensions = []
 
     def add(self, id_, is_param):
         """ Add Variable to `variables` dictionary if not existent """
@@ -19,6 +20,17 @@ class VariableTable:
             # we can't know where to put it without the type, just store the reference for now
             self.variables[id_] = Variable(id_, is_param=is_param)
             self.current_variable = self.variables[id_]
+
+    def add_dimension(self, size):
+        """ Append dimension size to current dimensions list """
+        self.current_dimensions.append(size)
+
+    def allocate_dimensions(self, layer: Layers, memory: Allocator):
+        """ Multiply all the current dimensions to allocate required space """
+        size = math.prod(self.current_dimensions)
+        memory.allocate_space(self.current_variable.type_, layer, size)
+        # Empty current_dimensions for next use
+        self.current_dimensions = []
 
     def set_type(self, type_, layer: Layers, memory: Allocator):
         """ Sets current var type """

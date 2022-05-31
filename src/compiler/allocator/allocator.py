@@ -45,6 +45,16 @@ class Allocator(Publisher, Subscriber):
 
         return new_address
 
+    def allocate_space(self, value_type: ValueType, layer: Layers, size):
+        """ Allocates `size` spaces of memory. Used for arrays """
+        segment = self.__segments[layer.value]
+        resource: TypeResource = segment.resources[value_type.value]
+
+        if resource.end < resource.pointer + (size - 1):
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Too many variables")))
+
+        resource.pointer += (size - 1)
+
     def get_segment(self, address):
 
         return get_segment(address, self.__segments)
