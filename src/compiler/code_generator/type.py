@@ -32,6 +32,7 @@ class OperationType(Enum):
     ERA = 'era'
     END = 'end'
     PRINT = 'print'
+    VERIFY = 'verify'
 
 
 class Operator:
