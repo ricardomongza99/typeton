@@ -13,4 +13,5 @@ var i: Float
 
 func main() {
     print("Hello world!")
+    A[0] = 5
 }
