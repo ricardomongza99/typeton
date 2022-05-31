@@ -1,8 +1,9 @@
+import timeit
 from typing import List, Dict
 
-import timeit
 import jsonpickle
 
+from src.compiler.allocator.types import ValueType
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
@@ -39,6 +40,24 @@ FUNCTIONS = {
     OperationType.RETURN,
     OperationType.CALL_ASSIGN
 }
+
+
+def _execute_typed_multiply(result_type, left_value, right_value):
+    if result_type is ValueType.INT:
+        return int(left_value) * int(right_value)
+    return float(left_value) * float(right_value)
+
+
+def _execute_typed_subtract(result_type, left_value, right_value):
+    if result_type is ValueType.INT:
+        return int(left_value) - int(right_value)
+    return float(left_value) - float(right_value)
+
+
+def _execute_typed_add(result_type: ValueType, left_value, right_value):
+    if result_type is ValueType.INT:
+        return int(left_value) + int(right_value)
+    return float(left_value) + float(right_value)
 
 
 class VirtualMachine:
@@ -119,23 +138,38 @@ class VirtualMachine:
             self._ip += 1
         else:
             print("Unknown Command")
+            print(quad.operation)
             self._ip = len(self._quads) + 1
 
     # -- EXECUTION methods  ----------------------------
 
+    def _stop(self):
+        self._ip = len(self._quads) + 1
+
+    def _execute_typed_divide(self, result_type, left_value, right_value):
+        if right_value == 0:
+            print(f'Divide by 0 at {left_value} / 0')
+            return self._stop()
+
+        if result_type is ValueType.INT:
+            return int(int(left_value) / int(right_value))
+        return float(left_value) / float(right_value)
+
     def __execute_expression(self, quad):
         left = self._get_value(quad.left_address)
         right = self._get_value(quad.right_address)
+        type_ = self.global_memory.get_type(quad.result_address)
+        print(type_)
         result = 0
 
         if quad.operation is OperationType.ADD:
-            result = left + right
+            result = _execute_typed_add(type_, left, right)
         elif quad.operation is OperationType.SUBTRACT:
-            result = left - right
+            result = _execute_typed_subtract(type_, left, right)
         elif quad.operation is OperationType.MULTIPLY:
-            result = left * right
+            result = _execute_typed_multiply(type_, left, right)
         elif quad.operation is OperationType.DIVIDE:
-            result = left / right
+            result = self._execute_typed_divide(type_, left, right)
 
         self._ip += 1
         self.__execute_assign(quad.result_address, result)
