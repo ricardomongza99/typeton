@@ -105,6 +105,11 @@ class ContextMemory:
         print("Bool", self.data_storage[ValueType.BOOL])
         print("String", self.data_storage[ValueType.STRING])
 
+    def get_type(self, address):
+        segment = get_segment(address, self.type_data)
+        type_data: TypeRange = get_resource(address, segment)
+        return type_data.type_
+
     def __init_storage(self):
         """Only for local variables"""
         self.data_storage[ValueType.INT] = init_storage(self.size_data.get_data(ValueType.INT).total)
