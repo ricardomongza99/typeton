@@ -28,14 +28,13 @@ def _add(operators, combinations):
             _cube[f'{operator}:{left_type}:{right_type}'] = result_type
 
 
-_arithmetic_symbols = ['+', '-', '*', '/']
+_arithmetic_symbols = ['+', '-', '*', '/', '+=', '-=', '*=', '/=']
 _arithmetic_combinations = [
     ['Int', 'Int', 'Int'],
     ['Float', 'Float', 'Float'],
     ['Int', 'Float', 'Float'],
     ['Float', 'Int', 'Float'],
-    ['String', 'String', 'String'],
-
+    # ['String', 'String', 'String'],
 ]
 
 _comparison_symbols = ['==', '!=', '<', '<=', '>', '>=']

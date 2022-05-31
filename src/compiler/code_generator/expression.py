@@ -17,6 +17,14 @@ class ExpressionEvents(Enum):
     ADD_TEMP = 0
 
 
+SHORTHAND = {
+    OperationType.DASSIGN,
+    OperationType.LASSIGN,
+    OperationType.MASSIGN,
+    OperationType.PASSIGN
+}
+
+
 class ExpressionActions(Publisher, Subscriber):
     def __init__(self, quad_list, operands, operators):
         super().__init__()
@@ -45,6 +53,10 @@ class ExpressionActions(Publisher, Subscriber):
 
         if last_operator is not None and last_operator.priority == priority:
             if priority == 0:
+                print(last_operator.type_)
+                if last_operator.type_ in SHORTHAND:
+                    print("short_hand")
+                    return self.execute_shorthand_assign(scheduler)
                 return self.__execute_assign()
             return self.__execute_arithmetic(scheduler)
 
@@ -110,6 +122,47 @@ class ExpressionActions(Publisher, Subscriber):
 
         self.quad_list.append(quad)
         # self.broadcast(Event(CompilerEvent.RELEASE_MEM_IF_POSSIBLE, [right.address]))
+
+    def execute_shorthand_assign(self, scheduler):
+        address_map = Debug.map()
+        operator = self.next_operator()
+
+        expression = self.next_operand()
+        assignment = self.next_operand()
+
+        type_match = check_type(operator.type_.value, assignment.type_.value, expression.type_.value)
+        if type_match is None:
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'{address_map[assignment.address]}:'
+                f'{assignment.type_.value} '
+                f'{operator.type_.value} '
+                f'{address_map[expression.address]} '
+                f'({assignment.type_.value} and {expression.type_.value} are not compatible)')))
+
+        # address needed to store operation (a += b) = (a + b = temp, a = temp)
+        temp_address = scheduler.allocate_address(ValueType(type_match), Layers.TEMPORARY)
+        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, temp_address)))
+        operator_type = None
+
+        if operator.type_ is OperationType.PASSIGN:
+            operator_type = OperationType.ADD
+        elif operator.type_ is OperationType.LASSIGN:
+            operator_type = OperationType.SUBTRACT
+        elif operator.type_ is OperationType.MASSIGN:
+            operator_type = OperationType.MULTIPLY
+        elif operator.type_ is OperationType.DASSIGN:
+            operator_type = OperationType.DIVIDE
+        else:
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'Invalid shorthand type {operator.type_}')))
+
+        temp_quad = Quad(operation=operator_type,
+                         left_address=assignment.address,
+                         right_address=expression.address,
+                         result_address=temp_address)
+
+        assignment_quad = Quad(OperationType.ASSIGN, left_address=temp_address, result_address=assignment.address)
+        self.quad_list.append(temp_quad)
+        self.quad_list.append(assignment_quad)
 
     def __execute_function_return(self, type_: ValueType):
         operator = self.next_operator()

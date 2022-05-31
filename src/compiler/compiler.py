@@ -302,10 +302,10 @@ class Compiler(Publisher, Subscriber):
     def p_assign2(self, p):  # TODO add rest to semantic cube
         """
         assign2 : ASSIGN push_operator
-                | PASSIGN
-                | LASSIGN
-                | MASSIGN
-                | DASSIGN
+                | PASSIGN push_operator
+                | LASSIGN push_operator
+                | MASSIGN push_operator
+                | DASSIGN push_operator
         """
 
     def p_call_array(self, p):
@@ -662,7 +662,11 @@ class Compiler(Publisher, Subscriber):
         type_ = OperationType(p[-1])
         priority = 0
 
-        if type_ is {OperationType.ASSIGN}:
+        if type_ in {OperationType.LASSIGN,
+                     OperationType.ASSIGN,
+                     OperationType.PASSIGN,
+                     OperationType.MASSIGN,
+                     OperationType.DASSIGN}:
             priority = 0
         elif type_ in {OperationType.AND, OperationType.OR}:
             priority = 1
