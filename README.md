@@ -190,11 +190,11 @@ func main() {
     - [x] Arithmetic expressions
     - [x] Sequential blocks (ASSIGN, INPUT, ETC.)
     - [x] Conditional blocks (IF, ELSE, WHILE, WHILE)
-    - [ ] Functions  -80% complete
-    - [ ] Arrays
+    - [x] Functions
+    - [ ] Arrays  (declaration done, access 60%)
     - [ ] Classes
-- [ ] 🖥 Virtual Machine
-    - [ ] Memory for execution (Global memory, temporal memory, execution stack)
+- [x] 🖥 Virtual Machine
+    - [x] Memory for execution (Global memory, temporal memory, execution stack)
     - [x] Arithmetic expressions execution
     - [x] Sequential blocks execution
     - [x] Conditional blocks execution
