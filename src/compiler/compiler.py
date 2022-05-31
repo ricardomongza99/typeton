@@ -653,29 +653,7 @@ class Compiler(Publisher, Subscriber):
         """
         push_operator :
         """
-
-        # TODO move all this garbage into a helper function
-        type_ = OperationType(p[-1])
-        priority = 0
-
-        if type_ is {OperationType.ASSIGN}:
-            priority = 0
-        elif type_ in {OperationType.AND, OperationType.OR}:
-            priority = 1
-        elif type_ in {OperationType.GREAT_THAN,
-                       OperationType.EQUAL,
-                       OperationType.LESS_THAN,
-                       OperationType.LESS_EQUAL,
-                       OperationType.GREAT_EQUAL}:
-            priority = 2
-        elif type_ in {OperationType.ADD, OperationType.SUBTRACT}:
-            priority = 3
-
-        elif type_ in {OperationType.MULTIPLY, OperationType.DIVIDE}:
-            priority = 4
-
-        operator = Operator(priority, type_)
-        (self._code_generator.push_operator(operator))
+        self._code_generator.push_operator(p[-1])
 
     def p_push_variable(self, p):
         """
