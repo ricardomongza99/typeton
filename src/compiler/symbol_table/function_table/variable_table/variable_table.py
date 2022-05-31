@@ -12,7 +12,6 @@ class VariableTable:
     def __init__(self):
         self.variables: Dict[str, Variable] = {}
         self.current_variable = None
-        self.current_dimensions = []
 
     def add(self, id_, is_param):
         """ Add Variable to `variables` dictionary if not existent """
@@ -22,15 +21,13 @@ class VariableTable:
             self.current_variable = self.variables[id_]
 
     def add_dimension(self, size):
-        """ Append dimension size to current dimensions list """
-        self.current_dimensions.append(size)
+        """ Append new dimension `size` to current variable's `dimensions` list """
+        self.current_variable.dimensions.append(size)
 
     def allocate_dimensions(self, layer: Layers, memory: Allocator):
-        """ Multiply all the current dimensions to allocate required space """
-        size = math.prod(self.current_dimensions)
+        """ Multiply all the dimensions of current variable to allocate required space """
+        size = math.prod(self.current_variable.dimensions)
         memory.allocate_space(self.current_variable.type_, layer, size)
-        # Empty current_dimensions for next use
-        self.current_dimensions = []
 
     def set_type(self, type_, layer: Layers, memory: Allocator):
         """ Sets current var type """
