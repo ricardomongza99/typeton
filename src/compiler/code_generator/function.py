@@ -1,4 +1,4 @@
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.types import ValueType
 
 from src.compiler.code_generator.type import Quad, OperationType, Operand
 from src.compiler.errors import CompilerEvent

@@ -1,9 +1,9 @@
 import math
 from typing import Dict
 from .variable import Variable
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.helpers import Layers
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.types import ValueType
 from src.utils.debug import Debug
 from src.utils.display import make_table
 
@@ -25,12 +25,13 @@ class VariableTable:
         """ Append new dimension `size` to current variable's `dimensions` list """
         self.current_variable.dimensions.append(size)
 
-    def allocate_dimensions(self, layer: Layers, memory: Allocator):
+    def allocate_dimensions(self, layer: Layers, memory: StackAllocator):
         """ Multiply all the dimensions of current variable to allocate required space """
         size = math.prod(self.current_variable.dimensions)
+
         memory.allocate_space(self.current_variable.type_, layer, size)
 
-    def set_type(self, type_, layer: Layers, memory: Allocator):
+    def set_type(self, type_, layer: Layers, memory: StackAllocator):
         """ Sets current var type """
         enum_value = ValueType(type_)
         address = memory.allocate_address(enum_value, layer)

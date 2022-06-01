@@ -1,12 +1,12 @@
 # Stores Type Data
-from src.compiler.allocator.helpers import get_available_address, init_types, Layers, get_resource, get_segment
-from src.compiler.allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
+from src.compiler.stack_allocator.helpers import get_available_address, init_types, Layers, get_resource, get_segment
+from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.debug import Debug
 from src.utils.observer import Publisher, Event, Subscriber
 
 
-class Allocator(Publisher, Subscriber):
+class StackAllocator(Publisher, Subscriber):
     def __init__(self, type_resources: [MemoryType] = DEFAULT_TYPES):
         super().__init__()
         self.__segments = init_types(type_resources, is_runtime=False)

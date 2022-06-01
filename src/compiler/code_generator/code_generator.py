@@ -2,7 +2,7 @@ from typing import List
 
 import jsonpickle
 
-from src.compiler.allocator.allocator import Allocator
+from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
 from src.compiler.code_generator.expression import Operand, Operator, ExpressionActions
@@ -15,7 +15,7 @@ from src.utils.display import make_table, TableOptions
 
 
 class CodeGenerator:
-    def __init__(self, scheduler: Allocator):
+    def __init__(self, scheduler: StackAllocator):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []

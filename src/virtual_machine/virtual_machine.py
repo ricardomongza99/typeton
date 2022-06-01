@@ -3,7 +3,7 @@ from typing import List, Dict
 
 import jsonpickle
 
-from src.compiler.allocator.types import ValueType
+from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
