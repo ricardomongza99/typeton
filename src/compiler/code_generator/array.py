@@ -2,9 +2,9 @@ from typing import List
 from src.compiler.code_generator.type import Quad, OperationType, Operand
 from src.utils.observer import Subscriber, Event, Publisher
 from src.compiler.errors import CompilerError, CompilerEvent
-from src.compiler.allocator.allocator import Allocator
-from src.compiler.allocator.types import ValueType
-from src.compiler.allocator.helpers import Layers
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.types import ValueType
+from src.compiler.stack_allocator.helpers import Layers
 
 
 class ArrayActions(Publisher):
@@ -35,7 +35,7 @@ class ArrayActions(Publisher):
         )
         self._quad_list.append(quad)
 
-    def get_array_pointer(self, scheduler: Allocator):
+    def get_array_pointer(self, stack_allocator: StackAllocator):
         print(self._dimension_address_stack)
 
         if len(self._operand_stack) <= 1:
