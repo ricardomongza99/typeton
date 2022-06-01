@@ -186,6 +186,7 @@ func main() {
     - [x] Functions directory
     - [x] Variable tables
     - [x] Semantics cube
+    - [x] Heap Allocator
 - [ ] 🏭 Code generation 
     - [x] Arithmetic expressions
     - [x] Short Hand Assignments (+=, -=, *=, /=)
