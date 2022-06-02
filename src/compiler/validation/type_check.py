@@ -64,11 +64,15 @@ _assign_combinations = [
     ['Return', 'Bool', 'Bool'],
     ['Return', 'Int', 'Int'],
     ['Return', 'Float', 'Float'],
-    ['Return', 'String', 'String']
-
-
-
-
+    ['Return', 'String', 'String'],
+    ['Pointer', 'Int', 'Pointer'],
+    ['Pointer', 'Float', 'Pointer'],
+    ['Pointer', 'Bool', 'Pointer'],
+    ['Pointer', 'String', 'Pointer'],
+    ['Int', 'Pointer', 'Int'],
+    ['Float', 'Pointer', 'Float'],
+    ['Bool', 'Pointer', 'Bool'],
+    ['String', 'Pointer', 'String'],
 ]
 
 _boolean_symbols = ['&&', '||']
