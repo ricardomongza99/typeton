@@ -9,6 +9,7 @@ class ValueType(Enum):
     STRING = "String"
     FLOAT = "Float"
     BOOL = "Bool"
+    POINTER = "Pointer"
 
 
 class TypeRange:
@@ -23,7 +24,6 @@ class TypeResource(TypeRange):
         super().__init__(start, end, resource_type)
         self.free_addresses_list = Queue()
         self.pointer = start
-
 
 
 class MemoryType:

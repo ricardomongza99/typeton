@@ -1,7 +1,8 @@
 # Static Helpers
 from enum import Enum
 
-from src.compiler.allocator.types import TypeResource, MemoryType, TypeRange
+from src.compiler.allocator.types import TypeResource, MemoryType, TypeRange, ValueType
+from src.config.definitions import POINTER_RANGE_SIZE
 
 
 def is_between_range(start: int, value: int, end: int):
@@ -84,6 +85,20 @@ def init_types(memory_types: [MemoryType], is_runtime: bool):
 
             segment.resources[memory_type.type.value] = resource
             current_start = new_end + 1
+
+        # TODO: Refactor
+        if layer == Layers.TEMPORARY:
+            memory_type = MemoryType(value_type=ValueType.POINTER, size=POINTER_RANGE_SIZE)
+            new_end = current_start + memory_type.size
+            # Only take what we need
+            if is_runtime:
+                resource = TypeRange(current_start, new_end, memory_type.type)
+            else:
+                resource = TypeResource(current_start, new_end, memory_type.type)
+
+            segment.resources[memory_type.type.value] = resource
+            current_start = new_end + 1
+
         segment.end = current_start - 1
         segments[layer.value] = segment
 
