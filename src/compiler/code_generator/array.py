@@ -52,3 +52,4 @@ class ArrayActions(Publisher):
             result_address=result_address
         )
         self._quad_list.append(quad)
+        self._operand_stack.append(Operand(ValueType.POINTER, result_address))
