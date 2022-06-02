@@ -9,6 +9,7 @@ class ValueType(Enum):
     STRING = "String"
     FLOAT = "Float"
     BOOL = "Bool"
+    POINTER = "Pointer"
 
 
 class TypeRange:
