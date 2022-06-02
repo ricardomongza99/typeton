@@ -43,9 +43,7 @@ class ArrayActions(Publisher):
         left_operand = self._operand_stack.pop()
         right_operand = self._operand_stack.pop()
 
-        # TODO: allocate pointer address
         result_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
-        #result = scheduler.allocate_address(ValueType.Pointer, Layers.TEMPORARY)
 
         quad = Quad(
             operation=OperationType.ADD,
