@@ -1,17 +1,9 @@
-var A: Int[8]
-var x: Int
-var y: Int
-var C: Int[10]
-var M: Int[4][5]
-var z: Int
-
-var g: Float
-var B: Float[3]
-var h: Float
-var C: Float[2][3][4]
-var i: Float
-
+var A: Int[10]
+var M: Int[10][8]
+var i: Int
+var p: Int
 
 func main() {
-    M[2][3] = 100
+    M[i][A[i+p]] = A[i] + 4
 }
+
