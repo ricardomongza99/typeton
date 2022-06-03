@@ -9,7 +9,16 @@ from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
 from src.virtual_machine.types import ContextMemory, FunctionData
 
-EXPRESSIONS = {OperationType.ADD, OperationType.DIVIDE, OperationType.MULTIPLY, OperationType.SUBTRACT}
+EXPRESSIONS = {
+    OperationType.ADD,
+    OperationType.DIVIDE,
+    OperationType.MULTIPLY,
+    OperationType.SUBTRACT
+}
+
+ARRAYS = {
+    OperationType.VERIFY
+}
 
 BOOLEAN_EXPRESSIONS = {
     OperationType.AND,
@@ -55,7 +64,7 @@ def _execute_typed_subtract(result_type, left_value, right_value):
 
 
 def _execute_typed_add(result_type: ValueType, left_value, right_value):
-    if result_type is ValueType.INT:
+    if result_type is ValueType.INT or result_type is ValueType.POINTER:
         return int(left_value) + int(right_value)
     return float(left_value) + float(right_value)
 
@@ -76,6 +85,8 @@ class VirtualMachine:
         self.context_jump_locations = []
         self.global_memory = None
 
+        self._error_occurred = False
+
     def __init_global_function(self):
         size_data = self._function_data["global"].size_data
         self.global_memory = ContextMemory(size_data, self._constant_table, None)
@@ -93,7 +104,7 @@ class VirtualMachine:
         print('🦭🦭🦭typeton🦭🦭🦭')
 
         start = timeit.default_timer()
-        while self._ip < len(self._quads):
+        while self._ip < len(self._quads) or self._error_occurred:
             quad = self._quads[self._ip]
             self._execute(quad)
             self.operation_count += 1
@@ -125,6 +136,8 @@ class VirtualMachine:
 
         if operation in EXPRESSIONS:
             self.__execute_expression(quad)
+        elif operation in ARRAYS:
+            self.__execute_array(quad)
         elif operation in BOOLEAN_EXPRESSIONS:
             self.__execute_boolean_expression(quad)
         elif operation in JUMPS:
@@ -159,7 +172,6 @@ class VirtualMachine:
         left = self._get_value(quad.left_address)
         right = self._get_value(quad.right_address)
         type_ = self.global_memory.get_type(quad.result_address)
-        print(type_)
         result = 0
 
         if quad.operation is OperationType.ADD:
@@ -173,6 +185,16 @@ class VirtualMachine:
 
         self._ip += 1
         self.__execute_assign(quad.result_address, result)
+
+    def __execute_array(self, quad):
+        left = self._get_value(quad.left_address)
+        result = self._get_value(quad.result_address)
+
+        if quad.operation == OperationType.VERIFY:
+            if left >= result:
+                self._show_error(f'[{left}] out of range')
+
+        self._ip += 1
 
     def __execute_boolean_expression(self, quad):
         left = self._get_value(quad.left_address)
@@ -289,3 +311,7 @@ class VirtualMachine:
         print('    {:<5} {:<5} {:<5} {:<5}'.format('OP', 'LEFT', 'RIGHT', 'RESULT'))
         for index, quad in enumerate(self._quads):
             quad.display(index)
+
+    def _show_error(self, message):
+        print(f'RUNTIME ERROR - {message}')
+        self._error_occurred = True

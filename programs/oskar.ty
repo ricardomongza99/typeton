@@ -4,6 +4,7 @@ var i: Int
 var p: Int
 
 func main() {
-    M[i][A[i+p]] = A[i] + 4
+    A[8] = 100
+    print(A[6])
 }
 
