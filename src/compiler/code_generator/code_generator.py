@@ -20,17 +20,20 @@ class CodeGenerator:
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
 
+        self.__pointer_types = {}
+
         self.scheduler = scheduler
 
         self.conditional_actions = ConditionalActions(self.__quad_list)
-        self.array_actions = ArrayActions(self.__quad_list, self.__operand_address_stack)
+        self.array_actions = ArrayActions(self.__quad_list, self.__operand_address_stack, self.__pointer_types)
         self.function_actions = FunctionActions(self.__quad_list, self.__operand_address_stack)
         self.loop_actions = LoopActions(self.__quad_list)
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
         self.expression_actions = ExpressionActions(self.__quad_list,
                                                     self.__operand_address_stack,
-                                                    self.__operator_stack)
+                                                    self.__operator_stack,
+                                                    self.__pointer_types)
 
     # Expressions -------------------------------------------
 

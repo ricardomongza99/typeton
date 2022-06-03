@@ -8,11 +8,13 @@ from src.compiler.stack_allocator.helpers import Layers
 
 
 class ArrayActions(Publisher):
-    def __init__(self, quad_list, operand_stack):
+    def __init__(self, quad_list, operand_stack, pointer_types):
         super().__init__()
 
         self._operand_stack: List[Operand] = operand_stack
         self._quad_list: List[Quad] = quad_list
+        self._pointer_types = pointer_types
+
         self._dimension_address_stack = []
 
     def push_dimensions(self, addresses):
@@ -43,13 +45,15 @@ class ArrayActions(Publisher):
         left_operand = self._operand_stack.pop()
         right_operand = self._operand_stack.pop()
 
-        result_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
+        pointer_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
 
         quad = Quad(
             operation=OperationType.ADD,
             left_address=left_operand.address,
             right_address=right_operand.address,
-            result_address=result_address
+            result_address=pointer_address
         )
         self._quad_list.append(quad)
-        self._operand_stack.append(Operand(ValueType.POINTER, result_address))
+        self._operand_stack.append(Operand(ValueType.POINTER, pointer_address))
+        self._pointer_types[pointer_address] = right_operand.type_
+
