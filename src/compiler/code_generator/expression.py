@@ -26,12 +26,13 @@ SHORTHAND = {
 
 
 class ExpressionActions(Publisher, Subscriber):
-    def __init__(self, quad_list, operands, operators):
+    def __init__(self, quad_list, operands, operators, pointer_types):
         super().__init__()
         self.__operand_address_stack: List[Operand] = operands  # stores the
         self.quad_list: List[Quad] = quad_list
         # ed virtual address, not actual value
         self.__operator_stack: List[Operator] = operators
+        self.__pointer_types = pointer_types
         self.parenthesis_start = [0]  # operators indexed before this value do not exist
 
     def handle_event(self, event: Event):
@@ -125,7 +126,11 @@ class ExpressionActions(Publisher, Subscriber):
         right = self.next_operand()
         left = self.next_operand()
 
-        type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
+        right_type = self.__get_operand_type(right)
+        left_type = self.__get_operand_type(left)
+
+        type_match = check_type(operator.type_.value, left_type.value, right_type.value)
+
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{address_map[left.address]}:'
@@ -147,17 +152,21 @@ class ExpressionActions(Publisher, Subscriber):
         address_map = Debug.map()
         operator = self.next_operator()
 
-        expression = self.next_operand()
-        assignment = self.next_operand()
+        right = self.next_operand()
+        left = self.next_operand()
 
-        type_match = check_type(operator.type_.value, assignment.type_.value, expression.type_.value)
+        right_type = self.__get_operand_type(right)
+        left_type = self.__get_operand_type(left)
+
+        type_match = check_type(operator.type_.value, left_type.value, right_type.value)
+
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                f'{address_map[assignment.address]}:'
-                f'{assignment.type_.value} '
+                f'{address_map[left.address]}:'
+                f'{left.type_.value} '
                 f'{operator.type_.value} '
-                f'{address_map[expression.address]} '
-                f'({assignment.type_.value} and {expression.type_.value} are not compatible)')))
+                f'{address_map[right.address]} '
+                f'({left.type_.value} and {right.type_.value} are not compatible)')))
 
         # address needed to store operation (a += b) = (a + b = temp, a = temp)
         temp_address = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
@@ -176,11 +185,11 @@ class ExpressionActions(Publisher, Subscriber):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'Invalid shorthand type {operator.type_}')))
 
         temp_quad = Quad(operation=operator_type,
-                         left_address=assignment.address,
-                         right_address=expression.address,
+                         left_address=left.address,
+                         right_address=right.address,
                          result_address=temp_address)
 
-        assignment_quad = Quad(OperationType.ASSIGN, left_address=temp_address, result_address=assignment.address)
+        assignment_quad = Quad(OperationType.ASSIGN, left_address=temp_address, result_address=left.address)
         self.quad_list.append(temp_quad)
         self.quad_list.append(assignment_quad)
 
@@ -210,8 +219,11 @@ class ExpressionActions(Publisher, Subscriber):
         right: Operand = self.next_operand()
         left: Operand = self.next_operand()
 
+        right_type = self.__get_operand_type(right)
+        left_type = self.__get_operand_type(left)
+
         address_map = Debug.map()
-        type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
+        type_match = check_type(operator.type_.value, left_type.value, right_type.value)
 
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
@@ -229,9 +241,9 @@ class ExpressionActions(Publisher, Subscriber):
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
 
         if stack_allocator.is_segment(left.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left.type_, left.address)))
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left_type, left.address)))
         if stack_allocator.is_segment(right.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right.type_, right.address)))
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right_type, right.address)))
 
         quad = (Quad(
             left_address=left.address,
@@ -249,3 +261,9 @@ class ExpressionActions(Publisher, Subscriber):
         if len(self.__operator_stack) - 1 < self.parenthesis_start[-1]:
             return None
         return self.__operator_stack[-1]
+
+    def __get_operand_type(self, operand: Operand):
+        """ If `operand` is a pointer, returns the type of what its pointing. If not return operand type """
+        if operand.type_ == ValueType.POINTER:
+            return self.__pointer_types[operand.address]
+        return operand.type_

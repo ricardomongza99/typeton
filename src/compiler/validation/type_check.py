@@ -65,10 +65,6 @@ _assign_combinations = [
     ['Return', 'Int', 'Int'],
     ['Return', 'Float', 'Float'],
     ['Return', 'String', 'String']
-
-
-
-
 ]
 
 _boolean_symbols = ['&&', '||']
