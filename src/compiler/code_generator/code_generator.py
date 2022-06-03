@@ -73,11 +73,14 @@ class CodeGenerator:
 
     # Arrays -------------------------------------------
 
-    def push_dimensions(self, addresses):
-        self.array_actions.push_dimensions(addresses)
+    def push_dimensions(self, dimensions):
+        self.array_actions.push_dimensions(dimensions)
 
     def verify_dimension(self):
         self.array_actions.verify_dimensions()
+
+    def calculate_dimension(self):
+        self.array_actions.calculate_dimension(self.scheduler)
 
     def get_array_pointer(self):
         self.array_actions.get_array_pointer(self.scheduler)

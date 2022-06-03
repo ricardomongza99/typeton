@@ -1,11 +1,12 @@
 import math
 from typing import Dict
-from .variable import Variable
+from .variable import Variable, DimData
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.types import ValueType
 from src.utils.debug import Debug
 from src.utils.display import make_table
+from src.compiler.symbol_table.constant_table import ConstantTable
 
 
 class VariableTable:
@@ -23,12 +24,24 @@ class VariableTable:
 
     def add_dimension(self, size):
         """ Append new dimension `size` to current variable's `dimensions` list """
-        self.current_variable.dimensions.append(size)
+        dim_data = DimData(size=size)
+        self.current_variable.dim_data_list.append(dim_data)
 
-    def allocate_dimensions(self, layer: Layers, memory: StackAllocator):
+    def allocate_dimensions(self, layer: Layers, memory: StackAllocator, constant_table: ConstantTable):
         """ Multiply all the dimensions of current variable to allocate required space """
-        size = math.prod(self.current_variable.dimensions)
 
+        dim_data_list = self.current_variable.dim_data_list
+
+        # Calculate m for all dimensions except the rightmost
+        for i in range(len(dim_data_list) - 1):
+            sizes = [dim_data.size for dim_data in dim_data_list[i+1:]]
+            m = math.prod(sizes)
+            dim_data_list[i].m = m
+            # Add m to constant table
+            constant_table.add(m, memory)
+
+        sizes = [dim_data.size for dim_data in dim_data_list]
+        size = math.prod(sizes)
         memory.allocate_space(self.current_variable.type_, layer, size)
 
     def set_type(self, type_, layer: Layers, memory: StackAllocator):

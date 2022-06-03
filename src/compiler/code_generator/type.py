@@ -52,6 +52,12 @@ class Operand:
         self.address = address
 
 
+class Dimension:
+    def __init__(self, size_address, m_address=None):
+        self.size_address = size_address
+        self.m_address = m_address
+
+
 class Quad:
     def __init__(self, operation, left_address=None, right_address=None, result_address=None):
         self.operation: OperationType = OperationType(operation)
