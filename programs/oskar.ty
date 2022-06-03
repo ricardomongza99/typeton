@@ -13,5 +13,5 @@ var i: Float
 
 
 func main() {
-    A[3] = A[1] + 3
+    M[2][3] = 100
 }
