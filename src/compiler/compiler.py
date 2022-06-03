@@ -6,7 +6,7 @@ from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.code_generator import CodeGenerator
-from src.compiler.code_generator.expression import Operator
+from src.compiler.code_generator.type import Dimension
 from src.compiler.code_generator.type import OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
@@ -320,7 +320,7 @@ class Compiler(Publisher, Subscriber):
     def p_call_array1(self, p):
         """
         call_array1 : LBRACK expression verify_dimension RBRACK
-                    | LBRACK expression verify_dimension RBRACK call_array1
+                    | LBRACK expression verify_dimension RBRACK calculate_dimension call_array1
         """
 
     # Function Call ----------------------------------------------------------------------------------------------------
@@ -566,7 +566,7 @@ class Compiler(Publisher, Subscriber):
         """
         allocate_dimensions :
         """
-        self._symbol_table.function_table.allocate_dimensions(self._allocator)
+        self._symbol_table.function_table.allocate_dimensions(self._allocator, self._symbol_table.constant_table)
 
     def p_set_type(self, p):
         """
@@ -680,18 +680,31 @@ class Compiler(Publisher, Subscriber):
         id_ = self._symbol_table.function_table.get_id(operand.address)
         variable = self._symbol_table.function_table.get_variable(id_)
 
-        dimension_addresses = []
-        for dimension in reversed(variable.dimensions):
-            constant = self._symbol_table.constant_table.get_from_value(dimension)
-            dimension_addresses.append(constant.address)
+        dimensions = []
+        for dim_data in reversed(variable.dim_data_list):
+            size = self._symbol_table.constant_table.get_from_value(dim_data.size)
+            m = self._symbol_table.constant_table.get_from_value(dim_data.m)
 
-        self._code_generator.push_dimensions(dimension_addresses)
+            if m is None:
+                dimension = Dimension(size_address=size.address)
+            else:
+                dimension = Dimension(size_address=size.address, m_address=m.address)
+
+            dimensions.append(dimension)
+
+        self._code_generator.push_dimensions(dimensions)
 
     def p_verify_dimension(self, p):
         """
         verify_dimension :
         """
         self._code_generator.verify_dimension()
+
+    def p_calculate_dimension(self, p):
+        """
+        calculate_dimension :
+        """
+        self._code_generator.calculate_dimension()
 
     def p_get_array_pointer(self, p):
         """

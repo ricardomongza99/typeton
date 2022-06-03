@@ -102,10 +102,10 @@ class FunctionTable(Publisher, Subscriber):
         """ Adds dimension to current array """
         self.current_function.add_dimension(size)
 
-    def allocate_dimensions(self, memory: StackAllocator):
+    def allocate_dimensions(self, memory: StackAllocator, constant_table):
         """ Allocates spaces for array (Moves pointer x spaces) """
         layer = Layers.GLOBAL if self.current_function.id_ == 'global' else Layers.LOCAL
-        self.current_function.allocate_dimensions(layer, memory)
+        self.current_function.allocate_dimensions(layer, memory, constant_table)
 
     def set_type(self, type_, memory: StackAllocator):
         """ Sets type for function, parameter or variable """

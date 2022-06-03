@@ -1,5 +1,14 @@
+from typing import List
+
 # NOTE: `type` is a reserved words in python, so
 # we use the underscore at the end convention `type_`
+
+
+class DimData:
+    """ Stores dimensions data. Set during declaration of an array """
+    def __init__(self, size):
+        self.size = size
+        self.m = None
 
 
 class Variable:
@@ -7,6 +16,7 @@ class Variable:
         self.id_ = id_
         self.type_ = None
         self.address_ = None
-        self.dimensions = []    # stays empty if not array
+        self.dim_data_list: List[DimData] = []    # stays empty if not array
         self.isReturned = None
         self.is_param = is_param
+
