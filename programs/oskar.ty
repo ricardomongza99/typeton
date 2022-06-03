@@ -1,6 +1,7 @@
 var A: Int[8]
 var x: Int
 var y: Int
+var C: Int[10]
 var M: Int[4][5]
 var z: Int
 
@@ -12,7 +13,5 @@ var i: Float
 
 
 func main() {
-    A[3] = 100
-    M[2][2] = 200
-    B[3 * (3 / 2)] = 300.0
+    A[3] = A[1] + 3
 }
