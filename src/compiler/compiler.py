@@ -35,6 +35,7 @@ class Compiler(Publisher, Subscriber):
 
         # subscribe to array actions
         array_actions = self._code_generator.array_actions
+        array_actions.add_subscriber(self._symbol_table.function_table, {})
         array_actions.add_subscriber(self, {})
 
         # subscribers for function table

@@ -27,7 +27,8 @@ class SizeData:
             ValueType.INT.value: SizeUnit(),
             ValueType.FLOAT.value: SizeUnit(),
             ValueType.BOOL.value: SizeUnit(),
-            ValueType.STRING.value: SizeUnit()}
+            ValueType.STRING.value: SizeUnit(),
+            ValueType.POINTER.value: SizeUnit()}
 
     def get_data(self, type_: ValueType):
         return self.hash[type_.value]
@@ -116,6 +117,7 @@ class ContextMemory:
         self.data_storage[ValueType.FLOAT] = init_storage(self.size_data.get_data(ValueType.FLOAT).total)
         self.data_storage[ValueType.BOOL] = init_storage(self.size_data.get_data(ValueType.BOOL).total)
         self.data_storage[ValueType.STRING] = init_storage(self.size_data.get_data(ValueType.STRING).total)
+        self.data_storage[ValueType.POINTER] = init_storage(self.size_data.get_data(ValueType.POINTER).total)
 
     def get_offset(self, address, segment: Segment, type_data: TypeRange):
         """Get offset based on address segment range to store in exact array"""

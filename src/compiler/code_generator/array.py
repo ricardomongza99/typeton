@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension
 from src.utils.observer import Subscriber, Event, Publisher
@@ -5,6 +6,10 @@ from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.types import ValueType
 from src.compiler.stack_allocator.helpers import Layers
+
+
+class ArrayEvents(Enum):
+    ADD_TEMP = 0
 
 
 class ArrayActions(Publisher):
@@ -86,6 +91,11 @@ class ArrayActions(Publisher):
 
             result_address = stack_allocator.allocate_address(ValueType.INT, Layers.TEMPORARY)
 
+            self._operand_stack.append(Operand(ValueType.INT, result_address))
+
+            # Reserve temp int
+            self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.INT, result_address)))
+
             quad = Quad(
                 operation=OperationType.ADD,
                 left_address=left_operand.address,
@@ -93,7 +103,6 @@ class ArrayActions(Publisher):
                 result_address=result_address
             )
             self._quad_list.append(quad)
-            self._operand_stack.append(Operand(ValueType.INT, result_address))
 
     def _generate_base_sum_quad(self, stack_allocator: StackAllocator):
         """ Generates last array access quad to pointer. Adds base """
@@ -106,6 +115,14 @@ class ArrayActions(Publisher):
 
         pointer_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
 
+        self._operand_stack.append(Operand(ValueType.POINTER, pointer_address))
+
+        # Reserve temp pointer
+        self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address)))
+
+        self._pointer_types[pointer_address] = right_operand.type_
+
+
         quad = Quad(
             operation=OperationType.ADD,
             left_address=left_operand.address,
@@ -113,5 +130,3 @@ class ArrayActions(Publisher):
             result_address=pointer_address
         )
         self._quad_list.append(quad)
-        self._operand_stack.append(Operand(ValueType.POINTER, pointer_address))
-        self._pointer_types[pointer_address] = right_operand.type_

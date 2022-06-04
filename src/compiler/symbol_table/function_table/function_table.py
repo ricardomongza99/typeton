@@ -53,7 +53,9 @@ class FunctionTable(Publisher, Subscriber):
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
         from src.compiler.code_generator.expression import ExpressionEvents
-        if event.type_ is ExpressionEvents.ADD_TEMP:
+        from src.compiler.code_generator.array import ArrayEvents
+
+        if event.type_ is ExpressionEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
             type_, address = event.payload
             self.__handle_add_temporal(type_, address)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
