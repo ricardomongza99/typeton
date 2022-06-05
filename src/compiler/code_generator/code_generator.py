@@ -38,7 +38,8 @@ class CodeGenerator:
 
         self.expression_actions = ExpressionActions(self.__quad_list,
                                                     self.__operand_address_stack,
-                                                    self.__operator_stack)
+                                                    self.__operator_stack,
+                                                    self.pointer_types)
 
     # Expressions -------------------------------------------
 

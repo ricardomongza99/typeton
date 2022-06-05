@@ -42,7 +42,9 @@ class ObjectActions(Publisher):
             self.broadcast(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'object {variable.id_} has not been initialized'))
 
-        self.heap_allocator.free_reference(variable.reference)
+        end = self.heap_allocator.free_reference(variable.reference)
+        q = Quad(OperationType.POINTER_ASSIGN, -1, end, variable.address_)
+        self.quad_list.append(q)
 
     def push_variable(self, variable: Variable):
         self.variable_stack.append(variable)
@@ -63,9 +65,6 @@ class ObjectActions(Publisher):
                 f'{property_name} not found in Class {class_data.id_}')))
 
         property_data = class_data.variables[property_name]
-
-        # temp = self.stack_allocator.allocate_address(
-        #     property_data.type_, Layers.TEMPORARY)
 
         property_pointer = self.stack_allocator.allocate_address(
             ValueType.POINTER, Layers.TEMPORARY)

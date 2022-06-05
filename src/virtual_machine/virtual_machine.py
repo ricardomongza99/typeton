@@ -297,6 +297,9 @@ class VirtualMachine:
         if action_left is not None:
             p_left = self._get_value(quad.left_address)
 
+        if p_left == -1:
+            p_left = None
+
         self.context_memory[-1].save_reference(
             quad.result_address, p_left)
 

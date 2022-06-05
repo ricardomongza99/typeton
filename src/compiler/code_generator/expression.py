@@ -26,8 +26,9 @@ SHORTHAND = {
 
 
 class ExpressionActions(Publisher, Subscriber):
-    def __init__(self, quad_list, operands, operators):
+    def __init__(self, quad_list, operands, operators, pointer_types):
         super().__init__()
+        self.pointer_types = pointer_types
         self.__operand_address_stack: List[Operand] = operands  # stores the
         self.quad_list: List[Quad] = quad_list
         # ed virtual address, not actual value
@@ -155,6 +156,13 @@ class ExpressionActions(Publisher, Subscriber):
                     self.quad_list.append(quad)
                     return
 
+        # validate pointer assignment
+        if left.type_ is ValueType.POINTER:
+            type_ = self.pointer_types[left.address]
+            if right.type_ != type_:
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                    f'({right.type_.value} cannot be assigned to {type_.value})')))
+
         quad = Quad(
             left_address=right.address,
             right_address=None,
@@ -204,6 +212,13 @@ class ExpressionActions(Publisher, Subscriber):
                          left_address=assignment.address,
                          right_address=expression.address,
                          result_address=temp_address)
+
+        # validate pointer assignment
+        if assignment.type_ is ValueType.POINTER:
+            type_ = self.pointer_types[assignment.address]
+            if ValueType(type_match) != type_:
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                    f'({type_match} cannot be assigned to {type_.value})')))
 
         assignment_quad = Quad(
             OperationType.ASSIGN, left_address=temp_address, result_address=assignment.address)
