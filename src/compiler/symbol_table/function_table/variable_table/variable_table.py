@@ -31,13 +31,14 @@ class VariableTable:
 
         memory.allocate_space(self.current_variable.type_, layer, size)
 
-    def set_type(self, type_, layer: Layers, memory: StackAllocator):
+    def set_type(self, type_, layer: Layers, memory: StackAllocator, class_id):
         """ Sets current var type """
         enum_value = ValueType(type_)
         address = memory.allocate_address(enum_value, layer)
 
         Debug.map()[address] = str(self.current_variable.id_)
         self.current_variable.type_ = enum_value
+        self.current_variable.class_id = class_id
         self.current_variable.address_ = address
         self.inverse_hash[address] = self.current_variable.id_
 
@@ -50,5 +51,6 @@ class VariableTable:
         return self.inverse_hash[address]
 
     def display(self, id_):
+        print("wtf main")
         print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items())))

@@ -6,7 +6,10 @@ class Variable:
     def __init__(self, id_, is_param=False):
         self.id_ = id_
         self.type_ = None
+        self.class_id = None
         self.address_ = None
+        self.initialized = False
+        self.reference = None
         self.dimensions = []    # stays empty if not array
         self.isReturned = None
         self.is_param = is_param
