@@ -3,10 +3,12 @@ from src.compiler.ply import lex
 reserved = {
     'class': 'CLASS',
     'func': 'FUNC',
+    'new': 'NEW',
     'var': 'VAR',
     'Int': 'INT',
     'Float': 'FLOAT',
     'String': 'STRING',
+    'delete': 'DELETE',
     'Bool': 'BOOL',
     'print': 'PRINT',
     'if': 'IF',
@@ -17,46 +19,46 @@ reserved = {
 }
 
 tokens = [
-             # SYMBOLS
-             'NLINE',
-             'COLON',
-             'COMMA',
-             'PERIOD',
-             'LPAREN',
-             'RPAREN',
-             'LCURLY',
-             'RCURLY',
-             'LBRACK',
-             'RBRACK',
-             # 'QUOTE',
-             'BSLASH',
-             'ARROW',
-             # RELATIONAL OPERATORS
-             'AND',
-             'OR',
-             'LESS',
-             'MORE',
-             'EQUALS',
-             'NEQUALS',
-             'PASSIGN',
-             'LASSIGN',
-             'MASSIGN',
-             'DASSIGN',
-             'LEQUALS',
-             'MEQUALS',
-             # OPERATORS
-             'PLUS',
-             'MINUS',
-             'TIMES',
-             'DIVIDE',
-             'ASSIGN',
-             # REGEX
-             'ID',
-             'INTLIT',
-             'BOOLLIT',
-             'FLOATLIT',
-             'STRINGLIT'
-         ] + list(reserved.values())
+    # SYMBOLS
+    'NLINE',
+    'COLON',
+    'COMMA',
+    'PERIOD',
+    'LPAREN',
+    'RPAREN',
+    'LCURLY',
+    'RCURLY',
+    'LBRACK',
+    'RBRACK',
+    # 'QUOTE',
+    'BSLASH',
+    'ARROW',
+    # RELATIONAL OPERATORS
+    'AND',
+    'OR',
+    'LESS',
+    'MORE',
+    'EQUALS',
+    'NEQUALS',
+    'PASSIGN',
+    'LASSIGN',
+    'MASSIGN',
+    'DASSIGN',
+    'LEQUALS',
+    'MEQUALS',
+    # OPERATORS
+    'PLUS',
+    'MINUS',
+    'TIMES',
+    'DIVIDE',
+    'ASSIGN',
+    # REGEX
+    'ID',
+    'INTLIT',
+    'BOOLLIT',
+    'FLOATLIT',
+    'STRINGLIT'
+] + list(reserved.values())
 
 # Symbol rules
 t_COLON = ':'

@@ -5,7 +5,7 @@ from src.compiler.stack_allocator.types import ValueType
 
 class OperationType(Enum):
     CALL_ASSIGN = 'callassign'
-
+    POINTER_ADD = 'pointeradd'
     PARAM = 'param'
     ARE = 'are'
     GOTOMAIN = 'gotomain'
@@ -37,6 +37,7 @@ class OperationType(Enum):
     PASSIGN = '+='
     DASSIGN = '/='
     MASSIGN = '*='
+    POINTER_ASSIGN = '&='
     VERIFY = 'verify'
 
 
@@ -47,9 +48,10 @@ class Operator:
 
 
 class Operand:
-    def __init__(self, type_: ValueType, address: int):
+    def __init__(self, type_: ValueType, address: int, class_id=None):
         self.type_ = type_
         self.address = address
+        self.class_id = class_id
 
 
 class Quad:
@@ -65,7 +67,7 @@ class Quad:
         right_address = '----' if self.right_address is None else self.right_address
 
         print('{:3}. {:<5} {:<5} {:<5} {:<5}'.format(index,
-                                                     self.operation.value,
-                                                     left_address,
-                                                     right_address,
-                                                     self.result_address))
+                                                     self.operation.value if self.operation is not None else '',
+                                                     left_address if self.left_address is not None else '',
+                                                     right_address if self.right_address is not None else '',
+                                                     self.result_address if self.result_address is not None else ''))
