@@ -1,4 +1,5 @@
 from typing import List
+from unittest import result
 from weakref import ref
 from src.compiler.code_generator.expression import ExpressionActions, ExpressionEvents
 from src.compiler.code_generator.type import Operand, OperationType, Quad
@@ -69,16 +70,20 @@ class ObjectActions(Publisher):
         property_pointer = self.stack_allocator.allocate_address(
             ValueType.POINTER, Layers.TEMPORARY)
         self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                       (ValueType.POINTER, property_pointer)))
+                       (ValueType.POINTER, property_pointer, property_data.class_id)))
+
+        print("adding property pointer", property_pointer)
 
         quad = Quad(OperationType.POINTER_ADD, left_address=f'&{object_address}',
                     right_address=property_data.offset, result_address=f'&{property_pointer}')
 
         self.quad_list.append(quad)
         self.operand_list.append(
-            Operand(ValueType.POINTER, property_pointer, class_id=class_data.id_))
+            Operand(ValueType.POINTER, property_pointer, class_id=class_data.id_, is_class_param=True))
 
         self.pointer_types[property_pointer] = property_data.type_
+        if property_data.class_id is not None:
+            self.pointer_types[property_pointer] = property_data.class_id
 
     def get_object_property(self):
 
@@ -95,23 +100,34 @@ class ObjectActions(Publisher):
         temp = self.stack_allocator.allocate_address(
             property_data.type_, Layers.TEMPORARY)
         self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                             (property_data.type_, temp)))
+                             (property_data.type_, temp, property_data.class_id)))
+
+        print("adding get object temp", temp, property_data.type_)
 
         property_pointer = self.stack_allocator.allocate_address(
             ValueType.POINTER, Layers.TEMPORARY)
         self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                       (ValueType.POINTER, property_pointer)))
+                       (ValueType.POINTER, property_pointer, property_data.class_id)))
 
         quad = Quad(OperationType.POINTER_ADD, left_address=f'&{object_address}',
                     right_address=property_data.offset, result_address=f'&{property_pointer}')
 
         self.quad_list.append(quad)
 
-        quad = Quad(OperationType.ASSIGN,
-                    left_address=f'*{property_pointer}', result_address=temp)
+        if property_data.type_ == ValueType.POINTER:
+            quad = Quad(OperationType.ASSIGN,
+                        left_address=f'*{property_pointer}', result_address=f'&{temp}')
+            self.pointer_types[temp] = property_data.class_id
+
+        else:
+            quad = Quad(OperationType.ASSIGN,
+                        left_address=f'*{property_pointer}', result_address=temp)
 
         self.quad_list.append(quad)
-        self.operand_list.append(Operand(property_data.type_, temp))
+        self.operand_list.append(
+            Operand(property_data.type_, temp, is_class_param=True))
+
+        # self.pointer_types[]
 
     def allocate_heap(self):
         object: Class = self.class_stack.pop()
@@ -127,11 +143,16 @@ class ObjectActions(Publisher):
         reference = self.heap_allocator.allocate_reference(variable.size)
         operand: Operand = self.operand_list.pop()
         var.reference = reference
+        print(var.id_, "var.id_ is None")
+
+        if var.id_ is None:
+            operand.address = f'*{operand.address}'
 
         quad = Quad(OperationType.POINTER_ASSIGN, left_address=reference,
                     result_address=operand.address)
 
         self.quad_list.append(quad)
+        self.pointer_types[operand.address] = var.class_id
 
     def push_class_data(self, class_data: Class):
         self.class_stack.append(class_data)

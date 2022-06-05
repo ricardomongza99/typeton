@@ -26,7 +26,7 @@ class Function:
         return self._vars_table
 
     def add_variable(self, id_, is_param):
-        self._vars_table.add(id_, is_param)
+        return self._vars_table.add(id_, is_param)
 
     def add_dimension(self, size):
         self._vars_table.add_dimension(size)

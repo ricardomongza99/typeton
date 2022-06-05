@@ -1,4 +1,5 @@
 from enum import Enum
+from re import L
 from typing import List
 
 from src.compiler.stack_allocator.index import StackAllocator
@@ -140,28 +141,34 @@ class ExpressionActions(Publisher, Subscriber):
                 f'({left.type_.value} and {right.type_.value} are not compatible)')))
 
         if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
-            print("pointer assign")
-            if left.class_id is not None and right.class_id is not None:
-                print("pointer assign class")
-                if left.class_id != right.class_id:
-                    self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                        f'({left.class_id} cannot be assigned to pointer of type {right.class_id})')))
-                else:
-                    print("classes are equal")
-                    quad = Quad(
-                        left_address=f'&{right.address}',
-                        right_address=None,
-                        operation=OperationType.POINTER_ASSIGN,
-                        result_address=left.address)
-                    self.quad_list.append(quad)
-                    return
+            print(left.class_id, left.address,
+                  right.class_id, right.address, "class_id")
+            left_class = self.pointer_types.get(
+                left.address) if left.class_id is None else left.class_id
+            right_class = self.pointer_types.get(
+                right.address) if right.class_id is None else right.class_id
+
+            if left_class != right_class:
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                    f'({left.class_id} cannot be assigned to pointer of type {right.class_id})')))
+            else:
+                if left.is_class_param:
+                    left.address = f'*{left.address}'
+                print("classes are equal")
+                quad = Quad(
+                    left_address=f'&{right.address}',
+                    right_address=None,
+                    operation=OperationType.POINTER_ASSIGN,
+                    result_address=left.address)
+                self.quad_list.append(quad)
+                return
 
         # validate pointer assignment
-        if left.type_ is ValueType.POINTER:
+        elif left.type_ is ValueType.POINTER and right.type_ is not ValueType.POINTER:
             type_ = self.pointer_types[left.address]
             if right.type_ != type_:
                 self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                    f'({right.type_.value} cannot be assigned to {type_.value})')))
+                    f'({right.type_} cannot be assigned to {type_})')))
 
         quad = Quad(
             left_address=right.address,
@@ -193,7 +200,7 @@ class ExpressionActions(Publisher, Subscriber):
         temp_address = stack_allocator.allocate_address(
             ValueType(type_match), Layers.TEMPORARY)
         self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                       (type_match, temp_address)))
+                       (type_match, temp_address, None)))
         operator_type = None
 
         if operator.type_ is OperationType.PASSIGN:
@@ -244,7 +251,7 @@ class ExpressionActions(Publisher, Subscriber):
         self.quad_list.append(quad)
 
         self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                       (function_return_type, address)))
+                       (function_return_type, address, None)))
         self.__operand_address_stack.append(
             Operand(function_return_type, address))
 
@@ -273,14 +280,15 @@ class ExpressionActions(Publisher, Subscriber):
             Operand(ValueType(type_match), result))
 
         # temps count towards function total size
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
+        self.broadcast(Event(ExpressionEvents.ADD_TEMP,
+                       (type_match, result, None)))
 
         if stack_allocator.is_segment(left.address, Layers.TEMPORARY):
             self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                           (left.type_, left.address)))
+                           (left.type_, left.address, None)))
         if stack_allocator.is_segment(right.address, Layers.TEMPORARY):
             self.broadcast(Event(ExpressionEvents.ADD_TEMP,
-                           (right.type_, right.address)))
+                           (right.type_, right.address, None)))
 
         quad = (Quad(
             left_address=left.address,

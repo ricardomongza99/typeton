@@ -102,13 +102,19 @@ class ObjectHeap:
         # print('getting heap value for address', heap_address-self.start)
         value = self.memory[heap_address - self.start]
         # print('got value', value)
+
         if value is None:
-            print(f'Heap address {heap_address} points to Null')
+            print(f'Heap address {heap_address-self.start} points to Null')
+            return
+
+        print("getting heap value for address", heap_address - self.start)
         return value
 
     def set_value(self, heap_address, value):
         # print('setting heap value for address',
         #       heap_address-self.start,   'value', value)
+        print('setting heap value for address',
+              heap_address - self.start, 'value', value)
         self.memory[heap_address - self.start] = value
 
     def is_heap_address(self, address):

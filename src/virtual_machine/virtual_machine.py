@@ -278,7 +278,6 @@ class VirtualMachine:
             self._assign_context_memory(quad.result_address)
             self._ip += 1
         elif quad.operation is OperationType.GOSUB:
-
             self.context_memory.append(self.context_pending_assigment.pop())
             self.context_jump_locations.append(self._ip + 1)
             self._ip = self.get_function_start(quad.result_address)
@@ -293,15 +292,23 @@ class VirtualMachine:
 
     def __execute_pointer_assign(self, quad):
         action_left, p_left = pure_address(quad.left_address)
+        action_res, p_res = pure_address(quad.result_address)
 
         if action_left is not None:
             p_left = self._get_value(quad.left_address)
+
+        if action_res is not None:
+            self.__execute_object_parameter_assign(quad.result_address, p_left)
+            return
 
         if p_left == -1:
             p_left = None
 
         self.context_memory[-1].save_reference(
             quad.result_address, p_left)
+
+    def __execute_object_parameter_assign(self, address, value):
+        self.context_memory[-1].save(address, value)
 
     def __execute_assign(self, address, value):
         # print(f'Assign {address} = {value}')

@@ -3,7 +3,7 @@ from src.virtual_machine import VirtualMachine
 import os
 from src.config.definitions import PROGRAMS_DIR
 
-FILENAME = 'oskar.ty'
+FILENAME = 'albert.ty'
 
 
 def main():
@@ -15,8 +15,8 @@ def main():
     compiler = Compiler()
     json_data = compiler.compile(data, debug=True)
 
-    # virtual_machine = VirtualMachine()
-    # virtual_machine.run(json_data)
+    virtual_machine = VirtualMachine()
+    virtual_machine.run(json_data)
 
     print('Done')
 

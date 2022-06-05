@@ -1,17 +1,51 @@
 var x: Int
 var y: Int
 
-func fib(n: Int) -> Int {
-   if (n <= 1) {
-       return n
-   }
 
-   return fib(n-1) + fib(n-2)
+
+class Animal {
+    bark: Bool
 }
 
-func main() {
-   var x: Int
+class Dog {
+    parent: Dog
+    breed: String
+    name: String
+    age: Int
+}
 
-   x = fib(20)
-   print(x)
+
+
+func main() {
+   var dog_a: Dog
+   var dog_b: Dog
+   var dog_c: Dog
+
+   dog_a = new Dog()
+   dog_a.name = "Scrappy"
+
+   dog_b = new Dog()
+   dog_b.name = "scrappy's dad"
+
+   dog_a.parent = dog_b
+   
+
+   dog_c = dog_a.parent
+   dog_a.name = dog_c.name
+   print(dog_a.name)
+
+   delete dog_a
+
+   print(dog_a.name)
+
+ 
+
+   
+
+   
+
+
+   
+   
+
 }

@@ -1,3 +1,4 @@
+from inspect import isclass
 from re import I
 from typing import Dict
 
@@ -10,6 +11,7 @@ class ClassVariable:
         self.id_ = id_
         self.type_ = None
         self.offset = offset
+        self.class_id = None
 
 
 class ClassTable:
@@ -41,7 +43,6 @@ class ClassTable:
                          map(lambda fun: [fun[1].id_, fun[1].size], self.classes.items())))
 
         for key in self.classes:
-            print(key)
             val = self.classes[key]
             val.display()
 
@@ -68,7 +69,7 @@ class Class:
         self.current_variable = self.variables[id_]
         self.offset += 1
 
-    def set_type(self, type_: ValueType):
+    def set_type(self, type_: ValueType, class_id):
         # if type_ is ValueType.VOID or type_ is ValueType.POINTER:
         #     # del self.variables[self._current_variable.id_]
         #     # self._current_variable = None
@@ -76,6 +77,7 @@ class Class:
         #     return
 
         self.current_variable.type_ = type_
+        self.current_variable.class_id = class_id
 
     def display(self):
         print(len(self.test))
@@ -83,5 +85,5 @@ class Class:
             print(x)
         print(make_table(self.id_ + ": Variables", ["ID", "TYPE", "OFFSET"],
                          map(lambda fun: [
-                             fun[1].id_, fun[1].type_.value, fun[1].offset], self.variables.items()),
+                             fun[1].id_, fun[1].type_, fun[1].offset], self.variables.items()),
                          TableOptions(20, 20)))

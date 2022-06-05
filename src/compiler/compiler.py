@@ -157,7 +157,6 @@ class Compiler(Publisher, Subscriber):
         """
         end_class :
         """
-        print("ended")
         self._symbol_table.class_table.end_class()
 
     def p_function(self, p):
@@ -175,7 +174,6 @@ class Compiler(Publisher, Subscriber):
         """
         class_declaration : ID add_class_variable COLON class_type
         """
-        print("declared")
 
     def p_class_type(self, p):
         """
@@ -183,21 +181,33 @@ class Compiler(Publisher, Subscriber):
                    | BOOL set_class_variable_type
                    | FLOAT set_class_variable_type
                    | STRING set_class_variable_type
+                   | ID set_class_object_type
         """
 
     def p_add_class_variable(self, p):
         """
         add_class_variable :
         """
-        print('adding var', p[-1])
         self._symbol_table.class_table.current_class.add_variable(p[-1])
+
+    def p_set_class_object_type(self, p):
+        """
+        set_class_object_type :
+        """
+        class_data = self._symbol_table.class_table.classes[p[-1]]
+        if class_data is None:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE,
+                              CompilerError("Class '" + p[-1] + "' not found")))
+
+        self._symbol_table.class_table.current_class.set_type(
+            ValueType.POINTER, p[-1])
 
     def p_set_class_variable_type(self, p):
         """
         set_class_variable_type :
         """
         type_ = ValueType(p[-1])
-        self._symbol_table.class_table.current_class.set_type(type_)
+        self._symbol_table.class_table.current_class.set_type(type_, None)
 
     # -- PARAMS -----------------------
 
@@ -395,12 +405,15 @@ class Compiler(Publisher, Subscriber):
         push_variable_class :
         """
         operand: Operand = self._code_generator.peak_operand()
-        id_ = self._symbol_table.function_table.get_id(operand.address)
-        var = self._symbol_table.function_table.get_variable(id_)
+
+        print(operand.class_id)
+
+        var = self._symbol_table.function_table.get_id(address=operand.address)
+        print(var.address_, var.type_, var.class_id)
 
         if var.class_id is None:
             self.handle_event(
-                Event(CompileError, f'Cannot assign object {p[-1]} to primitive variable {id_}'))
+                Event(CompileError, f'Cannot assign object {p[-1]} to primitive variable'))
 
         class_data = self._symbol_table.class_table.get_class(var.class_id)
         self._code_generator.object_actions.push_class_data(class_data)

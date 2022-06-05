@@ -48,10 +48,11 @@ class Operator:
 
 
 class Operand:
-    def __init__(self, type_: ValueType, address: int, class_id=None):
+    def __init__(self, type_: ValueType, address: int, class_id=None, is_class_param=False):
         self.type_ = type_
         self.address = address
         self.class_id = class_id
+        self.is_class_param = is_class_param
 
 
 class Quad:

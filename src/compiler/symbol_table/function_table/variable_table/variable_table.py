@@ -20,6 +20,7 @@ class VariableTable:
             # we can't know where to put it without the type, just store the reference for now
             self.variables[id_] = Variable(id_, is_param=is_param)
             self.current_variable = self.variables[id_]
+            return self.current_variable
 
     def add_dimension(self, size):
         """ Append new dimension `size` to current variable's `dimensions` list """
@@ -40,7 +41,7 @@ class VariableTable:
         self.current_variable.type_ = enum_value
         self.current_variable.class_id = class_id
         self.current_variable.address_ = address
-        self.inverse_hash[address] = self.current_variable.id_
+        self.inverse_hash[address] = self.current_variable
 
         return self.current_variable.id_
 

@@ -8,6 +8,7 @@ from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.types import ValueType
 from src.compiler.symbol_table.class_table import ClassTable
+from src.compiler.symbol_table.function_table.variable_table.variable import Variable
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
@@ -31,7 +32,10 @@ class FunctionTable(Publisher, Subscriber):
         super().__init__()
         self.functions = {}
         # keep track of them so we don't add repeat numbers to function size
-        self.temporal_variables = {'empty'}
+        self.temporal_hash: Dict[int, Variable] = {}
+        self.local_hash: Dict[int, Variable] = {}
+        self.global_hash: Dict[int, Variable] = {}
+
         self.should_delete_temp = []
         self.class_table = class_table
         self.function_data_table: Dict[str, FunctionData] = {}
@@ -61,17 +65,36 @@ class FunctionTable(Publisher, Subscriber):
         """Receive all subscribed events here"""
         from src.compiler.code_generator.expression import ExpressionEvents
         if event.type_ is ExpressionEvents.ADD_TEMP:
-            type_, address = event.payload
-            self.__handle_add_temporal(type_, address)
+            type_, address, class_id = event.payload
+            self.__handle_add_temporal(type_, address, class_id)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
             self.end_function()
 
-    def __handle_add_temporal(self, type_, address, should_delete=False):
-        if address in self.temporal_variables:
+    def __handle_add_temporal(self, type_, address, class_id=None):
+        if address in self.temporal_hash:
             return
 
         self.function_data().add_variable_size(ValueType(type_), Layers.TEMPORARY)
-        self.temporal_variables.append(address)
+        var = Variable(None)
+        var.address_ = address
+        var.type_ = type
+        var.class_id = class_id
+
+        self.temporal_hash[address] = var
+
+    def get_variable_by_address(self, address):
+        """ Returns variable by address """
+        if self.temporal_hash.get(address) is not None:
+            return self.temporal_hash[address]
+
+        if self.local_hash.get(address) is not None:
+            return self.local_hash[address]
+
+        if self.global_hash.get(address) is not None:
+            return self.global_hash[address]
+
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                       CompilerError(f'Variable with address {address} not found')))
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
@@ -104,10 +127,15 @@ class FunctionTable(Publisher, Subscriber):
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
-        self.current_function.add_variable(id_, is_param)
+
+        var = self.current_function.add_variable(id_, is_param)
+        if self.current_function.id_ == "global":
+            self.global_hash[id_] = var
+            return
+        self.local_hash[var.address_] = var
 
     def end_class(self):
-        print('ended')
+        print('')
 
     def add_dimension(self, size):
         """ Adds dimension to current array """
@@ -203,6 +231,8 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
+        self.local_hash = {}
+        self.temporal_hash = {}
 
         # tell quad generator to generate end_func quad
         self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
@@ -212,8 +242,9 @@ class FunctionTable(Publisher, Subscriber):
         for key in self.current_function.variables:
             delete_list.append(self.current_function.variables[key].address_)
 
-        for address in self.temporal_variables:
-            delete_list.append(address)
+        for key in self.temporal_variables:
+            var = self.temporal_variables[key]
+            delete_list.append(var.address_)
 
         self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
 
@@ -247,6 +278,9 @@ class FunctionTable(Publisher, Subscriber):
         variable = variable_table.get_from_address(address)
         if variable is not None:
             return variable
+
+        if address in self.temporal_hash:
+            return self.temporal_hash[address]
 
         # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(

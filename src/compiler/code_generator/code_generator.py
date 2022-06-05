@@ -126,6 +126,7 @@ class CodeGenerator:
 
     def display(self):
         address_map = Debug.map()
+        address_map = {}
         table = make_table("Quadruples",
                            ["#", "Operator", "Left", "Right", "Result"],
                            map(lambda quad:
