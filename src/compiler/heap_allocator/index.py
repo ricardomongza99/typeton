@@ -1,5 +1,7 @@
 from functools import cmp_to_key
 
+from src.config.definitions import HEAP_RANGE_SIZE
+
 
 class FreeRange:
     """Represents a continuous amount of available memory in the heap"""
@@ -24,9 +26,10 @@ def compare(a, b):
 
 
 class HeapAllocator:
-    def __init__(self, size):
-        self.size = size
-        self.ranges = [FreeRange(0, size - 1)]
+    def __init__(self, range_start):
+        self.size = HEAP_RANGE_SIZE
+        self.start = range_start
+        self.ranges = [FreeRange(range_start, range_start + self.size - 1)]
         self.end_map = {}
 
     def allocate_reference(self, size):

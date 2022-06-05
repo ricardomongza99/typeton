@@ -32,17 +32,18 @@ class ExpressionActions(Publisher, Subscriber):
         self.quad_list: List[Quad] = quad_list
         # ed virtual address, not actual value
         self.__operator_stack: List[Operator] = operators
-        self.parenthesis_start = [0]  # operators indexed before this value do not exist
+        # operators indexed before this value do not exist
+        self.parenthesis_start = [0]
 
     def handle_event(self, event: Event):
         if event.type_ is CompilerEvent.SET_RETURN:
             self.__execute_function_return(event.payload)
 
-    def push_variable(self, id_, type_, address):
+    def push_variable(self, id_, type_, address, class_id):
         if address is None:
             return CompilerError(f'Variable "{id_}" not found')
 
-        operand = Operand(type_, address)
+        operand = Operand(type_, address, class_id)
         self.__operand_address_stack.append(operand)
 
     def get_operands(self):
@@ -109,12 +110,14 @@ class ExpressionActions(Publisher, Subscriber):
 
     def next_operator(self):
         if len(self.__operator_stack) == 0:
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operator Stack empty")))
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                           CompilerError("Operator Stack empty")))
         return self.__operator_stack.pop()
 
     def next_operand(self):
         if len(self.__operand_address_stack) == 0:
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                           CompilerError("Operand stack empty")))
         return self.__operand_address_stack.pop()
 
     def __execute_assign(self):
@@ -125,7 +128,8 @@ class ExpressionActions(Publisher, Subscriber):
         right = self.next_operand()
         left = self.next_operand()
 
-        type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
+        type_match = check_type(operator.type_.value,
+                                left.type_.value, right.type_.value)
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{address_map[left.address]}:'
@@ -133,6 +137,23 @@ class ExpressionActions(Publisher, Subscriber):
                 f'{operator.type_.value} '
                 f'{address_map[right.address]} '
                 f'({left.type_.value} and {right.type_.value} are not compatible)')))
+
+        if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
+            print("pointer assign")
+            if left.class_id is not None and right.class_id is not None:
+                print("pointer assign class")
+                if left.class_id != right.class_id:
+                    self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                        f'({left.class_id} cannot be assigned to pointer of type {right.class_id})')))
+                else:
+                    print("classes are equal")
+                    quad = Quad(
+                        left_address=f'&{right.address}',
+                        right_address=None,
+                        operation=OperationType.POINTER_ASSIGN,
+                        result_address=left.address)
+                    self.quad_list.append(quad)
+                    return
 
         quad = Quad(
             left_address=right.address,
@@ -150,7 +171,8 @@ class ExpressionActions(Publisher, Subscriber):
         expression = self.next_operand()
         assignment = self.next_operand()
 
-        type_match = check_type(operator.type_.value, assignment.type_.value, expression.type_.value)
+        type_match = check_type(operator.type_.value,
+                                assignment.type_.value, expression.type_.value)
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{address_map[assignment.address]}:'
@@ -160,8 +182,10 @@ class ExpressionActions(Publisher, Subscriber):
                 f'({assignment.type_.value} and {expression.type_.value} are not compatible)')))
 
         # address needed to store operation (a += b) = (a + b = temp, a = temp)
-        temp_address = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, temp_address)))
+        temp_address = stack_allocator.allocate_address(
+            ValueType(type_match), Layers.TEMPORARY)
+        self.broadcast(Event(ExpressionEvents.ADD_TEMP,
+                       (type_match, temp_address)))
         operator_type = None
 
         if operator.type_ is OperationType.PASSIGN:
@@ -173,14 +197,16 @@ class ExpressionActions(Publisher, Subscriber):
         elif operator.type_ is OperationType.DASSIGN:
             operator_type = OperationType.DIVIDE
         else:
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'Invalid shorthand type {operator.type_}')))
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Invalid shorthand type {operator.type_}')))
 
         temp_quad = Quad(operation=operator_type,
                          left_address=assignment.address,
                          right_address=expression.address,
                          result_address=temp_address)
 
-        assignment_quad = Quad(OperationType.ASSIGN, left_address=temp_address, result_address=assignment.address)
+        assignment_quad = Quad(
+            OperationType.ASSIGN, left_address=temp_address, result_address=assignment.address)
         self.quad_list.append(temp_quad)
         self.quad_list.append(assignment_quad)
 
@@ -193,7 +219,8 @@ class ExpressionActions(Publisher, Subscriber):
                 f'Function return type validation failed: '
                 f'Should be {type_.value}, but is {return_expression.type_.value} instead')))
 
-        quad = Quad(operation=operator.type_.value, result_address=return_expression.address)
+        quad = Quad(operation=operator.type_.value,
+                    result_address=return_expression.address)
         self.quad_list.append(quad)
         self.quad_list.append(Quad(operation=OperationType.ENDFUNC))
 
@@ -201,8 +228,10 @@ class ExpressionActions(Publisher, Subscriber):
         quad = Quad(OperationType.CALL_ASSIGN, result_address=address)
         self.quad_list.append(quad)
 
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (function_return_type, address)))
-        self.__operand_address_stack.append(Operand(function_return_type, address))
+        self.broadcast(Event(ExpressionEvents.ADD_TEMP,
+                       (function_return_type, address)))
+        self.__operand_address_stack.append(
+            Operand(function_return_type, address))
 
     def __execute_arithmetic(self, stack_allocator: StackAllocator):
         operator = self.next_operator()
@@ -211,7 +240,8 @@ class ExpressionActions(Publisher, Subscriber):
         left: Operand = self.next_operand()
 
         address_map = Debug.map()
-        type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
+        type_match = check_type(operator.type_.value,
+                                left.type_.value, right.type_.value)
 
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
@@ -222,16 +252,20 @@ class ExpressionActions(Publisher, Subscriber):
 
             # broadcast add variable count to function data
 
-        result = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
-        self.__operand_address_stack.append(Operand(ValueType(type_match), result))
+        result = stack_allocator.allocate_address(
+            ValueType(type_match), Layers.TEMPORARY)
+        self.__operand_address_stack.append(
+            Operand(ValueType(type_match), result))
 
         # temps count towards function total size
         self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result)))
 
         if stack_allocator.is_segment(left.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left.type_, left.address)))
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP,
+                           (left.type_, left.address)))
         if stack_allocator.is_segment(right.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right.type_, right.address)))
+            self.broadcast(Event(ExpressionEvents.ADD_TEMP,
+                           (right.type_, right.address)))
 
         quad = (Quad(
             left_address=left.address,

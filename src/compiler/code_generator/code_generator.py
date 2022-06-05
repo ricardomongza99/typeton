@@ -1,30 +1,38 @@
-from typing import List
+from typing import Dict, List
 
 import jsonpickle
 
-from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.code_generator.array import ArrayActions
 from src.compiler.code_generator.built_in import Builtin_Function_Actions
 from src.compiler.code_generator.conditional import ConditionalActions
 from src.compiler.code_generator.expression import Operand, Operator, ExpressionActions
 from src.compiler.code_generator.function import FunctionActions
-from src.compiler.code_generator.array import ArrayActions
 from src.compiler.code_generator.loop import LoopActions
-from src.compiler.code_generator.type import Quad, OperationType
+from src.compiler.code_generator.object import ObjectActions
+from src.compiler.code_generator.type import Quad
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.types import ValueType
 from src.utils.debug import Debug
 from src.utils.display import make_table, TableOptions
 
 
 class CodeGenerator:
-    def __init__(self, scheduler: StackAllocator):
+    def __init__(self, stack_allocator: StackAllocator, heap_allocator):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
+        self.pointer_types: Dict[str, ValueType] = {}
 
-        self.scheduler = scheduler
+        self.scheduler = stack_allocator
+        self.heap_allocator = heap_allocator
 
+        self.object_actions = ObjectActions(
+            self.__quad_list, self.__operand_address_stack, self.heap_allocator, self.scheduler, self.pointer_types)
         self.conditional_actions = ConditionalActions(self.__quad_list)
-        self.array_actions = ArrayActions(self.__quad_list, self.__operand_address_stack)
-        self.function_actions = FunctionActions(self.__quad_list, self.__operand_address_stack)
+        self.array_actions = ArrayActions(
+            self.__quad_list, self.__operand_address_stack)
+        self.function_actions = FunctionActions(
+            self.__quad_list, self.__operand_address_stack)
         self.loop_actions = LoopActions(self.__quad_list)
         self.builtin_actions = Builtin_Function_Actions(self.__quad_list)
 
@@ -51,8 +59,8 @@ class CodeGenerator:
     def get_next_quad(self):
         return len(self.__quad_list)
 
-    def push_variable(self, id_, type_, address):
-        self.expression_actions.push_variable(id_, type_, address)
+    def push_variable(self, id_, type_, address, class_id):
+        self.expression_actions.push_variable(id_, type_, address, class_id)
 
     def push_operator(self, operator):
         self.expression_actions.push_operator(operator, self.scheduler)
@@ -123,11 +131,14 @@ class CodeGenerator:
                                [
                                    '{:^10}'.format(quad[0]),
                                    '{:^10}'.format(quad[1].operation.value),
-                                   '{:<5} -->{:>5}'.format(address_map[quad[1].left_address], quad[1].left_address)
-                                   if address_map.get(quad[1].left_address) is not None else "." * 8,
-                                   '{:<5} --> {:<5}'.format(address_map[quad[1].right_address], quad[1].right_address)
-                                   if address_map.get(quad[1].right_address) is not None else "." * 15,
-                                   '{:<5} -->{:>5}'.format(address_map[quad[1].result_address], quad[1].result_address)
+                                   '{:<5} -->{:>5}'.format(
+                                       address_map[quad[1].left_address], quad[1].left_address)
+                                   if address_map.get(quad[1].left_address) is not None else quad[1].left_address,
+                                   '{:<5} --> {:<5}'.format(
+                                       address_map[quad[1].right_address], quad[1].right_address)
+                                   if address_map.get(quad[1].right_address) is not None else quad[1].right_address,
+                                   '{:<5} -->{:>5}'.format(
+                                       address_map[quad[1].result_address], quad[1].result_address)
                                    if address_map.get(quad[1].result_address) is not None else quad[1].result_address
 
                                ], enumerate(self.__quad_list)),
@@ -139,7 +150,8 @@ class CodeGenerator:
         self.__quad_list.append(quad)
 
     def execute_builtin_call(self):
-        self.builtin_actions.execute_call(self.__operator_stack, self.__operand_address_stack)
+        self.builtin_actions.execute_call(
+            self.__operator_stack, self.__operand_address_stack)
 
     def get_output_quads(self):
         """ Returns quads list of types [str, str, str, str] used by the output file """

@@ -1,18 +1,20 @@
+from distutils.errors import CompileError
 import sys
 
 import jsonpickle
 
-from src.compiler.stack_allocator.index import StackAllocator
-from src.compiler.stack_allocator.helpers import Layers
-from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.code_generator import CodeGenerator
-from src.compiler.code_generator.expression import Operator
-from src.compiler.code_generator.type import OperationType
+from src.compiler.code_generator.type import Operand
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.types import ValueType
+from .heap_allocator.index import HeapAllocator
 from .output import OutputFile
 from .symbol_table import SymbolTable
+from .symbol_table.class_table import ClassTable
 from ..utils.observer import Subscriber, Event, Publisher
 
 
@@ -21,12 +23,18 @@ class Compiler(Publisher, Subscriber):
         super().__init__()
 
         self._allocator = StackAllocator()
+        self.heap_allocator = HeapAllocator(
+            self._allocator._segments[Layers.CONSTANT.value].end+1)
         self._symbol_table = SymbolTable()
 
         self.tokens = tokens
         self.lexer = lex
         self._parser = yacc.yacc(module=self, start="program", debug=True)
-        self._code_generator = CodeGenerator(scheduler=self._allocator)
+        self._code_generator = CodeGenerator(
+            self._allocator, self.heap_allocator)
+
+        object_actions = self._code_generator.object_actions
+        object_actions.add_subscriber(self._symbol_table.function_table, {})
 
         # subscribe to expression code generator
         expressions = self._code_generator.expression_actions
@@ -49,8 +57,13 @@ class Compiler(Publisher, Subscriber):
 
         # subscribe compiler to error messages
         self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
-        self._code_generator.expression_actions.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
-        self._symbol_table.function_table.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
+
+        self._code_generator.expression_actions.add_subscriber(
+            self, {CompilerEvent.STOP_COMPILE})
+        self._symbol_table.function_table.add_subscriber(
+            self, {CompilerEvent.STOP_COMPILE})
+        self._code_generator.object_actions.add_subscriber(
+            self, {CompilerEvent.STOP_COMPILE})
 
         self.syntax_error = None
 
@@ -71,11 +84,13 @@ class Compiler(Publisher, Subscriber):
         self._parser.parse(data, self.lexer, debug=False)
 
         if self._symbol_table.function_table.function_data_table.get("main") is None:
-            self.handle_event(Event(CompilerEvent.STOP_COMPILE, "Main function is required"))
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE,
+                              CompilerError("Main function is required")))
 
         if debug:
             self._display_tables()
             self._display_quads()
+            self._symbol_table.class_table.display()
 
         return self._make_json()
 
@@ -85,7 +100,8 @@ class Compiler(Publisher, Subscriber):
         quads = self._code_generator.get_output_quads()
         function_data = self._symbol_table.function_table.get_output_function_data()
 
-        output = OutputFile(constant_table, function_data, quads)
+        output = OutputFile(constant_table, function_data,
+                            quads, self.heap_allocator.start)
         return jsonpickle.encode(output)
 
     def _display_tables(self):
@@ -126,9 +142,23 @@ class Compiler(Publisher, Subscriber):
 
     def p_class(self, p):
         """
-        class : CLASS ID class_block
-              | CLASS ID COLON ID class_block
+        class : CLASS ID add_class class_block end_class
+
         """
+        #         | CLASS ID COLON ID class_block
+
+    def p_add_class(self, p):
+        """
+        add_class :
+        """
+        self._symbol_table.class_table.add_class(p[-1])
+
+    def p_end_class(self, p):
+        """
+        end_class :
+        """
+        print("ended")
+        self._symbol_table.class_table.end_class()
 
     def p_function(self, p):
         """
@@ -140,6 +170,34 @@ class Compiler(Publisher, Subscriber):
         """
         declaration : VAR ID add_variable COLON type
         """
+
+    def p_class_declaration(self, p):
+        """
+        class_declaration : ID add_class_variable COLON class_type
+        """
+        print("declared")
+
+    def p_class_type(self, p):
+        """
+        class_type : INT set_class_variable_type
+                   | BOOL set_class_variable_type
+                   | FLOAT set_class_variable_type
+                   | STRING set_class_variable_type
+        """
+
+    def p_add_class_variable(self, p):
+        """
+        add_class_variable :
+        """
+        print('adding var', p[-1])
+        self._symbol_table.class_table.current_class.add_variable(p[-1])
+
+    def p_set_class_variable_type(self, p):
+        """
+        set_class_variable_type :
+        """
+        type_ = ValueType(p[-1])
+        self._symbol_table.class_table.current_class.set_type(type_)
 
     # -- PARAMS -----------------------
 
@@ -164,7 +222,7 @@ class Compiler(Publisher, Subscriber):
 
     def p_type(self, p):
         """
-        type : ID
+        type : ID set_type
              | primitive
              | primitive array allocate_dimensions
         """
@@ -204,9 +262,10 @@ class Compiler(Publisher, Subscriber):
 
     def p_class_block3(self, p):
         """
-        class_block3 : function
-                     | declaration
+        class_block3 :  class_declaration
         """
+
+        # removed function for now
 
     def p_init_block(self, p):
         """
@@ -259,7 +318,16 @@ class Compiler(Publisher, Subscriber):
                   | assign
                   | call return_type_warning
                   | return
+                  | delete_heap_memory
         """
+
+    def p_delete_heap_memory(self, p):
+        """
+        delete_heap_memory : DELETE ID 
+        """
+        var = self._symbol_table.function_table.get_variable(p[2])
+        print(var.initialized, 'deleted')
+        self._code_generator.object_actions.free_heap_memory(var)
 
     def p_return_type_warning(self, p):
         """
@@ -268,7 +336,8 @@ class Compiler(Publisher, Subscriber):
         id_ = self._symbol_table.function_table.current_function_call_id_
         type_ = self._symbol_table.function_table.functions[id_].type_
         if type_ is not ValueType.VOID:
-            print(f'Warning, function {id_} returns {type_.value}, but is not unused')
+            print(
+                f'Warning, function {id_} returns {type_.value}, but is not unused')
 
     def p_while(self, p):
         """
@@ -293,14 +362,89 @@ class Compiler(Publisher, Subscriber):
 
     def p_assign(self, p):
         """
-        assign : assign1 ASSIGN input
+        assign : assign1 ASSIGN other_assign
                | assign1 assign2 bool_expr execute_priority_0
         """
+
+    def p_resolve_object_assignment(self, p):
+        """
+        resolve_object_assignment :
+        """
+        self._code_generator.object_actions.resolve_object_assignment()
+
+    def p_other_assing(self, p):
+        """
+        other_assign : input
+                    | push_variable_class new_object verify_and_allocate_object
+        """
+
+    def p_new_object(self, p):
+        """
+        new_object : NEW ID verify_class_exists LPAREN RPAREN
+        """
+
+    def p_verify_and_allocate_object(self, p):
+        """
+        verify_and_allocate_object :
+        """
+
+        self._code_generator.object_actions.allocate_heap()
+
+    def p_push_variable_class(self, p):
+        """
+        push_variable_class :
+        """
+        operand: Operand = self._code_generator.peak_operand()
+        id_ = self._symbol_table.function_table.get_id(operand.address)
+        var = self._symbol_table.function_table.get_variable(id_)
+
+        if var.class_id is None:
+            self.handle_event(
+                Event(CompileError, f'Cannot assign object {p[-1]} to primitive variable {id_}'))
+
+        class_data = self._symbol_table.class_table.get_class(var.class_id)
+        self._code_generator.object_actions.push_class_data(class_data)
+        self._code_generator.object_actions.push_variable(var)
+
+    def p_verify_class_exists(self, p):
+        """
+        verify_class_exists :
+        """
+        class_data = self._symbol_table.class_table.get_class(p[-1])
+        if class_data is None:
+            print(f'Class {p[-1]} does not exist')
+            print('Error, class does not exist')
+            self.handle_event(
+                Event(CompileError, f'Class {p[-1]} does not exist'))
+
+        self._code_generator.object_actions.push_class_data(class_data)
+
+    #
+    # def p_push_class_variable(self, p):
+    #     """
+    #     push_class_variable :
+    #     """
+    #     self._code_generator.object_actions.push_variable(p[-1])
+
+    # def p_push_class_id(self, p):
+    #     """
+    #     push_class_id :
+    #     """
+    #
+    #     # verify
+    #     data = self._symbol_table.class_table.classes[p[-1]]
+    #     if data is None:
+    #         print('error')
+    #         return
+    #
+    #     self._code_generator.object_actions.push_class_data(data)
 
     def p_assign1(self, p):
         """
         assign1 : ID push_variable
                 | call_array
+                | constant_object resolve_object_assignment
+
         """
 
     def p_assign2(self, p):  # TODO add rest to semantic cube
@@ -352,7 +496,7 @@ class Compiler(Publisher, Subscriber):
         """
         param_count = self._symbol_table.function_table.parameter_count + 1
         signature_len = len(self._symbol_table.function_table.function_data_table[
-                                self._symbol_table.function_table.current_function_call_id_].parameter_signature)
+            self._symbol_table.function_table.current_function_call_id_].parameter_signature)
 
         if param_count != signature_len:
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
@@ -388,7 +532,8 @@ class Compiler(Publisher, Subscriber):
                 f'Too many parameters for function {func_table.current_function_call_id_}')))
 
         param_type_ = current_func.parameter_signature[func_table.parameter_count]
-        self._code_generator.function_actions.verify_parameter_type(param_type_, func_table.parameter_count)
+        self._code_generator.function_actions.verify_parameter_type(
+            param_type_, func_table.parameter_count)
 
     def p_increment_parameter_count(self, p):
         """
@@ -432,7 +577,8 @@ class Compiler(Publisher, Subscriber):
                   | relational_exp execute_priority_1 OR push_operator bool_expr
         """
 
-    def p_relational_exp(self, p):  # TODO Changed to relation_exp to prevent compiler panic. fix this
+    # TODO Changed to relation_exp to prevent compiler panic. fix this
+    def p_relational_exp(self, p):
         """
         relational_exp : expression execute_priority_2 comp relational_exp
                        | expression execute_priority_2
@@ -467,6 +613,7 @@ class Compiler(Publisher, Subscriber):
                  |  call add_call_operator
                  | call_array
                  | constant2
+                 | constant_object get_object_property
         """
 
     def p_add_call_operator(self, p):
@@ -484,8 +631,44 @@ class Compiler(Publisher, Subscriber):
     def p_constant2(self, p):
         """
         constant2 : ID push_variable
-                  | ID PERIOD constant2
         """
+
+    def p_constant_object(self, p):
+        """
+        constant_object : ID push_object PERIOD ID push_object_property
+        """
+
+    def p_push_object(self, p):
+        """
+        push_object :
+        """
+
+        variable = self._symbol_table.function_table.get_variable(p[-1])
+        if variable.class_id is None:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Variable {p[-1]} is not an object')))
+
+        class_data = self._symbol_table.class_table.get_class(
+            variable.class_id)
+
+        self._code_generator.object_actions.push_object_address(
+            variable.address_)
+
+        self._code_generator.object_actions.push_class_data(class_data)
+
+    def p_push_object_property(self, p):
+        """
+        push_object_property :
+        """
+
+        self._code_generator.object_actions.push_object_property(p[-1])
+
+    def p_get_object_property(self, p):
+        """
+        get_object_property :
+        """
+
+        self._code_generator.object_actions.get_object_property()
 
     def p_comp(self, p):
         """
@@ -515,7 +698,8 @@ class Compiler(Publisher, Subscriber):
         """
         add_function :
         """
-        self._symbol_table.function_table.add(p[-1], self._code_generator.get_next_quad())
+        self._symbol_table.function_table.add(
+            p[-1], self._code_generator.get_next_quad())
 
     def p_set_void(self, p):
         """
@@ -541,7 +725,8 @@ class Compiler(Publisher, Subscriber):
         add_constant :
         """
         (self._symbol_table.constant_table.add(p[-1], self._allocator))
-        (self._code_generator.push_constant(p[-1], self._symbol_table.constant_table))
+        (self._code_generator.push_constant(
+            p[-1], self._symbol_table.constant_table))
 
     def p_add_param(self, p):
         """
@@ -573,19 +758,22 @@ class Compiler(Publisher, Subscriber):
         set_type :
         """
 
-        id_ = self._symbol_table.function_table.set_type(p[-1], self._allocator)
-        if id_ is not None:
-            # TODO refactor
-            variable = self._symbol_table.function_table.get_variable(id_)
-            self._code_generator.push_variable(id_, variable.type_, variable.address_)
+        id_ = self._symbol_table.function_table.set_type(
+            p[-1], self._allocator)
+        # if id_ is not None:
+        #    # TODO refactor
+        #     variable = self._symbol_table.function_table.get_variable(id_)
+        #     self._code_generator.push_variable(id_, variable.type_, variable.address_)
 
-    def p_execute_priority_0(self, p):  # used to check on stack and execute quad operations
+    # used to check on stack and execute quad operations
+    def p_execute_priority_0(self, p):
         """
         execute_priority_0 :
         """
         (self._code_generator.execute_if_possible(0))
 
-    def p_execute_builtin_call(self, p):  # used to check on stack and execute quad operations
+    # used to check on stack and execute quad operations
+    def p_execute_builtin_call(self, p):
         """
         execute_builtin_call :
         """
@@ -669,7 +857,8 @@ class Compiler(Publisher, Subscriber):
         push_variable :
         """
         variable = self._symbol_table.function_table.get_variable(p[-1])
-        self._code_generator.push_variable(p[-1], variable.type_, variable.address_)
+        self._code_generator.push_variable(
+            p[-1], variable.type_, variable.address_, variable.class_id)
 
     def p_push_dimensions(self, p):
         """
@@ -682,7 +871,8 @@ class Compiler(Publisher, Subscriber):
 
         dimension_addresses = []
         for dimension in reversed(variable.dimensions):
-            constant = self._symbol_table.constant_table.get_from_value(dimension)
+            constant = self._symbol_table.constant_table.get_from_value(
+                dimension)
             dimension_addresses.append(constant.address)
 
         self._code_generator.push_dimensions(dimension_addresses)
