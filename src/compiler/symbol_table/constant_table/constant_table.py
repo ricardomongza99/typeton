@@ -12,7 +12,7 @@ from .constant import Constant
 
 class ConstantTable:
     def __init__(self):
-        self.constant_dict: Dict[str, Constant] = {}
+        self.constants: Dict[str, Constant] = {}
         self.inverse_hash: Dict[int, any] = {}
 
     def add(self, value, memory: StackAllocator):
@@ -37,7 +37,7 @@ class ConstantTable:
         debug = Debug.get_instance().map()
         debug[address] = str(value)
 
-        self.constant_dict[value] = Constant(address, type_)
+        self.constants[value] = Constant(address, type_)
         self.inverse_hash[address] = value
         return address
 
@@ -49,18 +49,18 @@ class ConstantTable:
         return self.inverse_hash[address]
 
     def get_from_value(self, value):
-        if self.constant_dict.get(value) is None:
+        if self.constants.get(value) is None:
             # TODO error handling
             return
 
-        return self.constant_dict[value]
+        return self.constants[value]
 
     def display(self):
         print(make_table("Constants", ["ID", "TYPE", "ADRESS"],
-                         map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address], self.constant_dict.items())))
+                         map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address], self.constants.items())))
 
     def exists(self, key):
-        if self.constant_dict.get(key) is None:
+        if self.constants.get(key) is None:
             return False
         return True
 
