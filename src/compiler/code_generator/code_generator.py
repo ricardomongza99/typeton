@@ -97,6 +97,9 @@ class CodeGenerator:
     def verify_dimension(self):
         self.array_actions.verify_dimensions()
 
+    def calculate_dimension(self):
+        self.array_actions.calculate_dimension(self.scheduler)
+
     def get_array_pointer(self):
         self.array_actions.get_array_pointer(self.scheduler)
 
