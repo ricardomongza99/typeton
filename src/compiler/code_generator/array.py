@@ -1,6 +1,8 @@
+
+
 from enum import Enum
 from typing import List
-from src.compiler.code_generator.type import Quad, OperationType, Operand
+from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension
 from src.utils.observer import Subscriber, Event, Publisher
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.stack_allocator.index import StackAllocator
@@ -20,12 +22,14 @@ class ArrayActions(Publisher):
         self._quad_list: List[Quad] = quad_list
         self._pointer_types = pointer_types
 
-        self._dimensions_stack = []
+        self._dimensions_stack: List[Dimension] = []
 
     def push_dimensions(self, dimensions):
+        print("push dimensions")
         self._dimensions_stack.extend(dimensions)
 
     def verify_dimensions(self):
+        print("verify dimensions")
         """ Generates verify quad """
         if not self._operand_stack:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
@@ -46,6 +50,7 @@ class ArrayActions(Publisher):
 
     def calculate_dimension(self, stack_allocator: StackAllocator):
         """ Creates quad that multiplies index by m """
+        print("calculate dimension")
 
         if not self._operand_stack:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
@@ -68,6 +73,7 @@ class ArrayActions(Publisher):
         self._operand_stack.append(Operand(type_=ValueType.INT, address=result_address))
 
     def get_array_pointer(self, stack_allocator: StackAllocator):
+        print("get array pointer")
         # Error handling: missing indexes for array
         self._dimensions_stack.pop()
         # if self._dimensions_stack:
@@ -78,6 +84,7 @@ class ArrayActions(Publisher):
         self._generate_base_sum_quad(stack_allocator)
 
     def _generate_sum_quads(self, stack_allocator: StackAllocator):
+        print("generate sum quads")
         """ Generates sum quads for calculations indexes * ms """""
         while True:
             if len(self._operand_stack) <= 1:
@@ -94,7 +101,7 @@ class ArrayActions(Publisher):
             self._operand_stack.append(Operand(ValueType.INT, result_address))
 
             # Reserve temp int
-            self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.INT, result_address)))
+            self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.INT, result_address, None)))
 
             quad = Quad(
                 operation=OperationType.ADD,
@@ -118,14 +125,14 @@ class ArrayActions(Publisher):
         self._operand_stack.append(Operand(ValueType.POINTER, pointer_address))
 
         # Reserve temp pointer
-        self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address)))
+        self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address, None)))
 
         self._pointer_types[pointer_address] = right_operand.type_
 
         quad = Quad(
-            operation=OperationType.ADD,
-            left_address=left_operand.address,
+            operation=OperationType.POINTER_ADD,
+            left_address=f'&{left_operand.address}',
             right_address=right_operand.address,
-            result_address=pointer_address
+            result_address=f'&{pointer_address}'
         )
         self._quad_list.append(quad)

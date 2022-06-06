@@ -1,7 +1,7 @@
 from typing import List
 from unittest import result
 from weakref import ref
-from src.compiler.code_generator.expression import ExpressionActions, ExpressionEvents
+from src.compiler.code_generator.expression import ExpressionActions
 from src.compiler.code_generator.type import Operand, OperationType, Quad
 from src.compiler.errors import CompilerError, CompilerEvent
 

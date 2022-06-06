@@ -4,7 +4,7 @@ import sys
 import jsonpickle
 
 from src.compiler.code_generator.code_generator import CodeGenerator
-from src.compiler.code_generator.type import Operand
+from src.compiler.code_generator.type import Dimension, Operand
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
@@ -40,6 +40,7 @@ class Compiler(Publisher, Subscriber):
 
         # subscribe to array actions
         array_actions = self._code_generator.array_actions
+        array_actions.add_subscriber(self._symbol_table.function_table, {})
         array_actions.add_subscriber(self, {})
 
         # subscribers for function table
@@ -53,6 +54,7 @@ class Compiler(Publisher, Subscriber):
         self.add_subscriber(self._symbol_table.function_table, {})
 
         # subscribe compiler to error messages
+        self._allocator.add_subscriber(self._symbol_table.function_table, {})
         self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
 
         self._code_generator.expression_actions.add_subscriber(
@@ -229,9 +231,9 @@ class Compiler(Publisher, Subscriber):
 
     def p_type(self, p):
         """
-        type : ID set_type
-             | primitive
+        type :  primitive
              | primitive array allocate_dimensions
+             | ID set_type
         """
 
     def p_primitive(self, p):
@@ -382,6 +384,7 @@ class Compiler(Publisher, Subscriber):
         """
         other_assign : input
                     | push_variable_class new_object verify_and_allocate_object
+
         """
 
     def p_new_object(self, p):
@@ -490,8 +493,14 @@ class Compiler(Publisher, Subscriber):
     def p_call_array1(self, p):
         """
         call_array1 : LBRACK expression verify_dimension RBRACK
-                    | LBRACK expression verify_dimension RBRACK call_array1
+                    | LBRACK expression verify_dimension RBRACK calculate_dimension call_array1
         """
+
+    def p_calculate_dimension(self, p):
+        """
+        calculate_dimension :
+        """
+        self._code_generator.calculate_dimension()
 
     # Function Call ----------------------------------------------------------------------------------------------------
 
@@ -520,11 +529,13 @@ class Compiler(Publisher, Subscriber):
         """
         verify_param_count :
         """
-        param_count = self._symbol_table.function_table.parameter_count + 1
+
+        param_count = self._symbol_table.function_table.parameter_count
         signature_len = len(self._symbol_table.function_table.function_data_table[
             self._symbol_table.function_table.current_function_call_id_].parameter_signature)
 
-        if param_count != signature_len:
+        if param_count + 1 != signature_len and (signature_len != 0 and param_count == 0):
+            print(param_count, signature_len)
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Function Call Parameter Mistmatch {param_count} != {signature_len}')))
 
@@ -558,8 +569,7 @@ class Compiler(Publisher, Subscriber):
                 f'Too many parameters for function {func_table.current_function_call_id_}')))
 
         param_type_ = current_func.parameter_signature[func_table.parameter_count]
-        self._code_generator.function_actions.verify_parameter_type(
-            param_type_, func_table.parameter_count)
+        self._code_generator.function_actions.verify_parameter_type(param_type_, func_table.parameter_count)
 
     def p_increment_parameter_count(self, p):
         """
@@ -636,7 +646,7 @@ class Compiler(Publisher, Subscriber):
                  | FLOATLIT  add_constant
                  | BOOLLIT   add_constant
                  | string
-                 |  call add_call_operator
+                 | call add_call_operator
                  | call_array
                  | constant2
                  | constant_object resolve_object
@@ -747,6 +757,7 @@ class Compiler(Publisher, Subscriber):
         """
         add_dimension :
         """
+        print(p[-2])
         self._symbol_table.constant_table.add(p[-2], self._allocator)
         self._symbol_table.function_table.add_dimension(p[-2])
 
@@ -754,7 +765,8 @@ class Compiler(Publisher, Subscriber):
         """
         allocate_dimensions :
         """
-        self._symbol_table.function_table.allocate_dimensions(self._allocator)
+        size = self._symbol_table.function_table.allocate_dimensions(self._allocator, self._symbol_table.constant_table)
+        # self._code_generator.array_actions.initialize_array(size)
 
     def p_set_type(self, p):
         """
@@ -869,16 +881,21 @@ class Compiler(Publisher, Subscriber):
         """
         # TODO: Clean this mess
         operand = self._code_generator.peak_operand()
-        id_ = self._symbol_table.function_table.get_id(operand.address)
-        variable = self._symbol_table.function_table.get_variable(id_)
+        variable = self._symbol_table.function_table.get_id(operand.address)
 
-        dimension_addresses = []
-        for dimension in reversed(variable.dimensions):
-            constant = self._symbol_table.constant_table.get_from_value(
-                dimension)
-            dimension_addresses.append(constant.address)
+        dimensions = []
+        for dim_data in reversed(variable.dim_data_list):
+            size = self._symbol_table.constant_table.get_from_value(dim_data.size)
+            m = self._symbol_table.constant_table.get_from_value(dim_data.m)
 
-        self._code_generator.push_dimensions(dimension_addresses)
+            if m is None:
+                dimension = Dimension(size_address=size.address)
+            else:
+                dimension = Dimension(size_address=size.address, m_address=m.address)
+
+            dimensions.append(dimension)
+
+        self._code_generator.push_dimensions(dimensions)
 
     def p_verify_dimension(self, p):
         """

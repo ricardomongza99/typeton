@@ -137,6 +137,8 @@ class ContextMemory(Publisher):
         offset = address - type_data.start
         if segment.type_ is Layers.TEMPORARY:
             offset += self.size_data.get_data(type_data.type_).local
+            # print(offset)
+
         return offset
 
     def is_global(self):
@@ -184,7 +186,6 @@ class ContextMemory(Publisher):
                 #       "actual address", slot[offset], 'for value', value)
                 self.object_heap.set_value(slot[offset], value)
                 return
-
         slot[offset] = value
 
     def map_parameter(self, argument_value, argument_address, parameter_index):
@@ -217,10 +218,16 @@ class ContextMemory(Publisher):
         offset = self.get_offset(pure_addr, segment, type_data)
 
         if type_data.type_ is ValueType.POINTER:
+
             if action is PointerAction.REFERENCE:
                 return slot[offset]
             else:
-                return self.object_heap.get_value(slot[offset])
+                if self.object_heap.is_heap_address(slot[offset]):
+                    return self.object_heap.get_value(slot[offset])
+                else:
+                    return self.get(slot[offset])
+                # else:
+                #     return slot[offset]
 
         return slot[offset]
 

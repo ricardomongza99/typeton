@@ -1,3 +1,4 @@
+from ctypes import pointer
 from enum import Enum
 from queue import Queue
 from src.config.definitions import INT_RANGE_SIZE, FLOAT_RANGE_SIZE, BOOL_RANGE_SIZE, POINTER_RANGE_SIZE, STRING_RANGE_SIZE
@@ -21,9 +22,13 @@ class TypeRange:
 
 class TypeResource(TypeRange):
     def __init__(self, start, end, resource_type: ValueType):
+        self.start = start
         super().__init__(start, end, resource_type)
         self.free_addresses_list = Queue()
         self.pointer = start
+
+    def reset(self):
+        self.pointer = self.start
 
 
 class MemoryType:

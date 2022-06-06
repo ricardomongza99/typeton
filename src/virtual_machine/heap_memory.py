@@ -38,6 +38,7 @@ class Heap(Publisher):
         self.start = range_start
         self.ranges = [FreeRange(range_start, range_start + self.size - 1)]
         self.end_map = {}
+        self.end = range_start + self.size - 1
         self.memory = [None] * self.size
 
     def get_value(self, heap_address):

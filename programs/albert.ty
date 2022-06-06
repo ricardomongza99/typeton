@@ -24,39 +24,25 @@ var y: Int
 var global_dog: Dog
 
 
-
-
-
-func new_dog(n: Int) {
+func new_dog() {
     var dog: Dog
     dog = new Dog()
-    dog.age = n
-    delete dog
-
 }
 
 
 func main() {
+  var dog_a: Dog
+   
   
+  dog_a.name = new Name()
+  dog_a.name.first = "chelo"
 
-  var x: Int
-  x = 0
+  dog_a.parent = new Dog()
+  dog_a.parent.age = 20
+  dog_a.age = 1
 
-  while (x < 5000) {
-
-      new_dog(x)
-      x += 1
-  }
-
-
-
-
-
- 
-
-
-  
-
-
+  print(dog_a.name.first)
+  print(dog_a.parent.age)
+  print(dog_a.age)
 
 }

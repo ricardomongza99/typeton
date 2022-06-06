@@ -49,6 +49,12 @@ class Operator:
         self.type_ = type_
 
 
+class Dimension:
+    def __init__(self, size_address, m_address=None):
+        self.size_address = size_address
+        self.m_address = m_address
+
+
 class Operand:
     def __init__(self, type_: ValueType, address: int, class_id=None, is_class_param=False):
         self.type_ = type_

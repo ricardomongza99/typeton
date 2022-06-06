@@ -32,7 +32,7 @@ class Function:
         self._vars_table.add_dimension(size)
 
     def allocate_dimensions(self, layer, memory, constant_table):
-        self._vars_table.allocate_dimensions(layer, memory, constant_table)
+        return self._vars_table.allocate_dimensions(layer, memory, constant_table)
 
     def set_variable_type(self, type_, layer, memory, class_id):
         return self._vars_table.set_type(type_, layer, memory, class_id)

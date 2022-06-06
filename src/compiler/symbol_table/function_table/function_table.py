@@ -1,3 +1,4 @@
+from audioop import add
 from enum import Enum
 from typing import Dict
 
@@ -81,7 +82,6 @@ class FunctionTable(Publisher, Subscriber):
         var.address_ = address
         var.type_ = type
         var.class_id = class_id
-
         self.temporal_hash[address] = var
 
     def get_variable_by_address(self, address):
@@ -101,7 +101,6 @@ class FunctionTable(Publisher, Subscriber):
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
         if self.functions.get(id_) is None:
-            self.temporal_variables = []
             reference = Function(id_=id_)
             self.functions[id_] = reference
             self.current_function = reference
@@ -146,7 +145,7 @@ class FunctionTable(Publisher, Subscriber):
     def allocate_dimensions(self, memory: StackAllocator, constant_table):
         """ Allocates spaces for array (Moves pointer x spaces) """
         layer = Layers.GLOBAL if self.current_function.id_ == 'global' else Layers.LOCAL
-        self.current_function.allocate_dimensions(layer, memory, constant_table)
+        return self.current_function.allocate_dimensions(layer, memory, constant_table)
 
     def set_type(self, type_, memory: StackAllocator):
         """ Sets type for function, parameter or variable """
@@ -233,8 +232,8 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
-        self.local_hash = {}
-        self.temporal_hash = {}
+
+        print("deleting", self.current_function.id_)
 
         # tell quad generator to generate end_func quad
         self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
@@ -244,11 +243,12 @@ class FunctionTable(Publisher, Subscriber):
         for key in self.current_function.variables:
             delete_list.append(self.current_function.variables[key].address_)
 
-        for key in self.temporal_variables:
-            var = self.temporal_variables[key]
+        for key in self.temporal_hash:
+            var = self.temporal_hash[key]
             delete_list.append(var.address_)
 
-        self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
+        self.broadcast(Event(CompilerEvent.FREE_MEMORY, None))
+        self.temporal_hash = {}
 
     def current_trace(self):
         return self.current_function.id_
@@ -263,6 +263,8 @@ class FunctionTable(Publisher, Subscriber):
         variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
             return variable_table[id_]
+
+        print(f'Variable {id_} not found')
 
         # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE,
