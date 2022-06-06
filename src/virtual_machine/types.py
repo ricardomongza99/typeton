@@ -104,17 +104,14 @@ class ObjectHeap:
         # print('got value', value)
 
         if value is None:
-            print(f'Heap address {heap_address-self.start} points to Null')
             return
 
-        print("getting heap value for address", heap_address - self.start)
         return value
 
     def set_value(self, heap_address, value):
         # print('setting heap value for address',
         #       heap_address-self.start,   'value', value)
-        print('setting heap value for address',
-              heap_address - self.start, 'value', value)
+
         self.memory[heap_address - self.start] = value
 
     def is_heap_address(self, address):
@@ -251,10 +248,8 @@ class ContextMemory:
 
         if type_data.type_ is ValueType.POINTER:
             if action is PointerAction.REFERENCE:
-                # print('returning reference', slot[offset], 'from', address)
                 return slot[offset]
             else:
-                # print('returning value from address', slot[offset],)
                 return self.object_heap.get_value(slot[offset])
 
         return slot[offset]

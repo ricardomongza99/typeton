@@ -132,7 +132,6 @@ class VirtualMachine:
 
     def _execute(self, quad):
         operation = quad.operation
-        # quad.display(self._ip)
 
         if operation in POINTER_EXPRESSIONS:
             self.__pointer_expression(quad)

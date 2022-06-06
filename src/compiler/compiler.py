@@ -31,7 +31,7 @@ class Compiler(Publisher, Subscriber):
         self.lexer = lex
         self._parser = yacc.yacc(module=self, start="program", debug=True)
         self._code_generator = CodeGenerator(
-            self._allocator, self.heap_allocator)
+            self._allocator, self.heap_allocator, self._symbol_table.class_table.classes)
 
         object_actions = self._code_generator.object_actions
         object_actions.add_subscriber(self._symbol_table.function_table, {})
@@ -336,7 +336,6 @@ class Compiler(Publisher, Subscriber):
         delete_heap_memory : DELETE ID 
         """
         var = self._symbol_table.function_table.get_variable(p[2])
-        print(var.initialized, 'deleted')
         self._code_generator.object_actions.free_heap_memory(var)
 
     def p_return_type_warning(self, p):
@@ -376,11 +375,11 @@ class Compiler(Publisher, Subscriber):
                | assign1 assign2 bool_expr execute_priority_0
         """
 
-    def p_resolve_object_assignment(self, p):
+    def p_resolve_object_(self, p):
         """
-        resolve_object_assignment :
+        resolve_object :
         """
-        self._code_generator.object_actions.resolve_object_assignment()
+        self._code_generator.object_actions.resolve()
 
     def p_other_assing(self, p):
         """
@@ -405,11 +404,9 @@ class Compiler(Publisher, Subscriber):
         push_variable_class :
         """
         operand: Operand = self._code_generator.peak_operand()
-
-        print(operand.class_id)
+        print(operand.address)
 
         var = self._symbol_table.function_table.get_id(address=operand.address)
-        print(var.address_, var.type_, var.class_id)
 
         if var.class_id is None:
             self.handle_event(
@@ -456,9 +453,27 @@ class Compiler(Publisher, Subscriber):
         """
         assign1 : ID push_variable
                 | call_array
-                | constant_object resolve_object_assignment
+                | constant_object resolve_object
 
         """
+
+    def p_constant_object(self, p):
+        """
+        constant_object : ID push_assign_object PERIOD object_property
+        """
+
+    def p_push_assign_object(self, p):
+        """
+        push_assign_object :
+        """
+        self._code_generator.object_actions.set_parse_type(0)
+
+        variable = self._symbol_table.function_table.get_variable(p[-1])
+        if variable.class_id is None:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Variable {p[-1]} is not an object')))
+
+        self._code_generator.object_actions.push_object(variable)
 
     def p_assign2(self, p):  # TODO add rest to semantic cube
         """
@@ -613,7 +628,7 @@ class Compiler(Publisher, Subscriber):
 
     def p_factor(self, p):
         """
-        factor : constant
+        factor : constant 
                | LPAREN push_operator bool_expr RPAREN push_operator
         """
 
@@ -626,8 +641,9 @@ class Compiler(Publisher, Subscriber):
                  |  call add_call_operator
                  | call_array
                  | constant2
-                 | constant_object get_object_property
+                 | constant_object resolve_object
         """
+        self._code_generator.object_actions.set_parse_type(1)
 
     def p_add_call_operator(self, p):
         """
@@ -646,28 +662,11 @@ class Compiler(Publisher, Subscriber):
         constant2 : ID push_variable
         """
 
-    def p_constant_object(self, p):
+    def p_object_property(self, p):
         """
-        constant_object : ID push_object PERIOD ID push_object_property
+        object_property : ID push_object_property PERIOD object_property
+                        | ID push_object_property
         """
-
-    def p_push_object(self, p):
-        """
-        push_object :
-        """
-
-        variable = self._symbol_table.function_table.get_variable(p[-1])
-        if variable.class_id is None:
-            self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                f'Variable {p[-1]} is not an object')))
-
-        class_data = self._symbol_table.class_table.get_class(
-            variable.class_id)
-
-        self._code_generator.object_actions.push_object_address(
-            variable.address_)
-
-        self._code_generator.object_actions.push_class_data(class_data)
 
     def p_push_object_property(self, p):
         """
@@ -675,13 +674,6 @@ class Compiler(Publisher, Subscriber):
         """
 
         self._code_generator.object_actions.push_object_property(p[-1])
-
-    def p_get_object_property(self, p):
-        """
-        get_object_property :
-        """
-
-        self._code_generator.object_actions.get_object_property()
 
     def p_comp(self, p):
         """

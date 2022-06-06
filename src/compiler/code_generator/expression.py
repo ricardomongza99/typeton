@@ -56,7 +56,6 @@ class ExpressionActions(Publisher, Subscriber):
 
         if last_operator is not None and last_operator.priority == priority:
             if priority == 0:
-                print(last_operator.type_)
                 if last_operator.type_ in SHORTHAND:
                     print("short_hand")
                     return self.execute_shorthand_assign(stack_allocator)

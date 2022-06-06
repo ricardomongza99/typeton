@@ -17,7 +17,7 @@ from src.utils.display import make_table, TableOptions
 
 
 class CodeGenerator:
-    def __init__(self, stack_allocator: StackAllocator, heap_allocator):
+    def __init__(self, stack_allocator: StackAllocator, heap_allocator, classes):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
@@ -27,7 +27,7 @@ class CodeGenerator:
         self.heap_allocator = heap_allocator
 
         self.object_actions = ObjectActions(
-            self.__quad_list, self.__operand_address_stack, self.heap_allocator, self.scheduler, self.pointer_types)
+            self.__quad_list, self.__operand_address_stack, self.heap_allocator, self.scheduler, self.pointer_types, classes)
         self.conditional_actions = ConditionalActions(self.__quad_list)
         self.array_actions = ArrayActions(
             self.__quad_list, self.__operand_address_stack)
