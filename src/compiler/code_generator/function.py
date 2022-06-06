@@ -1,7 +1,7 @@
 from src.compiler.stack_allocator.types import ValueType
 
 from src.compiler.code_generator.type import Quad, OperationType, Operand
-from src.compiler.errors import CompilerEvent
+from src.compiler.errors import CompilerError, CompilerEvent
 from src.utils.observer import Subscriber, Event, Publisher
 
 
@@ -40,10 +40,12 @@ class FunctionActions(Publisher, Subscriber):
     def verify_parameter_type(self, type_: ValueType, param_id):
         operand: Operand = self.operand_list.pop()
         if operand.type_ is not type_:
-            self.broadcast(Event(
-                CompilerEvent.STOP_COMPILE,
-                f'"Invalid function call signature: Type should be {type_.value} but its {operand.type_.value} instead'
-            ))
+            self.broadcast(
+                Event(
+                    CompilerEvent.STOP_COMPILE,
+                    CompilerError(f'"Invalid function call signature: Type should be {type_.value} but its {operand.type_.value} instead')
+                )
+            )
 
         quad = Quad(operation=OperationType.PARAM, left_address=operand.address, right_address=param_id)
         self.quad_list.append(quad)

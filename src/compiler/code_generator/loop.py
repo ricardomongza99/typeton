@@ -1,14 +1,16 @@
-from src.compiler.errors import CompilerError
+from multiprocessing import Event
+from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.code_generator.type import Operand
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.stack_allocator.types import ValueType
+from src.utils.observer import Publisher, Subscriber
 
 """
 Conditional semantic actions
 """
 
 
-class LoopActions:
+class LoopActions(Publisher):
     def __init__(self, quad_list):
         self.loop_jumps = []
         self.quad_list = quad_list
@@ -20,7 +22,7 @@ class LoopActions:
     def set_loop_condition(self, operand_list):
         boolean_result: Operand = operand_list.pop()
         if boolean_result.type_ is not ValueType.BOOL:
-            return CompilerError("Type error: loop expression should be boolean")
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Type Error, if expression should be boolean")))
 
         quad = Quad(operation=OperationType.GOTOF, left_address=boolean_result.address)
 
@@ -35,7 +37,3 @@ class LoopActions:
 
         self.quad_list.append(quad)
         self.quad_list[goto_f_index].result_address = len(self.quad_list)
-
-
-
-

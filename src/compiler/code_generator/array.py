@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import List
-from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension
+from src.compiler.code_generator.type import Quad, OperationType, Operand
 from src.utils.observer import Subscriber, Event, Publisher
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.stack_allocator.index import StackAllocator
@@ -20,7 +20,7 @@ class ArrayActions(Publisher):
         self._quad_list: List[Quad] = quad_list
         self._pointer_types = pointer_types
 
-        self._dimensions_stack: List[Dimension] = []
+        self._dimensions_stack = []
 
     def push_dimensions(self, dimensions):
         self._dimensions_stack.extend(dimensions)
@@ -121,7 +121,6 @@ class ArrayActions(Publisher):
         self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address)))
 
         self._pointer_types[pointer_address] = right_operand.type_
-
 
         quad = Quad(
             operation=OperationType.ADD,
