@@ -21,6 +21,7 @@ class VariableTable:
             # we can't know where to put it without the type, just store the reference for now
             self.variables[id_] = Variable(id_, is_param=is_param)
             self.current_variable = self.variables[id_]
+            return self.current_variable
 
     def add_dimension(self, size):
         """ Append new dimension `size` to current variable's `dimensions` list """
@@ -44,15 +45,16 @@ class VariableTable:
         size = math.prod(sizes)
         memory.allocate_space(self.current_variable.type_, layer, size)
 
-    def set_type(self, type_, layer: Layers, memory: StackAllocator):
+    def set_type(self, type_, layer: Layers, memory: StackAllocator, class_id):
         """ Sets current var type """
         enum_value = ValueType(type_)
         address = memory.allocate_address(enum_value, layer)
 
         Debug.map()[address] = str(self.current_variable.id_)
         self.current_variable.type_ = enum_value
+        self.current_variable.class_id = class_id
         self.current_variable.address_ = address
-        self.inverse_hash[address] = self.current_variable.id_
+        self.inverse_hash[address] = self.current_variable
 
         return self.current_variable.id_
 
@@ -63,5 +65,6 @@ class VariableTable:
         return self.inverse_hash[address]
 
     def display(self, id_):
+        print("wtf main")
         print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items())))

@@ -3,10 +3,12 @@ from typing import Dict
 
 import jsonpickle
 
-from src.compiler.stack_allocator.index import StackAllocator
-from src.compiler.stack_allocator.helpers import Layers
-from src.compiler.stack_allocator.types import ValueType
 from src.compiler.errors import CompilerError, CompilerEvent
+from src.compiler.stack_allocator.helpers import Layers
+from src.compiler.stack_allocator.index import StackAllocator
+from src.compiler.stack_allocator.types import ValueType
+from src.compiler.symbol_table.class_table import ClassTable
+from src.compiler.symbol_table.function_table.variable_table.variable import Variable
 from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
@@ -19,18 +21,27 @@ class TypeContext(Enum):
     VARIABLE = 2
 
 
+PRIMITIVE_TYPES = {ValueType.INT.value, ValueType.FLOAT.value,
+                   ValueType.STRING.value, ValueType.BOOL.value}
+
+
 class FunctionTable(Publisher, Subscriber):
     """ A symbol_table of functions """
 
-    def __init__(self):
+    def __init__(self, class_table: ClassTable):
         super().__init__()
         self.functions = {}
         # keep track of them so we don't add repeat numbers to function size
-        self.temporal_variables = {'empty'}
+        self.temporal_hash: Dict[int, Variable] = {}
+        self.local_hash: Dict[int, Variable] = {}
+        self.global_hash: Dict[int, Variable] = {}
+
         self.should_delete_temp = []
+        self.class_table = class_table
         self.function_data_table: Dict[str, FunctionData] = {}
+
         self.current_function: Function = None
-        self.current_function_call_id_ = None
+
         self.parameter_count = 0
 
         # We need this for global variable search
@@ -56,17 +67,36 @@ class FunctionTable(Publisher, Subscriber):
         from src.compiler.code_generator.array import ArrayEvents
 
         if event.type_ is ExpressionEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
-            type_, address = event.payload
-            self.__handle_add_temporal(type_, address)
+            type_, address, class_id = event.payload
+            self.__handle_add_temporal(type_, address, class_id)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
             self.end_function()
 
-    def __handle_add_temporal(self, type_, address, should_delete=False):
-        if address in self.temporal_variables:
+    def __handle_add_temporal(self, type_, address, class_id=None):
+        if address in self.temporal_hash:
             return
 
         self.function_data().add_variable_size(ValueType(type_), Layers.TEMPORARY)
-        self.temporal_variables.append(address)
+        var = Variable(None)
+        var.address_ = address
+        var.type_ = type
+        var.class_id = class_id
+
+        self.temporal_hash[address] = var
+
+    def get_variable_by_address(self, address):
+        """ Returns variable by address """
+        if self.temporal_hash.get(address) is not None:
+            return self.temporal_hash[address]
+
+        if self.local_hash.get(address) is not None:
+            return self.local_hash[address]
+
+        if self.global_hash.get(address) is not None:
+            return self.global_hash[address]
+
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                       CompilerError(f'Variable with address {address} not found')))
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
@@ -92,13 +122,22 @@ class FunctionTable(Publisher, Subscriber):
         self.current_function_call_id_ = id_
 
     def generate_are_memory(self):
-        self.broadcast(Event(CompilerEvent.GENERATE_ARE, self.current_function_call_id_))
+        self.broadcast(Event(CompilerEvent.GENERATE_ARE,
+                       self.current_function_call_id_))
         # start counting param signature
         self.parameter_count = 0
 
     def add_variable(self, id_, is_param):
         """ Add Var to the current function's vars table """
-        self.current_function.add_variable(id_, is_param)
+
+        var = self.current_function.add_variable(id_, is_param)
+        if self.current_function.id_ == "global":
+            self.global_hash[id_] = var
+            return
+        self.local_hash[var.address_] = var
+
+    def end_class(self):
+        print('')
 
     def add_dimension(self, size):
         """ Adds dimension to current array """
@@ -126,20 +165,36 @@ class FunctionTable(Publisher, Subscriber):
         self.function_data().type_ = ValueType(type_)
 
     def _set_param_type(self, type_, layer, memory: StackAllocator):
-        self.current_function.set_variable_type(type_, layer, memory)
+        self.current_function.set_variable_type(type_, layer, memory, None)
         self.function_data().add_variable_size(ValueType(type_), layer)
         self.__add_parameter_signature(type_)
 
     def _set_variable_type(self, type_, layer, memory: StackAllocator):
+        # check if parameter type_ first character is capitalized
+        # its a class
+        if type_[0].isupper() and type_ not in PRIMITIVE_TYPES:
+            class_size = self.class_table.class_size(type_)
+            if class_size is None:
+                self.broadcast(
+                    Event(CompilerEvent.STOP_COMPILE,
+                          CompilerError(f'Class {type_} not found')))
+
+            self.function_data().add_variable_size(ValueType.POINTER, layer)
+            self.current_function.set_variable_type(
+                ValueType.POINTER, layer, memory, type_)
+            return
+
         self.function_data().add_variable_size(ValueType(type_), layer)
-        id_ = self.current_function.set_variable_type(type_, layer, memory)
+        id_ = self.current_function.set_variable_type(
+            type_, layer, memory, None)
         return id_
 
     def function_data(self):
         return self.function_data_table[self.current_function.id_]
 
     def __add_parameter_signature(self, type_):
-        self.function_data_table[self.current_function.id_].parameter_signature.append(ValueType(type_))
+        self.function_data_table[self.current_function.id_].parameter_signature.append(
+            ValueType(type_))
 
     def display(self, debug=False):
         """ Displays symbol_table of functions tables """
@@ -160,10 +215,14 @@ class FunctionTable(Publisher, Subscriber):
                                  fun[1].type_.value,
                                  fun[1].start_quad,
                                  fun[1].print_signature(),
-                                 fun[1].size_data.get_data(ValueType.INT).total,
-                                 fun[1].size_data.get_data(ValueType.FLOAT).total,
-                                 fun[1].size_data.get_data(ValueType.BOOL).total,
-                                 fun[1].size_data.get_data(ValueType.STRING).total,
+                                 fun[1].size_data.get_data(
+                                     ValueType.INT).total,
+                                 fun[1].size_data.get_data(
+                                     ValueType.FLOAT).total,
+                                 fun[1].size_data.get_data(
+                                     ValueType.BOOL).total,
+                                 fun[1].size_data.get_data(
+                                     ValueType.STRING).total,
                              ],
                              self.function_data_table.items()), TableOptions(25, 50)))
 
@@ -174,6 +233,8 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
+        self.local_hash = {}
+        self.temporal_hash = {}
 
         # tell quad generator to generate end_func quad
         self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
@@ -183,8 +244,9 @@ class FunctionTable(Publisher, Subscriber):
         for key in self.current_function.variables:
             delete_list.append(self.current_function.variables[key].address_)
 
-        for address in self.temporal_variables:
-            delete_list.append(address)
+        for key in self.temporal_variables:
+            var = self.temporal_variables[key]
+            delete_list.append(var.address_)
 
         self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
 
@@ -203,7 +265,8 @@ class FunctionTable(Publisher, Subscriber):
             return variable_table[id_]
 
         # Could not find
-        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable {id_} is undefined')))
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                       CompilerError(f'variable {id_} is undefined')))
 
     def get_id(self, address):
         # Try to find local first
@@ -218,13 +281,17 @@ class FunctionTable(Publisher, Subscriber):
         if variable is not None:
             return variable
 
-        # Could not find
-        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable at address {address} is undefined')))
+        if address in self.temporal_hash:
+            return self.temporal_hash[address]
 
+        # Could not find
+        self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+            f'variable at address {address} is undefined')))
 
     def set_return(self):
         self.current_function.has_return = True
-        self.broadcast(Event(CompilerEvent.SET_RETURN, self.current_function.type_))
+        self.broadcast(Event(CompilerEvent.SET_RETURN,
+                       self.current_function.type_))
 
     def __validate_return(self):
         if not self.current_function.valid_function():

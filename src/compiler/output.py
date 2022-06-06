@@ -6,7 +6,8 @@ from src.virtual_machine.types import FunctionData
 
 
 class OutputFile:
-    def __init__(self, constant_table, function_data, quad_list):
+    def __init__(self, constant_table, function_data, quad_list, heap_start):
         self.constant_table: ConstantTable = constant_table
         self.function_data: Dict[str, FunctionData] = function_data
         self.quad_list: List[Quad] = quad_list
+        self.heap_start = heap_start

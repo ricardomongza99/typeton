@@ -1,8 +1,16 @@
+from audioop import add
+from enum import Enum
 from typing import Dict, List
 
 from src.compiler.stack_allocator.helpers import Layers, init_types, get_segment, get_resource, Segment
 from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, TypeRange
 from src.compiler.symbol_table.constant_table import ConstantTable
+from src.config.definitions import HEAP_RANGE_SIZE
+
+
+class PointerAction(Enum):
+    REFERENCE = 'reference'
+    VALUE = 'value'
 
 
 class SizeUnit:
@@ -28,7 +36,8 @@ class SizeData:
             ValueType.FLOAT.value: SizeUnit(),
             ValueType.BOOL.value: SizeUnit(),
             ValueType.STRING.value: SizeUnit(),
-            ValueType.POINTER.value: SizeUnit()}
+            ValueType.POINTER.value: SizeUnit()
+        }
 
     def get_data(self, type_: ValueType):
         return self.hash[type_.value]
@@ -79,6 +88,35 @@ class FunctionData:
 def init_storage(size):
     return [None] * size
 
+# TODO get heap start
+
+
+class ObjectHeap:
+    def __init__(self, start):
+        self.size = HEAP_RANGE_SIZE
+        self.start = start
+        self.memory = [None] * HEAP_RANGE_SIZE
+        self.end = self.start + self.size - 1
+
+    def get_value(self, heap_address):
+        # print('getting heap value for address', heap_address-self.start)
+        value = self.memory[heap_address - self.start]
+        # print('got value', value)
+
+        if value is None:
+            return
+
+        return value
+
+    def set_value(self, heap_address, value):
+        # print('setting heap value for address',
+        #       heap_address-self.start,   'value', value)
+
+        self.memory[heap_address - self.start] = value
+
+    def is_heap_address(self, address):
+        return self.start <= address <= self.end
+
 
 class ContextMemory:
     """Memory stores exact amount of needed spaces for a specific function"""
@@ -86,11 +124,11 @@ class ContextMemory:
     # TODO move size_data init_types to outside of ContextMemory
 
     def __init__(self, size_data: SizeData, constant_data: ConstantTable,
-                 global_data):
+                 global_data, object_heap: ObjectHeap):
         self.pending_return_value = None
         self.type_data = init_types(DEFAULT_TYPES, is_runtime=True)
         self.size_data = size_data
-
+        self.object_heap = object_heap
         # TODO removed double mapping and use offset from known segment ranges
         self.data_storage: Dict[ValueType, List] = {}
 
@@ -107,12 +145,12 @@ class ContextMemory:
         print("String", self.data_storage[ValueType.STRING])
 
     def get_type(self, address):
+        _, address = pure_address(address)
         segment = get_segment(address, self.type_data)
         type_data: TypeRange = get_resource(address, segment)
         return type_data.type_
 
     def __init_storage(self):
-        """Only for local variables"""
         self.data_storage[ValueType.INT] = init_storage(self.size_data.get_data(ValueType.INT).total)
         self.data_storage[ValueType.FLOAT] = init_storage(self.size_data.get_data(ValueType.FLOAT).total)
         self.data_storage[ValueType.BOOL] = init_storage(self.size_data.get_data(ValueType.BOOL).total)
@@ -133,8 +171,22 @@ class ContextMemory:
         if self.global_data is None:
             self.global_data.save(address, value)
 
+    def save_reference(self, address, value):
+        """Save value to pointer"""
+
+        # print('saving reference', address, value)
+
+        segment = get_segment(address, self.type_data)
+        type_data: TypeRange = get_resource(address, segment)
+        slot = self.data_storage[type_data.type_]
+        offset = self.get_offset(address, segment, type_data)
+
+        slot[offset] = value
+
     def save(self, address, value):
         """Deduce type and store in corresponding array slot"""
+        action, address = pure_address(address)
+
         segment = get_segment(address, self.type_data)
         type_data: TypeRange = get_resource(address, segment)
 
@@ -142,11 +194,23 @@ class ContextMemory:
             self.global_data.save(address, value)
             return
 
-        if segment.type_ is Layers.CONSTANT:
-            return
+        # if segment.type_ is Layers.CONSTANT:
+        #     return
 
         slot = self.data_storage[type_data.type_]
         offset = self.get_offset(address, segment, type_data)
+
+        if type_data.type_ is ValueType.POINTER:
+            if action is PointerAction.REFERENCE:
+                # print('saving reference', address, value)
+                slot[offset] = value
+                return
+            elif action is PointerAction.VALUE or action is None:
+                # print('saving value from pointer', address,
+                #       "actual address", slot[offset], 'for value', value)
+                self.object_heap.set_value(slot[offset], value)
+                return
+
         slot[offset] = value
 
     def map_parameter(self, argument_value, argument_address, parameter_index):
@@ -159,6 +223,11 @@ class ContextMemory:
 
     def get(self, address):
         """Get from address origin, be it global, local, or constant table"""
+        action, address = pure_address(address)
+
+        if self.object_heap.is_heap_address(address):
+            return self.object_heap.get_value(address)
+
         segment = get_segment(address, self.type_data)
         type_data: TypeRange = get_resource(address, segment)
         if segment.type_ is Layers.GLOBAL and not self.is_global():
@@ -171,4 +240,31 @@ class ContextMemory:
         # else get from local memory
         slot = self.data_storage[type_data.type_]
         offset = self.get_offset(address, segment, type_data)
+
+        if type_data.type_ is ValueType.POINTER:
+            if action is PointerAction.REFERENCE:
+                return slot[offset]
+            else:
+                return self.object_heap.get_value(slot[offset])
+
         return slot[offset]
+
+
+def pointer_type(address):
+    # return pointer type using enum by checking if the first char is a '&' or a '*'
+    if address[0] == '&':
+        return PointerAction.REFERENCE, int(address[1:])
+    elif address[0] == '*':
+        return PointerAction.VALUE, int(address[1:])
+    else:
+        raise Exception('Invalid pointer type')
+
+
+def pure_address(address):
+    if type(address) is int:
+        return None, address
+    # return pure address without pointer type
+    elif address[0] == '&':
+        return PointerAction.REFERENCE, int(address[1:])
+    elif address[0] == '*':
+        return PointerAction.VALUE, int(address[1:])

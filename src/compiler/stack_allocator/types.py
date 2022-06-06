@@ -1,6 +1,6 @@
 from enum import Enum
 from queue import Queue
-from src.config.definitions import INT_RANGE_SIZE, FLOAT_RANGE_SIZE, BOOL_RANGE_SIZE, STRING_RANGE_SIZE
+from src.config.definitions import INT_RANGE_SIZE, FLOAT_RANGE_SIZE, BOOL_RANGE_SIZE, POINTER_RANGE_SIZE, STRING_RANGE_SIZE
 
 
 class ValueType(Enum):
@@ -26,7 +26,6 @@ class TypeResource(TypeRange):
         self.pointer = start
 
 
-
 class MemoryType:
     def __init__(self, value_type: ValueType, size: int):
         self.type = value_type
@@ -37,5 +36,6 @@ DEFAULT_TYPES = [
     MemoryType(value_type=ValueType.INT, size=INT_RANGE_SIZE),
     MemoryType(value_type=ValueType.FLOAT, size=FLOAT_RANGE_SIZE),
     MemoryType(value_type=ValueType.BOOL, size=BOOL_RANGE_SIZE),
-    MemoryType(value_type=ValueType.STRING, size=STRING_RANGE_SIZE)
+    MemoryType(value_type=ValueType.STRING, size=STRING_RANGE_SIZE),
+    MemoryType(value_type=ValueType.POINTER, size=POINTER_RANGE_SIZE)
 ]
