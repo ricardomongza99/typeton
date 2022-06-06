@@ -1,19 +1,14 @@
 func main() {
-    var A: Int[3][4][5]
+    var M: Int[4][4]
 
     var i: Int
     var j: Int
-    var k: Int
 
     i = 0
-    while (i < 3) {
+    while (i < 4) {
         j = 0
         while (j < 4) {
-            k = 0
-            while (k < 5) {
-                A[i][j][k] = 2
-                k += 1
-            }
+            M[i][j] = 2
             j += 1
         }
         i += 1
@@ -21,14 +16,10 @@ func main() {
 
 
     i = 0
-    while (i < 3) {
+    while (i < 4) {
         j = 0
         while (j < 4) {
-            k = 0
-            while (k < 5) {
-                print(A[i][j][k])
-                k += 1
-            }
+            print(M[i][j])
             j += 1
         }
         i += 1
