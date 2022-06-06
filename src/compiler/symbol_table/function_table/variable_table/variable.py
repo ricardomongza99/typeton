@@ -20,7 +20,7 @@ class Variable:
         self.address_ = None
         self.dim_data_list: List[DimData] = []    # stays empty if not array
         self.initialized = False
-        self.reference = None
+        self.references = []
         self.dimensions = []    # stays empty if not array
         self.isReturned = None
         self.is_param = is_param

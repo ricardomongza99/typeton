@@ -81,9 +81,12 @@ class HeapAllocator:
 
         self.ranges = result
 
-    def free_reference(self, reference):
+    def free_references(self, references):
+        print('freeing references', references)
         """Adds range to be able to use it again"""
-        end = self.end_map[reference]
-        self.ranges.append(FreeRange(reference, end))
-        self._merge_intervals()
+
+        for ref in references:
+            end = self.end_map[ref]
+            self.ranges.append(FreeRange(ref, end))
+            self._merge_intervals()
         return end

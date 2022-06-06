@@ -67,28 +67,13 @@ func main() {
   print(dog_a.parent.name.first)
   print(dog_a.parent.name.gender.male)
 
+
+  delete dog_a
+
   global_dog = new Dog()
 
   global_dog.name = new Name()
 
   global_dog.name.first = "global"
   print(global_dog.name.first)
-
-
-
-
-
-
- 
-
- 
-
-   
-
-   
-
-
-   
-   
-
 }

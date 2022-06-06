@@ -459,12 +459,12 @@ class Compiler(Publisher, Subscriber):
 
     def p_constant_object(self, p):
         """
-        constant_object : ID push_assign_object PERIOD object_property
+        constant_object : ID push_object PERIOD object_property
         """
 
-    def p_push_assign_object(self, p):
+    def p_push_object(self, p):
         """
-        push_assign_object :
+        push_object :
         """
         self._code_generator.object_actions.set_parse_type(0)
 
@@ -473,6 +473,7 @@ class Compiler(Publisher, Subscriber):
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Variable {p[-1]} is not an object')))
 
+        self._code_generator.object_actions.property_parent = variable
         self._code_generator.object_actions.push_object(variable)
 
     def p_assign2(self, p):  # TODO add rest to semantic cube

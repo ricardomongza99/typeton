@@ -24,6 +24,7 @@ class ObjectActions(Publisher):
         super().__init__()
         self.pointer_types = pointer_types
         self.parse_type = 0
+        self.property_parent = None
         self.variable_stack: List[Variable] = []
         self.class_stack = []
         self.object_property_stack = []
@@ -43,7 +44,7 @@ class ObjectActions(Publisher):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{variable.id_} is not a freeable variable')))
 
-        if variable.initialized is False:
+        if len(variable.references) == 0:
             self.broadcast(
                 Event(
                     CompilerEvent.STOP_COMPILE,
@@ -51,9 +52,9 @@ class ObjectActions(Publisher):
                 )
             )
 
-        end = self.heap_allocator.free_reference(variable.reference)
-        q = Quad(OperationType.POINTER_ASSIGN, -1, end, variable.address_)
-        self.quad_list.append(q)
+        _ = self.heap_allocator.free_references(variable.references)
+        # q = Quad(OperationType.POINTER_ASSIGN, -1, end, variable.address_)
+        # self.quad_list.append(q)
 
     def set_parse_type(self, parse_type):
         self.parse_type = parse_type
@@ -161,9 +162,10 @@ class ObjectActions(Publisher):
 
         reference = self.heap_allocator.allocate_reference(variable.size)
         operand: Operand = self.operand_list.pop()
-        var.reference = reference
-
-        if var.id_ is None:
+        if var.id_ is not None:
+            var.references.append(reference)
+        else:
+            self.property_parent.references.append(reference)
             operand.address = f'*{operand.address}'
 
         quad = Quad(OperationType.POINTER_ASSIGN, left_address=reference,
