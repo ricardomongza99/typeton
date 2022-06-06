@@ -1,8 +1,10 @@
 # Static Helpers
 from enum import Enum
+from typing import List
 
 from src.compiler.stack_allocator.types import TypeResource, MemoryType, TypeRange, ValueType
 from src.config.definitions import POINTER_RANGE_SIZE
+
 
 def is_between_range(start: int, value: int, end: int):
     if start <= value <= end:
@@ -67,37 +69,39 @@ def get_resource(address, segment):
             return resource
 
 
-def init_types(memory_types: [MemoryType], is_runtime: bool):
+def init_types(memory_types: List[MemoryType], is_runtime: bool):
     """Initializes segment types for each type"""
     segments = {}
     current_start = 0
 
     for layer in Layers:
         segment = Segment(type_=layer)
+        segment.start = current_start
         for memory_type in memory_types:
             new_end = current_start + memory_type.size
             # Only take what we need
             if is_runtime:
                 resource = TypeRange(current_start, new_end, memory_type.type)
             else:
-                resource = TypeResource(current_start, new_end, memory_type.type)
+                resource = TypeResource(
+                    current_start, new_end, memory_type.type)
 
             segment.resources[memory_type.type.value] = resource
             current_start = new_end + 1
 
         # Adds Temporary Pointer spaces
         # TODO: Refactor
-        if layer == Layers.TEMPORARY:
-            memory_type = MemoryType(value_type=ValueType.POINTER, size=POINTER_RANGE_SIZE)
-            new_end = current_start + memory_type.size
-            # Only take what we need
-            if is_runtime:
-                resource = TypeRange(current_start, new_end, memory_type.type)
-            else:
-                resource = TypeResource(current_start, new_end, memory_type.type)
+        # if layer == Layers.TEMPORARY:
+        #     memory_type = MemoryType(value_type=ValueType.POINTER, size=POINTER_RANGE_SIZE)
+        #     new_end = current_start + memory_type.size
+        #     # Only take what we need
+        #     if is_runtime:
+        #         resource = TypeRange(current_start, new_end, memory_type.type)
+        #     else:
+        #         resource = TypeResource(current_start, new_end, memory_type.type)
 
-            segment.resources[memory_type.type.value] = resource
-            current_start = new_end + 1
+        #     segment.resources[memory_type.type.value] = resource
+        #     current_start = new_end + 1
 
         segment.end = current_start - 1
         segments[layer.value] = segment

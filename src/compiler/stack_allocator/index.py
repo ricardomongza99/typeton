@@ -1,4 +1,5 @@
 # Stores Type Data
+from typing import List
 from src.compiler.stack_allocator.helpers import get_available_address, init_types, Layers, get_resource, get_segment
 from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
 from src.compiler.errors import CompilerError, CompilerEvent
@@ -7,9 +8,9 @@ from src.utils.observer import Publisher, Event, Subscriber
 
 
 class StackAllocator(Publisher, Subscriber):
-    def __init__(self, type_resources: [MemoryType] = DEFAULT_TYPES):
+    def __init__(self, type_resources: List[MemoryType] = DEFAULT_TYPES):
         super().__init__()
-        self.__segments = init_types(type_resources, is_runtime=False)
+        self._segments = init_types(type_resources, is_runtime=False)
 
     def handle_event(self, event: Event):
         if event.type_ is CompilerEvent.RELEASE_MEM_IF_POSSIBLE:
@@ -28,13 +29,14 @@ class StackAllocator(Publisher, Subscriber):
 
     # Compilation
     def allocate_address(self, value_type: ValueType, layer: Layers):
-        segment = self.__segments[layer.value]
+        segment = self._segments[layer.value]
         resource: TypeResource = segment.resources[value_type.value]
         # Refactor method get_available_address
         new_address, error = get_available_address(resource)
 
         if error:
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Too many variables")))
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                           CompilerError("Too many variables")))
 
         if layer == layer.TEMPORARY:
             debug = Debug.map()
@@ -47,17 +49,18 @@ class StackAllocator(Publisher, Subscriber):
 
     def allocate_space(self, value_type: ValueType, layer: Layers, size):
         """ Allocates `size` spaces of memory. Used for arrays """
-        segment = self.__segments[layer.value]
+        segment = self._segments[layer.value]
         resource: TypeResource = segment.resources[value_type.value]
 
         if resource.end < resource.pointer + (size - 1):
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Too many variables")))
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE,
+                           CompilerError("Too many variables")))
 
         resource.pointer += (size - 1)
 
     def get_segment(self, address):
 
-        return get_segment(address, self.__segments)
+        return get_segment(address, self._segments)
 
     def is_segment(self, address, type_: Layers):
         segment = self.get_segment(address)
