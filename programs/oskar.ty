@@ -3,11 +3,13 @@ var x: Int
 
 func main() {
     var a: Int[10]
+    var b: Int[10]
+    b[1] = 2
+    b[2] = 1
+    b[3] = 4
 
-    var m: Int
-    x = 20
-    a[x] = 100
-    m = 200 * 3
-    print(a[6])
+    a[b[b[1]]] = 99
+    print(a[1])
+
 }
 

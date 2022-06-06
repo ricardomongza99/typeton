@@ -5,6 +5,7 @@ from src.compiler.stack_allocator.types import ValueType
 
 class OperationType(Enum):
     ALLOCATE_HEAP = 'allocateheap'
+    ARRAY_ADD = 'arrayadd'
     DELETE_REF = 'deleteref'
     CALL_ASSIGN = 'callassign'
     POINTER_ADD = 'pointeradd'
@@ -41,6 +42,10 @@ class OperationType(Enum):
     MASSIGN = '*='
     POINTER_ASSIGN = '&='
     VERIFY = 'verify'
+
+
+class FunctionTableEvents(Enum):
+    ADD_TEMP = 0
 
 
 class Operator:

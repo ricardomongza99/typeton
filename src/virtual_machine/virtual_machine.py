@@ -2,6 +2,7 @@ from enum import Enum
 from operator import le
 import sys
 import timeit
+from turtle import right
 from typing import List, Dict
 
 import jsonpickle
@@ -20,6 +21,11 @@ EXPRESSIONS = {OperationType.ADD, OperationType.DIVIDE,
 POINTER_EXPRESSIONS = {
     OperationType.POINTER_ADD,
     OperationType.DELETE_REF
+}
+
+ARRAYS = {
+    OperationType.VERIFY,
+    OperationType.ARRAY_ADD
 }
 
 BOOLEAN_EXPRESSIONS = {
@@ -146,10 +152,15 @@ class VirtualMachine(Subscriber):
     def _execute(self, quad):
         operation = quad.operation
 
+        # quad.display(0)
+
         if operation in POINTER_EXPRESSIONS:
             self.__pointer_expression(quad)
         elif operation in EXPRESSIONS:
             self.__execute_expression(quad)
+
+        elif operation in ARRAYS:
+            self.__execute_array_call(quad)
         elif operation in BOOLEAN_EXPRESSIONS:
             self.__execute_boolean_expression(quad)
         elif operation in JUMPS:
@@ -204,8 +215,7 @@ class VirtualMachine(Subscriber):
             if p_left is None or p_right is None:
                 self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'NULL pointer exception'))
 
-            result = _execute_typed_add(
-                ValueType.INT, p_left, p_right)
+            result = _execute_typed_add(ValueType.INT, p_left, p_right)
             self.__execute_assign(quad.result_address, result)
 
         self._ip += 1
@@ -227,6 +237,20 @@ class VirtualMachine(Subscriber):
 
         self._ip += 1
         self.__execute_assign(quad.result_address, result)
+
+    def __execute_array_call(self, quad):
+        left = self._get_value(quad.left_address)
+        result = self._get_value(quad.result_address)
+
+        if quad.operation == OperationType.VERIFY:
+            if not(0 <= left <= result):
+                self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Array Index out of range'))
+        elif quad.operation is OperationType.ARRAY_ADD:
+            value = _execute_typed_add(ValueType.INT, quad.left_address, self._get_value(quad.right_address))
+            action, addr = pure_address(quad.result_address)
+            self.context_memory[-1].save_reference(addr, value)
+
+        self._ip += 1
 
     def __execute_boolean_expression(self, quad):
         left = self._get_value(quad.left_address)

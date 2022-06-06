@@ -1,5 +1,7 @@
 # Stores Type Data
 from typing import List
+
+from src.compiler.code_generator.type import FunctionTableEvents
 from src.compiler.stack_allocator.helpers import get_available_address, init_types, Layers, get_resource, get_segment
 from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
 from src.compiler.errors import CompilerError, CompilerEvent
@@ -30,7 +32,6 @@ class StackAllocator(Publisher, Subscriber):
     # Compilation
 
     def allocate_address(self, value_type: ValueType, layer: Layers):
-        print("Allocating address", value_type, layer)
         segment = self._segments[layer.value]
         resource: TypeResource = segment.resources[value_type.value]
         # Refactor method get_available_address
@@ -59,7 +60,7 @@ class StackAllocator(Publisher, Subscriber):
                            CompilerError("Too many variables")))
 
         for i in range(size):
-            self.broadcast(Event(0, resource.pointer))
+            self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (value_type, resource.pointer, None)))
             resource.pointer += 1
 
     def get_segment(self, address):

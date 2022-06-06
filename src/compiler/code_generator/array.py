@@ -130,9 +130,9 @@ class ArrayActions(Publisher):
         self._pointer_types[pointer_address] = right_operand.type_
 
         quad = Quad(
-            operation=OperationType.POINTER_ADD,
-            left_address=f'&{left_operand.address}',
-            right_address=right_operand.address,
+            operation=OperationType.ARRAY_ADD,
+            left_address=right_operand.address,
+            right_address=left_operand.address,
             result_address=f'&{pointer_address}'
         )
         self._quad_list.append(quad)

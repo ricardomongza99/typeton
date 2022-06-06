@@ -14,6 +14,7 @@ from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
 from .function import Function
+from ...code_generator.type import FunctionTableEvents
 
 
 class TypeContext(Enum):
@@ -64,10 +65,10 @@ class FunctionTable(Publisher, Subscriber):
 
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
-        from src.compiler.code_generator.expression import ExpressionEvents
+        from src.compiler.code_generator.expression import ExpressionActions
         from src.compiler.code_generator.array import ArrayEvents
 
-        if event.type_ is ExpressionEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
+        if event.type_ is FunctionTableEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
             type_, address, class_id = event.payload
             self.__handle_add_temporal(type_, address, class_id)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
