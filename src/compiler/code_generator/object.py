@@ -5,7 +5,6 @@ from src.compiler.code_generator.expression import ExpressionActions, Expression
 from src.compiler.code_generator.type import Operand, OperationType, Quad
 from src.compiler.errors import CompilerError, CompilerEvent
 
-from src.compiler.heap_allocator.index import HeapAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.types import ValueType
@@ -20,7 +19,7 @@ Conditional semantic actions
 
 
 class ObjectActions(Publisher):
-    def __init__(self, quad_list, operand_list, heap_allocator: HeapAllocator, stack_allocator: StackAllocator, pointer_types, classes):
+    def __init__(self, quad_list, operand_list, stack_allocator: StackAllocator, pointer_types, classes):
         super().__init__()
         self.pointer_types = pointer_types
         self.parse_type = 0
@@ -34,7 +33,6 @@ class ObjectActions(Publisher):
         self.operand_list = operand_list
         self.quad_list = quad_list
         self.stack_allocator = stack_allocator
-        self.heap_allocator = heap_allocator
 
     # def push_variable(self, var):
 
@@ -44,17 +42,8 @@ class ObjectActions(Publisher):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{variable.id_} is not a freeable variable')))
 
-        if len(variable.references) == 0:
-            self.broadcast(
-                Event(
-                    CompilerEvent.STOP_COMPILE,
-                    CompilerError(f'object {variable.id_} has not been initialized')
-                )
-            )
-
-        _ = self.heap_allocator.free_references(variable.references)
-        # q = Quad(OperationType.POINTER_ASSIGN, -1, end, variable.address_)
-        # self.quad_list.append(q)
+        q = Quad(OperationType.DELETE_REF, result_address=variable.address_)
+        self.quad_list.append(q)
 
     def set_parse_type(self, parse_type):
         self.parse_type = parse_type
@@ -160,15 +149,11 @@ class ObjectActions(Publisher):
                 )
             )
 
-        reference = self.heap_allocator.allocate_reference(variable.size)
         operand: Operand = self.operand_list.pop()
-        if var.id_ is not None:
-            var.references.append(reference)
-        else:
-            self.property_parent.references.append(reference)
+        if var.id_ is None:
             operand.address = f'*{operand.address}'
 
-        quad = Quad(OperationType.POINTER_ASSIGN, left_address=reference,
+        quad = Quad(OperationType.POINTER_ASSIGN, left_address=OperationType.ALLOCATE_HEAP, right_address=variable.size,
                     result_address=operand.address)
 
         self.quad_list.append(quad)

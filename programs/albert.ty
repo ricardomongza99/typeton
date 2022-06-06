@@ -24,56 +24,39 @@ var y: Int
 var global_dog: Dog
 
 
+
+
+
+func new_dog(n: Int) {
+    var dog: Dog
+    dog = new Dog()
+    dog.age = n
+    delete dog
+
+}
+
+
 func main() {
-   var dog_a: Dog
-   var dog_b: Dog
-   var dog_c: Dog
-
-   dog_c = new Dog()
-   var x: Int
-
-  dog_a = new Dog()
-
-  dog_a.name = new Name()
-  dog_a.name.gender = new Gender()
-  dog_a.parent = new Dog()
-  dog_a.parent.name = new Name()
-
-  dog_a.parent.name.first = "Paco's Parent"
-  dog_a.parent.name.gender = new Gender()
-  dog_a.parent.name.gender.male = false
-
-  dog_a.parent.age = 100
-  dog_a.parent.name.last = "Sainz"
-
-
-
-  dog_a.age = 20
-  dog_a.name.first = "Paco"
   
 
-  dog_a.name.gender.male = true
+  var x: Int
+  x = 0
 
-  dog_a.name.last = "Sainz"
-  dog_a.name.first = "Paco"
+  while (x < 5000) {
 
-  x = dog_a.age * 20 / 3
-
-
-  print(dog_a.name.first)
-  print(dog_a.name.gender.male)
-  print(dog_a.name.last)
-  print(x * dog_a.parent.age)
-  print(dog_a.parent.name.first)
-  print(dog_a.parent.name.gender.male)
+      new_dog(x)
+      x += 1
+  }
 
 
-  delete dog_a
 
-  global_dog = new Dog()
 
-  global_dog.name = new Name()
 
-  global_dog.name.first = "global"
-  print(global_dog.name.first)
+ 
+
+
+  
+
+
+
 }

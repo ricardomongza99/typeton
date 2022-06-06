@@ -11,7 +11,6 @@ from src.compiler.ply import yacc
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.types import ValueType
-from .heap_allocator.index import HeapAllocator
 from .output import OutputFile
 from .symbol_table import SymbolTable
 from .symbol_table.class_table import ClassTable
@@ -23,15 +22,13 @@ class Compiler(Publisher, Subscriber):
         super().__init__()
 
         self._allocator = StackAllocator()
-        self.heap_allocator = HeapAllocator(
-            self._allocator._segments[Layers.CONSTANT.value].end+1)
         self._symbol_table = SymbolTable()
 
         self.tokens = tokens
         self.lexer = lex
         self._parser = yacc.yacc(module=self, start="program", debug=True)
         self._code_generator = CodeGenerator(
-            self._allocator, self.heap_allocator, self._symbol_table.class_table.classes)
+            self._allocator, self._symbol_table.class_table.classes)
 
         object_actions = self._code_generator.object_actions
         object_actions.add_subscriber(self._symbol_table.function_table, {})
@@ -101,7 +98,7 @@ class Compiler(Publisher, Subscriber):
         function_data = self._symbol_table.function_table.get_output_function_data()
 
         output = OutputFile(constant_table, function_data,
-                            quads, self.heap_allocator.start)
+                            quads, self._allocator._segments[Layers.CONSTANT.value].end+1)
         return jsonpickle.encode(output)
 
     def _display_tables(self):

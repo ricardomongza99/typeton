@@ -1,6 +1,12 @@
+from enum import Enum
 from functools import cmp_to_key
 
 from src.config.definitions import HEAP_RANGE_SIZE
+from src.utils.observer import Event, Publisher
+
+
+class RuntimeActions(Enum):
+    STOP_RUNTIME = 'stop_runtime'
 
 
 class FreeRange:
@@ -25,25 +31,41 @@ def compare(a, b):
     return a.start - b.start or a.end - b.end
 
 
-class HeapAllocator:
+class Heap(Publisher):
     def __init__(self, range_start):
+        super().__init__()
         self.size = HEAP_RANGE_SIZE
         self.start = range_start
         self.ranges = [FreeRange(range_start, range_start + self.size - 1)]
         self.end_map = {}
+        self.memory = [None] * self.size
+
+    def get_value(self, heap_address):
+        value = self.memory[heap_address - self.start]
+
+        if value is None:
+            self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'NULL Pointer Exception: Trying to get value from uninitialized address'))
+
+        return value
+
+    def set_value(self, heap_address, value):
+        self.memory[heap_address - self.start] = value
+
+    def is_heap_address(self, address):
+        return self.start <= address <= self.end
 
     def allocate_reference(self, size):
         """Take the biggest range possible, break it up if needed"""
         if len(self.ranges) == 0:
-            return print('out of mem')
+            self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'Out of heap memory'))
+            return
         largest_free_block = self.ranges[0].size
         if size > largest_free_block:
-            print("out of memory")
+            self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'Not enough heap memory to allocate reference'))
             return
 
         free_block = self.ranges.pop()
         if size == largest_free_block:
-            print("all memory used")
             return free_block.start
 
         reference = free_block.start
@@ -81,12 +103,10 @@ class HeapAllocator:
 
         self.ranges = result
 
-    def free_references(self, references):
-        print('freeing references', references)
+    def free_reference(self, reference):
+        print('freeing references', reference)
         """Adds range to be able to use it again"""
 
-        for ref in references:
-            end = self.end_map[ref]
-            self.ranges.append(FreeRange(ref, end))
-            self._merge_intervals()
-        return end
+        end = self.end_map[reference]
+        self.ranges.append(FreeRange(reference, end))
+        self._merge_intervals()

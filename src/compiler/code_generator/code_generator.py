@@ -17,19 +17,17 @@ from src.utils.display import make_table, TableOptions
 
 
 class CodeGenerator:
-    def __init__(self, stack_allocator: StackAllocator, heap_allocator, classes):
+    def __init__(self, stack_allocator: StackAllocator, classes):
         self.__operand_address_stack: List[Operand] = []
         self.__operator_stack: List[Operator] = []
         self.__quad_list: List[Quad] = []
         self.pointer_types: Dict[str, ValueType] = {}
 
         self.scheduler = stack_allocator
-        self.heap_allocator = heap_allocator
 
         self.object_actions = ObjectActions(
             self.__quad_list,
             self.__operand_address_stack,
-            self.heap_allocator,
             self.scheduler,
             self.pointer_types,
             classes

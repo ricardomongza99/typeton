@@ -54,6 +54,7 @@ def get_segment(address, segments):
         segment = segments[key]
         if segment.start <= address <= segment.end:
             return segment
+    return
 
 
 def is_segment(address, segments, type_: Layers):

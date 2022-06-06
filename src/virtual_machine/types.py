@@ -1,11 +1,13 @@
 from audioop import add
 from enum import Enum
+from src.utils.observer import Event, Publisher
 from typing import Dict, List
 
 from src.compiler.stack_allocator.helpers import Layers, init_types, get_segment, get_resource, Segment
 from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, TypeRange
 from src.compiler.symbol_table.constant_table import ConstantTable
 from src.config.definitions import HEAP_RANGE_SIZE
+from src.virtual_machine.heap_memory import Heap
 
 
 class PointerAction(Enum):
@@ -91,41 +93,13 @@ def init_storage(size):
 # TODO get heap start
 
 
-class ObjectHeap:
-    def __init__(self, start):
-        self.size = HEAP_RANGE_SIZE
-        self.start = start
-        self.memory = [None] * HEAP_RANGE_SIZE
-        self.end = self.start + self.size - 1
-
-    def get_value(self, heap_address):
-        # print('getting heap value for address', heap_address-self.start)
-        value = self.memory[heap_address - self.start]
-        # print('got value', value)
-
-        if value is None:
-            print('WARNING: trying to get value from uninitialized heap address', heap_address)
-            return
-
-        return value
-
-    def set_value(self, heap_address, value):
-        # print('setting heap value for address',
-        #       heap_address-self.start,   'value', value)
-
-        self.memory[heap_address - self.start] = value
-
-    def is_heap_address(self, address):
-        return self.start <= address <= self.end
-
-
-class ContextMemory:
+class ContextMemory(Publisher):
     """Memory stores exact amount of needed spaces for a specific function"""
 
     # TODO move size_data init_types to outside of ContextMemory
 
     def __init__(self, size_data: SizeData, constant_data: ConstantTable,
-                 global_data, object_heap: ObjectHeap):
+                 global_data, object_heap: Heap):
         self.pending_return_value = None
         self.type_data = init_types(DEFAULT_TYPES, is_runtime=True)
         self.size_data = size_data
@@ -168,14 +142,13 @@ class ContextMemory:
     def is_global(self):
         return self.global_data == None
 
-    def __save_global(self, address, value):
-        if self.global_data is None:
-            self.global_data.save(address, value)
+    def release_reference(self, address):
+        """Release reference to object"""
+        self.object_heap.set_value(address, None)
 
     def save_reference(self, address, value):
         """Save value to pointer"""
 
-        # print('saving reference', address, value)
         segment = get_segment(address, self.type_data)
 
         if segment.type_ is Layers.GLOBAL and not self.is_global():
@@ -197,9 +170,6 @@ class ContextMemory:
         if segment.type_ is Layers.GLOBAL and not self.is_global():
             self.global_data.save(address, value)
             return
-
-        # if segment.type_ is Layers.CONSTANT:
-        #     return
 
         slot = self.data_storage[type_data.type_]
         offset = self.get_offset(pure_addr, segment, type_data)
@@ -261,8 +231,6 @@ def pointer_type(address):
         return PointerAction.REFERENCE, int(address[1:])
     elif address[0] == '*':
         return PointerAction.VALUE, int(address[1:])
-    else:
-        raise Exception('Invalid pointer type')
 
 
 def pure_address(address):
