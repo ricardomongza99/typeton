@@ -3,7 +3,7 @@ from src.virtual_machine import VirtualMachine
 import os
 from src.config.definitions import PROGRAMS_DIR
 
-FILENAME = 'oskar.ty'
+FILENAME = 'albert.ty'
 
 
 def main():
