@@ -151,7 +151,7 @@ class ContextMemory(Publisher):
     def save_reference(self, address, value):
         """Save value to pointer"""
 
-        print("saving to pointer address", address, value)
+        # print("saving to pointer address", address, value)
 
         segment = get_segment(address, self.type_data)
 
@@ -190,7 +190,7 @@ class ContextMemory(Publisher):
                     self.object_heap.set_value(slot[offset], value)
                     return
                 else:
-                    print("array", 'getting pointer value for address', address)
+                    #print("array", 'getting pointer value for address', address)
                     val = slot[offset]
                     self.save(val, value)
 
