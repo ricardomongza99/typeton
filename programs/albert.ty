@@ -1,8 +1,3 @@
-var x: Int
-var y: Int
-
-
-
 class Animal {
     bark: Bool
 }
@@ -17,7 +12,6 @@ class Name {
     gender: Gender
 }
 
-
 class Dog {
     parent: Dog
     breed: String
@@ -25,7 +19,9 @@ class Dog {
     age: Int
 }
 
-
+var x: Int
+var y: Int
+var global_dog: Dog
 
 
 func main() {
@@ -70,6 +66,17 @@ func main() {
   print(x * dog_a.parent.age)
   print(dog_a.parent.name.first)
   print(dog_a.parent.name.gender.male)
+
+  global_dog = new Dog()
+
+  global_dog.name = new Name()
+
+  global_dog.name.first = "global"
+  print(global_dog.name.first)
+
+
+
+
 
 
  

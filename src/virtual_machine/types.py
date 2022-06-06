@@ -104,6 +104,7 @@ class ObjectHeap:
         # print('got value', value)
 
         if value is None:
+            print('WARNING: trying to get value from uninitialized heap address', heap_address)
             return
 
         return value
@@ -175,8 +176,11 @@ class ContextMemory:
         """Save value to pointer"""
 
         # print('saving reference', address, value)
-
         segment = get_segment(address, self.type_data)
+
+        if segment.type_ is Layers.GLOBAL and not self.is_global():
+            self.global_data.save_reference(address, value)
+
         type_data: TypeRange = get_resource(address, segment)
         slot = self.data_storage[type_data.type_]
         offset = self.get_offset(address, segment, type_data)
@@ -185,10 +189,10 @@ class ContextMemory:
 
     def save(self, address, value):
         """Deduce type and store in corresponding array slot"""
-        action, address = pure_address(address)
+        action, pure_addr = pure_address(address)
 
-        segment = get_segment(address, self.type_data)
-        type_data: TypeRange = get_resource(address, segment)
+        segment = get_segment(pure_addr, self.type_data)
+        type_data: TypeRange = get_resource(pure_addr, segment)
 
         if segment.type_ is Layers.GLOBAL and not self.is_global():
             self.global_data.save(address, value)
@@ -198,7 +202,7 @@ class ContextMemory:
         #     return
 
         slot = self.data_storage[type_data.type_]
-        offset = self.get_offset(address, segment, type_data)
+        offset = self.get_offset(pure_addr, segment, type_data)
 
         if type_data.type_ is ValueType.POINTER:
             if action is PointerAction.REFERENCE:
@@ -223,23 +227,24 @@ class ContextMemory:
 
     def get(self, address):
         """Get from address origin, be it global, local, or constant table"""
-        action, address = pure_address(address)
+        action, pure_addr = pure_address(address)
 
-        if self.object_heap.is_heap_address(address):
-            return self.object_heap.get_value(address)
+        if self.object_heap.is_heap_address(pure_addr):
+            return self.object_heap.get_value(pure_addr)
 
-        segment = get_segment(address, self.type_data)
-        type_data: TypeRange = get_resource(address, segment)
+        segment = get_segment(pure_addr, self.type_data)
+        type_data: TypeRange = get_resource(pure_addr, segment)
+
         if segment.type_ is Layers.GLOBAL and not self.is_global():
             return self.global_data.get(address)
 
         if segment.type_ is Layers.CONSTANT:
-            const = self.constant_data.get_from_address(f'{address}')
+            const = self.constant_data.get_from_address(f'{pure_addr}')
             return const
 
         # else get from local memory
         slot = self.data_storage[type_data.type_]
-        offset = self.get_offset(address, segment, type_data)
+        offset = self.get_offset(pure_addr, segment, type_data)
 
         if type_data.type_ is ValueType.POINTER:
             if action is PointerAction.REFERENCE:
