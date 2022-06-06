@@ -243,7 +243,7 @@ class VirtualMachine(Subscriber):
         result = self._get_value(quad.result_address)
 
         if quad.operation == OperationType.VERIFY:
-            if not(0 <= left <= result):
+            if not(0 <= left < result):
                 self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Array Index out of range'))
         elif quad.operation is OperationType.ARRAY_ADD:
             value = _execute_typed_add(ValueType.INT, quad.left_address, self._get_value(quad.right_address))
