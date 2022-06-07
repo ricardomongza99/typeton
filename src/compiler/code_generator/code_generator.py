@@ -100,8 +100,8 @@ class CodeGenerator:
     def calculate_dimension(self):
         self.array_actions.calculate_dimension(self.scheduler)
 
-    def get_array_pointer(self):
-        self.array_actions.get_array_pointer(self.scheduler)
+    def get_array_pointer(self, function_name):
+        self.array_actions.get_array_pointer(self.scheduler, function_name)
 
     # -------------------------------------------------------
 

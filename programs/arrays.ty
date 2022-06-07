@@ -8,12 +8,10 @@ func main() {
     i = 0
     j = 0
 
-    
-    
     while (i < 10) {
         j = 0
         while (j < 10) {
-            M[i][j] = 10
+            M[i][j] = 23
             j += 1
         }
         i += 1

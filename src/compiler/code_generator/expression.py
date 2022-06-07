@@ -172,15 +172,23 @@ class ExpressionActions(Publisher, Subscriber):
 
         # validate pointer assignment
         elif left.type_ is ValueType.POINTER and right.type_ is not ValueType.POINTER:
-            type_ = self.pointer_types[left.address]
-            # if right.type_ != type_:
-            #     self.broadcast(
-            #         Event(
-            #             CompilerEvent.STOP_COMPILE,
-            #             CompilerError(
-            #                 f'({right.type_} cannot be assigned to {type_})')
-            #         )
-            #     )
+            if self.pointer_types[left.address] != right.type_:
+                self.broadcast(
+                    Event(
+                        CompilerEvent.STOP_COMPILE,
+                        CompilerError(
+                            f'({right.type_} cannot be assigned to {self.pointer_types[left.address]})')
+                    )
+                )
+        elif right.type_ is ValueType.POINTER and left.type_ is not ValueType.POINTER:
+            if left.type_ != self.pointer_values[right.type_]:
+                self.broadcast(
+                    Event(
+                        CompilerEvent.STOP_COMPILE,
+                        CompilerError(
+                            f'({left.type_} cannot be assigned to {slf.pointer_types[right.address]})')
+                    )
+                )
 
         quad = Quad(
             left_address=right.address,

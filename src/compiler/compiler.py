@@ -911,7 +911,7 @@ class Compiler(Publisher, Subscriber):
         """
         get_array_pointer :
         """
-        self._code_generator.get_array_pointer()
+        self._code_generator.get_array_pointer(self._symbol_table.function_table)
 
     # -- ERROR -----------------------
 

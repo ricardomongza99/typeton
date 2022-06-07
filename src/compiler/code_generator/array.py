@@ -32,6 +32,7 @@ class ArrayActions(Publisher):
     def initialize_array(self, size, variable: Variable):
         print("initialize array")
         """ Generates quad that initializes array """
+        self.variable_type = variable.array_type
 
         quad = Quad(
             OperationType.POINTER_ASSIGN,
@@ -86,7 +87,7 @@ class ArrayActions(Publisher):
         self._quad_list.append(quad)
         self._operand_stack.append(Operand(type_=ValueType.INT, address=result_address))
 
-    def get_array_pointer(self, stack_allocator: StackAllocator):
+    def get_array_pointer(self, stack_allocator: StackAllocator, funcion_table):
         print("get array pointer")
         # Error handling: missing indexes for array
         self._dimensions_stack.pop()
@@ -95,7 +96,7 @@ class ArrayActions(Publisher):
         #                          CompilerError(f"Variable is missing {len(self._dimensions_stack)} dimension")))
 
         self._generate_sum_quads(stack_allocator)
-        self._generate_base_sum_quad(stack_allocator)
+        self._generate_base_sum_quad(stack_allocator, funcion_table)
 
     def _generate_sum_quads(self, stack_allocator: StackAllocator):
         print("generate sum quads")
@@ -124,7 +125,9 @@ class ArrayActions(Publisher):
             )
             self._quad_list.append(quad)
 
-    def _generate_base_sum_quad(self, stack_allocator: StackAllocator):
+            self._pointer_types[result_address] = ValueType.INT
+
+    def _generate_base_sum_quad(self, stack_allocator: StackAllocator, funcion_table):
         """ Generates last array access quad to pointer. Adds base """
 
         if len(self._operand_stack) <= 1:
@@ -139,7 +142,8 @@ class ArrayActions(Publisher):
         # Reserve temp pointer
         self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address, None)))
 
-        self._pointer_types[pointer_address] = right_operand.type_
+        self._pointer_types[pointer_address] = self.variable_type
+        print('left_operand.type_', left_operand.type_)
 
         quad = Quad(
             operation=OperationType.POINTER_ADD,
