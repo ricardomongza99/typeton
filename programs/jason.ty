@@ -1,0 +1,6 @@
+func main() {
+    var age: Int
+    age = input("What is Jason's age?")
+    print("Jason's age is ")
+    print(age)
+}
