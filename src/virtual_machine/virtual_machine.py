@@ -46,7 +46,8 @@ JUMPS = {
 }
 
 BUILT_IN = {
-    OperationType.PRINT
+    OperationType.PRINT,
+    OperationType.INPUT
 }
 
 FUNCTIONS = {
