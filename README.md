@@ -111,6 +111,12 @@ func main() {
     
     i = 0
     while (i < 5) {
+        items[i] = i + 10
+        i += 1
+    }
+    
+    i = 0
+    while (i < 5) {
         print(items[i])
         i += 1
     }
