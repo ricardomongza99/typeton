@@ -106,63 +106,29 @@ print(userAge)
 **Program 1**: Iterate over an array of integers
 ```
 func main() {
-    var items: [Int] = [1, 2, 3, 4, 5]
-    var i = 0
-
-    while (counter < 10) {
+    var items: Int[5]
+    var i: Int
+    
+    i = 0
+    while (i < 5) {
         print(items[i])
         i += 1
     }
 }
 ```
 
-**Program 2**: Class inheritance
+**Program 2**: Input
 ```
-class Animal {
-    var name: String
-    var age: Int
-
-    func sleep() {
-        print("\(name) is sleeping")
-    }
-}
-
-class Dog: Animal {
-    var isBig: Bool
-
-    func bark() {
-        if (isBig) {
-            print("Wooff!")
-        } else {
-            print("wuf wuf")
-        }
-    }
-}
-
-class Cat: Animal {
-    
-    func meow() {
-        print("Meow")
-    }
-}
-
- 
 func main() {
-    var dog1 = Dog("Harold", 12, True)
-    var dog2 = Dog("Pinky", 5, False)
-    var cat = Cat("Tom", 6)
+    var age: Int
+    age = input("What is Jason's age?")
+    print("Jason's age is ")
+    print(age)
 
-    var animals: [Animal] = [dog1, dog2, cat]
-    
-    var existed: String = ""
-    if (dog1.age < dog2.age) {
-        existed = "younger"
-    } else {
-        existed = "older"
-    }
-    
-    print("\(dog1.name) is \(existed) than \(dog2.name)")
-
+    var color: String
+    color = input("What is Jason's favorite color?")
+    print("Jason's favorite color is...")
+    print(color)
 }
 ```
 
