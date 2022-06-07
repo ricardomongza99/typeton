@@ -163,11 +163,24 @@ class ExpressionActions(Publisher, Subscriber):
                 )
 
             else:
-                if left.is_class_param:
+                if left.is_class_param and right.is_class_param:
+                    # if assigning a class param to another class param
                     left.address = f'*{left.address}'
+                    right.address = f'&{right.address}'
+                elif not left.is_class_param and not right.is_class_param:
+                    # if assigning a class param to a non class param
+                    left.address = f'&{left.address}'
+                    right.address = f'&{right.address}'
+                elif left.is_class_param and not right.is_class_param:
+                    # if assigning a class param to a non class param
+                    left.address = f'*{left.address}'
+                    right.address = f'&{right.address}'
+                else:
+                    right.address = f'&{right.address}'
+
                 print("classes are equal")
                 quad = Quad(
-                    left_address=f'&{right.address}',
+                    left_address=right.address,
                     right_address=None,
                     operation=OperationType.POINTER_ASSIGN,
                     result_address=left.address)
@@ -182,7 +195,7 @@ class ExpressionActions(Publisher, Subscriber):
                     Event(
                         CompilerEvent.STOP_COMPILE,
                         CompilerError(
-                            f'({right.type_} cannot be assigned to {type_})')
+                            f'({left.type_} cannot be assigned to {self.pointer_types[right.address]})')
                     )
                 )
 
@@ -311,7 +324,9 @@ class ExpressionActions(Publisher, Subscriber):
                 f'{operator.type_.value} '
                 f'{address_map[right.address]}')))
 
-            # broadcast add variable count to function data
+        if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
+            # if pointer aritmetric get their type
+            type_match = self.pointer_types.get(left.address) or self.pointer_types.get(right.address)
 
         result = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
         self.__operand_address_stack.append(Operand(ValueType(type_match), result))

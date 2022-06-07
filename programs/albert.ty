@@ -1,20 +1,11 @@
-class Animal {
-    bark: Bool
-}
-
-class Gender {
-    male: Bool
-}
-
 class Name {
     first: String
     last: String
-    gender: Gender
 }
+
 
 class Dog {
     parent: Dog
-    breed: String
     name: Name
     age: Int
 }
@@ -25,70 +16,52 @@ var global_dog: Dog
 
 
 func main() {
-   var dog_a: Dog
-   var dog_b: Dog
-   var dog_c: Dog
-
-   dog_c = new Dog()
-   var x: Int
-
-  dog_a = new Dog()
-
-  dog_a.name = new Name()
-  dog_a.name.gender = new Gender()
-  dog_a.parent = new Dog()
-  dog_a.parent.name = new Name()
-
-  dog_a.parent.name.first = "Paco's Parent"
-  dog_a.parent.name.gender = new Gender()
-  dog_a.parent.name.gender.male = false
-
-  dog_a.parent.age = 100
-  dog_a.parent.name.last = "Sainz"
+  var son: Dog
+  var dad: Dog
+  var grandpa: Dog
+   
+  son = new Dog()
+  son.name = new Name()
+  son.name.first = "son"
+  son.age = 20
 
 
+  dad = new Dog()
+  dad.name = new Name()
+  dad.name.first = "dad"
+  dad.age = son.age + 20
 
-  dog_a.age = 20
-  dog_a.name.first = "Paco"
+
+  grandpa = new Dog()
+  grandpa.name = new Name()
+  grandpa.name.first = "grandpa"
+  grandpa.age = dad.age + 20
+
+
+  son.parent = dad
+  dad.parent = grandpa
+
+
+  var combinedAges: Int
+
+  combinedAges = dad.age + son.age + grandpa.age
+  print(combinedAges)
+
   
+  print(son.name.first)
+  print(dad.name.first)
+  print(grandpa.name.first)
 
-  dog_a.name.gender.male = true
+  print(son.parent.name.first)
 
-  dog_a.name.last = "Sainz"
-  dog_a.name.first = "Paco"
+  print(son.age)
+  print(dad.age)
+  print(grandpa.age)
 
-  x = dog_a.age * 20 / 3
+  son = grandpa
 
-
-  print(dog_a.name.first)
-  print(dog_a.name.gender.male)
-  print(dog_a.name.last)
-  print(x * dog_a.parent.age)
-  print(dog_a.parent.name.first)
-  print(dog_a.parent.name.gender.male)
-
-  global_dog = new Dog()
-
-  global_dog.name = new Name()
-
-  global_dog.name.first = "global"
-  print(global_dog.name.first)
-
-
-
-
-
-
- 
-
- 
-
-   
-
-   
-
-
-   
-   
+  print(son.age)
+  
+  
 
 }
