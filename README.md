@@ -3,7 +3,6 @@ An object oriented language developed by two rockstar engineering students at Te
 
 ## ⭐️ FEATURES
 - Local and global variables
-- Implicit types (detects primitives)
 - Shorthand assign operators (+=, -=, *=, /=)
 - String Interpolation
 - Arrays (with primitives)
@@ -11,7 +10,6 @@ An object oriented language developed by two rockstar engineering students at Te
 - Loops
 - Functions
 - Classes
-- Inheritance (one level)
 - Input/Output
 
 ## 🚗 GETTING STARTED
@@ -30,22 +28,23 @@ func main() {
 }
 ```
 
-**Variables**
+**Variable declaration**
 ```
-var myString: String = "Hello world!"
-var myNumber: Int = 5
-var myDog: Dog = Dog("Draco", 8)
+var myString: String
+var myNumber: Int
+var myDog: Dog
 ```
 
-**Implicit variables** (only for primitive types)
-```
-var myDecimal = 5.23
-```
 
 **Arrays**
 ```
-var items: [Int] = [1, 2, 3, 4, 5]
+var items: Int[10]
+items[0] = 1
+
+var Cube: Int[4][4][4]
+cube[1][2][3] = 10
 ```
+
 
 **Conditionals**
 ```
@@ -85,19 +84,14 @@ func main() {
 ```
 class Animal {
     // Declare properties
-    var name: String
-    var age: Int
-    
-    // Declare methods
-    func sleep() {
-        print("\(name) is sleeping")
-    }
+    name: String
+    age: Int
 }
 ```
 
 **Input**
 ```
-var userAge: Int = input()
+age = input("Enter age: ")
 ```
 
 **Output**
@@ -105,10 +99,6 @@ var userAge: Int = input()
 print(userAge)
 ```
 
-**String Interpolation**
-```
-print("You are \(userAge) years old!")
-```
 
 ## 👨‍💻 CODE EXAMPLES
 
