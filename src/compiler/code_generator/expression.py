@@ -14,9 +14,6 @@ from src.utils.debug import Debug
 from src.utils.observer import Publisher, Event, Subscriber
 
 
-
-
-
 SHORTHAND = {
     OperationType.DASSIGN,
     OperationType.LASSIGN,
@@ -176,14 +173,14 @@ class ExpressionActions(Publisher, Subscriber):
         # validate pointer assignment
         elif left.type_ is ValueType.POINTER and right.type_ is not ValueType.POINTER:
             type_ = self.pointer_types[left.address]
-            if right.type_ != type_:
-                self.broadcast(
-                    Event(
-                        CompilerEvent.STOP_COMPILE,
-                        CompilerError(
-                            f'({right.type_} cannot be assigned to {type_})')
-                    )
-                )
+            # if right.type_ != type_:
+            #     self.broadcast(
+            #         Event(
+            #             CompilerEvent.STOP_COMPILE,
+            #             CompilerError(
+            #                 f'({right.type_} cannot be assigned to {type_})')
+            #         )
+            #     )
 
         quad = Quad(
             left_address=right.address,

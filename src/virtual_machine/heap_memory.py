@@ -44,6 +44,8 @@ class Heap(Publisher):
     def get_value(self, heap_address):
         value = self.memory[heap_address - self.start]
 
+        # print('Heap', heap_address, 'value', value)
+
         if value is None:
             self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'NULL Pointer Exception: Trying to get value from uninitialized address'))
 

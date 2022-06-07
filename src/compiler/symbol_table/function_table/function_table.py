@@ -24,7 +24,7 @@ class TypeContext(Enum):
 
 
 PRIMITIVE_TYPES = {ValueType.INT.value, ValueType.FLOAT.value,
-                   ValueType.STRING.value, ValueType.BOOL.value}
+                   ValueType.STRING.value, ValueType.BOOL.value, ValueType.POINTER.value}
 
 
 class FunctionTable(Publisher, Subscriber):

@@ -3,6 +3,7 @@
 from enum import Enum
 from typing import List
 from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension
+from src.compiler.symbol_table.function_table.variable_table.variable import Variable
 from src.utils.observer import Subscriber, Event, Publisher
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.stack_allocator.index import StackAllocator
@@ -27,6 +28,19 @@ class ArrayActions(Publisher):
     def push_dimensions(self, dimensions):
         print("push dimensions")
         self._dimensions_stack.extend(dimensions)
+
+    def initialize_array(self, size, variable: Variable):
+        print("initialize array")
+        """ Generates quad that initializes array """
+
+        quad = Quad(
+            OperationType.POINTER_ASSIGN,
+            left_address=OperationType.ALLOCATE_HEAP,
+            right_address=size,
+            result_address=variable.address_
+        )
+
+        self._quad_list.append(quad)
 
     def verify_dimensions(self):
         print("verify dimensions")
@@ -96,18 +110,17 @@ class ArrayActions(Publisher):
             left_operand = self._operand_stack.pop()
             right_operand = self._operand_stack.pop()
 
-            result_address = stack_allocator.allocate_address(ValueType.INT, Layers.TEMPORARY)
-
-            self._operand_stack.append(Operand(ValueType.INT, result_address))
+            result_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
+            self._operand_stack.append(Operand(ValueType.POINTER, result_address))
 
             # Reserve temp int
-            self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.INT, result_address, None)))
+            self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, result_address, None)))
 
             quad = Quad(
                 operation=OperationType.ADD,
-                left_address=left_operand.address,
-                right_address=right_operand.address,
-                result_address=result_address
+                left_address=f'&{left_operand.address}',
+                right_address=f'&{right_operand.address}',
+                result_address=f'&{result_address}'
             )
             self._quad_list.append(quad)
 
@@ -121,7 +134,6 @@ class ArrayActions(Publisher):
         right_operand = self._operand_stack.pop()
 
         pointer_address = stack_allocator.allocate_address(ValueType.POINTER, Layers.TEMPORARY)
-
         self._operand_stack.append(Operand(ValueType.POINTER, pointer_address))
 
         # Reserve temp pointer
@@ -130,9 +142,9 @@ class ArrayActions(Publisher):
         self._pointer_types[pointer_address] = right_operand.type_
 
         quad = Quad(
-            operation=OperationType.ARRAY_ADD,
-            left_address=right_operand.address,
-            right_address=left_operand.address,
+            operation=OperationType.POINTER_ADD,
+            left_address=f'&{right_operand.address}',
+            right_address=f'& {left_operand.address}',
             result_address=f'&{pointer_address}'
         )
         self._quad_list.append(quad)

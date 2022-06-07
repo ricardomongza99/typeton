@@ -180,19 +180,13 @@ class ContextMemory(Publisher):
 
         if type_data.type_ is ValueType.POINTER:
             if action is PointerAction.REFERENCE:
-                # print('saving reference', address, value)
                 slot[offset] = value
                 return
             elif action is PointerAction.VALUE or action is None:
                 # print('saving value from pointer', address,
                 #       "actual address", slot[offset], 'for value', value)
-                if self.object_heap.is_heap_address(slot[offset]):
-                    self.object_heap.set_value(slot[offset], value)
-                    return
-                else:
-                    #print("array", 'getting pointer value for address', address)
-                    val = slot[offset]
-                    self.save(val, value)
+                self.object_heap.set_value(slot[offset], value)
+                return
 
         slot[offset] = value
 
@@ -226,16 +220,10 @@ class ContextMemory(Publisher):
         offset = self.get_offset(pure_addr, segment, type_data)
 
         if type_data.type_ is ValueType.POINTER:
-
             if action is PointerAction.REFERENCE:
                 return slot[offset]
             else:
-                if self.object_heap.is_heap_address(slot[offset]):
-                    return self.object_heap.get_value(slot[offset])
-                else:
-                    return self.get(slot[offset])
-                # else:
-                #     return slot[offset]
+                return self.object_heap.get_value(slot[offset])
 
         return slot[offset]
 

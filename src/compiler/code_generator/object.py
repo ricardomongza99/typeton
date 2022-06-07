@@ -2,7 +2,7 @@ from typing import List
 from unittest import result
 from weakref import ref
 from src.compiler.code_generator.expression import ExpressionActions
-from src.compiler.code_generator.type import Operand, OperationType, Quad
+from src.compiler.code_generator.type import FunctionTableEvents, Operand, OperationType, Quad
 from src.compiler.errors import CompilerError, CompilerEvent
 
 from src.compiler.stack_allocator.helpers import Layers
@@ -84,7 +84,7 @@ class ObjectActions(Publisher):
 
         property_pointer = self.stack_allocator.allocate_address(
             ValueType.POINTER, Layers.TEMPORARY)
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (ValueType.POINTER, property_pointer, property_data.class_id)))
+        self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (ValueType.POINTER, property_pointer, property_data.class_id)))
 
         if property_data.type_ == ValueType.POINTER:
             if self.count < 2:
@@ -150,6 +150,7 @@ class ObjectActions(Publisher):
             )
 
         operand: Operand = self.operand_list.pop()
+
         if var.id_ is None:
             operand.address = f'*{operand.address}'
 

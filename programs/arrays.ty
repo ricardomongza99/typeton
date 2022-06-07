@@ -1,0 +1,32 @@
+func main() {
+    var M: Int[10][10]
+
+    M[1][1] = 2
+
+    var i: Int
+    var j: Int
+    i = 0
+    j = 0
+
+    
+    
+    while (i < 10) {
+        j = 0
+        while (j < 10) {
+            M[i][j] = 10
+            j += 1
+        }
+        i += 1
+    }
+    i = 0
+    j = 0
+     while (i < 10) {
+        j = 0
+        while (j < 10) {
+            print(M[i][j])
+            j += 1
+        }
+        i += 1
+    }
+
+}
