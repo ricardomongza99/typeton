@@ -115,7 +115,7 @@ class VirtualMachine(Subscriber):
         self.context_memory.append(
             ContextMemory(self._function_data["main"].size_data, self._constant_table, self.global_memory, self.object_heap))
 
-        self._ip = self._function_data['main'].start_quad
+        self._ip = 0
 
         print('🦭🦭🦭typeton🦭🦭🦭')
 
@@ -173,18 +173,22 @@ class VirtualMachine(Subscriber):
         elif operation is OperationType.POINTER_ASSIGN:
             self.__execute_pointer_assign(quad)
             self._ip += 1
-        # elif operation is OperationType.POINTER_ASSIGN:
-        #     self.__execute_assing(quad.result_address, quad.left_address)
-        #     self._ip += 1
+
         elif operation is OperationType.ASSIGN:
             self.__execute_assign(quad.result_address,
                                   self._get_value(quad.left_address))
             self._ip += 1
+
+        elif operation is OperationType.END_GLOBAL:
+            self.go_to_main()
         else:
             print(f'Unknown Command {quad.operation}')
             self._ip = len(self._quads) + 1
 
     # -- EXECUTION methods  ----------------------------
+
+    def go_to_main(self):
+        self._ip = self._function_data['main'].start_quad
 
     def _stop(self):
         self._ip = len(self._quads) + 1
@@ -212,6 +216,8 @@ class VirtualMachine(Subscriber):
                 p_left = self._get_value(quad.left_address)
             if action_right is not None:
                 p_right = self._get_value(quad.right_address)
+
+            # print("left:", p_left, "right:", p_right)
 
             if p_left is None or p_right is None:
                 self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'NULL pointer exception'))

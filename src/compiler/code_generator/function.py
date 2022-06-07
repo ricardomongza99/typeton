@@ -20,6 +20,12 @@ class FunctionActions(Publisher, Subscriber):
             self.generate_go_to_main()
         elif event.type_ is CompilerEvent.GENERATE_ARE:
             self.generate_are(event.payload)
+        elif event.type_ is CompilerEvent.END_GLOBAL:
+            self.end_global()
+
+    def end_global(self):
+        quad = Quad(operation=OperationType.END_GLOBAL)
+        self.quad_list.append(quad)
 
     def generate_end_function(self):
         quad = Quad(operation=OperationType.ENDFUNC)

@@ -22,7 +22,4 @@ class CompilerEvent(Enum):
     GENERATE_ARE = 4
     SET_RETURN = 5
     RELEASE_MEM_IF_POSSIBLE = 6
-
-
-
-
+    END_GLOBAL = 8

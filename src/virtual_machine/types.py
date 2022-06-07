@@ -156,7 +156,7 @@ class ContextMemory(Publisher):
         segment = get_segment(address, self.type_data)
 
         if segment.type_ is Layers.GLOBAL and not self.is_global():
-            self.global_data.save_reference(address, value)
+            return self.global_data.save_reference(address, value)
 
         type_data: TypeRange = get_resource(address, segment)
         slot = self.data_storage[type_data.type_]
@@ -202,9 +202,6 @@ class ContextMemory(Publisher):
         """Get from address origin, be it global, local, or constant table"""
         action, pure_addr = pure_address(address)
 
-        if self.object_heap.is_heap_address(pure_addr):
-            return self.object_heap.get_value(pure_addr)
-
         segment = get_segment(pure_addr, self.type_data)
         type_data: TypeRange = get_resource(pure_addr, segment)
 
@@ -220,6 +217,7 @@ class ContextMemory(Publisher):
         offset = self.get_offset(pure_addr, segment, type_data)
 
         if type_data.type_ is ValueType.POINTER:
+            # print("getting pointer", address, slot[offset])
             if action is PointerAction.REFERENCE:
                 return slot[offset]
             else:

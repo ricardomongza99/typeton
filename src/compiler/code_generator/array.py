@@ -77,6 +77,7 @@ class ArrayActions(Publisher):
         dimension = self._dimensions_stack.pop()
 
         result_address = stack_allocator.allocate_address(ValueType.INT, Layers.TEMPORARY)
+        self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.INT, result_address, None)))
 
         quad = Quad(
             operation=OperationType.MULTIPLY,
@@ -148,7 +149,7 @@ class ArrayActions(Publisher):
         quad = Quad(
             operation=OperationType.POINTER_ADD,
             left_address=f'&{right_operand.address}',
-            right_address=f'& {left_operand.address}',
+            right_address=f'&{left_operand.address}',
             result_address=f'&{pointer_address}'
         )
         self._quad_list.append(quad)

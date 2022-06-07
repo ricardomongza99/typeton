@@ -768,7 +768,6 @@ class Compiler(Publisher, Subscriber):
         size = self._symbol_table.function_table.allocate_dimensions(self._allocator, self._symbol_table.constant_table)
         var = self._symbol_table.function_table.current_function.current_variable
         var.array_type = var.type_
-        # var.type_ = ValueType.POINTER
         self._symbol_table.function_table.set_type("Pointer", self._allocator)
         self._code_generator.array_actions.initialize_array(size, var)
 

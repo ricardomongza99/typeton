@@ -5,6 +5,7 @@ from src.compiler.stack_allocator.types import ValueType
 
 class OperationType(Enum):
     ALLOCATE_HEAP = 'allocateheap'
+    END_GLOBAL = 'endglobal'
     ARRAY_ADD = 'arrayadd'
     DELETE_REF = 'deleteref'
     CALL_ASSIGN = 'callassign'

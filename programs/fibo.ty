@@ -1,3 +1,5 @@
+var x: Int[10]
+
 func fib_r(n: Int) -> Int {
   if (n <= 1) {
       return n
