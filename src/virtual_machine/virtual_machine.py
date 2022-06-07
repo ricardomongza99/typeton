@@ -46,7 +46,8 @@ JUMPS = {
 }
 
 BUILT_IN = {
-    OperationType.PRINT
+    OperationType.PRINT,
+    OperationType.INPUT
 }
 
 FUNCTIONS = {
@@ -278,6 +279,17 @@ class VirtualMachine(Subscriber):
     def __execute_builtin_function(self, quad):
         if quad.operation is OperationType.PRINT:
             print(self._get_value(quad.result_address))
+        elif quad.operation is OperationType.INPUT:
+            result = input()
+            type_ = self.context_memory[-1].get_type(quad.result_address)
+
+            if type_ == ValueType.INT:
+                result = int(result)
+            elif type_ == ValueType.FLOAT:
+                result = float(result)
+
+            self.__execute_assign(quad.result_address, result)
+
         self._ip += 1
 
     def __execute_jump(self, quad):

@@ -167,7 +167,7 @@ class CodeGenerator:
         self.__quad_list.append(quad)
 
     def execute_builtin_call(self):
-        self.builtin_actions.execute_call(self.__operator_stack, self.__operand_address_stack)
+        self.builtin_actions.execute_call(self.__operator_stack, self.__operand_address_stack, self.scheduler)
 
     def get_output_quads(self):
         """ Returns quads list of types [str, str, str, str] used by the output file """

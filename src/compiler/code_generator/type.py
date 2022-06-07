@@ -42,6 +42,7 @@ class OperationType(Enum):
     MASSIGN = '*='
     POINTER_ASSIGN = '&='
     VERIFY = 'verify'
+    INPUT = 'input'
 
 
 class FunctionTableEvents(Enum):

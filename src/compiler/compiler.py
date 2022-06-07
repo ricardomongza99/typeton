@@ -4,7 +4,7 @@ import sys
 import jsonpickle
 
 from src.compiler.code_generator.code_generator import CodeGenerator
-from src.compiler.code_generator.type import Dimension, Operand
+from src.compiler.code_generator.type import Dimension, Operand, OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.lexer import lex, tokens
 from src.compiler.ply import yacc
@@ -42,6 +42,11 @@ class Compiler(Publisher, Subscriber):
         array_actions = self._code_generator.array_actions
         array_actions.add_subscriber(self._symbol_table.function_table, {})
         array_actions.add_subscriber(self, {})
+
+        # subscribe to builtin actions
+        built_in_actions = self._code_generator.builtin_actions
+        built_in_actions.add_subscriber(self._symbol_table.function_table, {})
+        built_in_actions.add_subscriber(self, {})
 
         # subscribers for function table
         functions = self._symbol_table.function_table
@@ -323,7 +328,6 @@ class Compiler(Publisher, Subscriber):
         statement : display
                   | if
                   | while
-                  | input
                   | assign
                   | call return_type_warning
                   | return
@@ -354,7 +358,7 @@ class Compiler(Publisher, Subscriber):
 
     def p_input(self, p):
         """
-        input : INPUT LPAREN string RPAREN
+        input : INPUT push_operator LPAREN STRINGLIT add_constant print_prompt RPAREN execute_builtin_call
         """
 
     def p_display(self, p):
@@ -372,6 +376,7 @@ class Compiler(Publisher, Subscriber):
         """
         assign : assign1 ASSIGN other_assign
                | assign1 assign2 bool_expr execute_priority_0
+               | assign1 assign2 input execute_priority_0
         """
 
     def p_resolve_object_(self, p):
@@ -382,8 +387,7 @@ class Compiler(Publisher, Subscriber):
 
     def p_other_assing(self, p):
         """
-        other_assign : input
-                    | push_variable_class new_object verify_and_allocate_object
+        other_assign : push_variable_class new_object verify_and_allocate_object
 
         """
 
@@ -793,6 +797,13 @@ class Compiler(Publisher, Subscriber):
         execute_builtin_call :
         """
         (self._code_generator.execute_builtin_call())
+
+    def p_print_prompt(self, p):
+        """
+        print_prompt :
+        """
+        self._code_generator.push_operator(OperationType.PRINT)
+        self._code_generator.execute_builtin_call()
 
     def p_execute_priority_1(self, p):
         """
