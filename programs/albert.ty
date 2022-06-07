@@ -33,7 +33,7 @@ func new_dog() {
 func main() {
   var dog_a: Dog
    
-  
+  dog_a = new Dog()
   dog_a.name = new Name()
   dog_a.name.first = "chelo"
 
