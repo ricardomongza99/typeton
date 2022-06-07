@@ -3,4 +3,13 @@ func main() {
     age = input("What is Jason's age?")
     print("Jason's age is ")
     print(age)
+
+    print("")
+
+    var color: String
+    color = input("What is Jason's favorite color?")
+    print("Jason's favorite color is...")
+    print(color)
+
+    print("")
 }
