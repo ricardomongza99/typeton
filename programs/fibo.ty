@@ -2,13 +2,31 @@ func fib_r(n: Int) -> Int {
   if (n <= 1) {
       return n
   }
-  return fib_r(n-1) + fib_r(n-2)
+  return fib_r(n - 1) + fib_r(n - 2)
 }
 
-class Hello {
-    name: String
-}
+func fibo_array(n: Int) -> Int {
 
+  if (n > 100) {
+      print("n is too big")
+      return -1
+  }
+
+  var arr: Int[101]
+  var i: Int
+
+  i = 2
+  arr[0] = 0
+  arr[1] = 1
+
+  while (i <= n) {
+        arr[i] = arr[i - 1] + arr[i - 2]
+        i += 1
+  }
+
+  return arr[n]
+
+}
 // test fact
 func factorial_r(n: Int) -> Int {
     if (n == 0) {
@@ -62,24 +80,25 @@ func fib_i(n: Int) -> Int {
     return curr
 }
 
-
-
 func main() -> {
     var x : Int
     var y: Float
     var z: Int
     var a: Int
+    var f: Int
 
-    z = factorial_r(10)
-    a = factorial_i(10)
+    //z = factorial_r(10)
+    //a = factorial_i(10)
 
-    y = fib_r(20)
+    // y = fib_r(20)
+    f = fibo_array(20)
     x = fib_i(20)
 
-    print(z)
-    print(a)
-    duck()
+    // print(z)
+    // print(f)
+    // print(a)
+    // duck()
 
     print(x)
-    print(y)
+    print(f)
 }
