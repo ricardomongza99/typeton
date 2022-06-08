@@ -1,0 +1,25 @@
+{
+    "name": "typeton-lang",
+    "displayName": "typeton",
+    "description": "extension for own language",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.67.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "typeton",
+            "aliases": ["typeton", "typeton"],
+            "extensions": [".ty"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "typeton",
+            "scopeName": "source.typeton",
+            "path": "./syntaxes/typeton.tmLanguage.json"
+        }]
+    }
+}

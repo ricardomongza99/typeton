@@ -10,7 +10,7 @@ class Dog {
     age: Int
 }
 
-var x: Int
+var d : Int
 var y: Int
 var global_dog: Dog
 

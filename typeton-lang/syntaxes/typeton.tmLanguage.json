@@ -1,0 +1,130 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "typeton",
+	"patterns": [
+		{
+			"include": "#comments"
+		},
+		{
+			"include": "declarations"
+		},
+		{
+			"include": "#reserved"
+		},
+		{
+			"include": "#functions"
+		},
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#types"
+		},
+		{
+			"include": "#variables"
+		}
+	],
+	"repository": {
+		"reserved": {
+			"patterns": [
+				{
+					"name": "storage.type.typeton",
+					"match": "const|var|func|class|new"
+				}
+			]
+		},
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.double-slash.typeton",
+					"begin": "//",
+					"end": "\n",
+					"patterns": [
+						{
+							"match": "\\b(//)\\b"
+						}
+					]
+				},
+				{
+					"name": "comment.block.typeton",
+					"begin": "/\\*",
+					"end": "\\*/",
+					"patterns": [
+						{
+							"include": "#block_comment"
+						}
+					]
+				}
+			]
+		},
+		"functions": {
+			"patterns": [
+				{
+					"name": "entity.name.function.typeton",
+					"match": "([a-zA-Z_0-9]*)\\((.*?)\\)",
+					"captures": {
+						"0": {
+							"name": "variable.parameter.typeton"
+						},
+						"1": {
+							"name": "support.function.typeton"
+						}
+					}
+				}
+			]
+		},
+		"declaration": {
+			"patterns": [
+				{
+					"name": "entity.name.variable.typeton",
+					"match": "\\b([a-z_0-9]*)\\b"
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "entity.name.variable.typeton",
+					"match": "([a-z][A-Za-z0-9_]+)"
+				}
+			]
+		},
+		"keywords": {
+			"patterns": [
+				{
+					"name": "keyword.control.typeton",
+					"match": "\\b(if|while|return)\\b"
+				},
+				{
+					"name": "keyword.operator.typeton",
+					"match": "\\b(./*|./-|\/|./+|./&&)\\b"
+				},
+				{
+					"name": "keyword.other.typeton",
+					"match": "\\b(true|false)\\b"
+				}
+			]
+		},
+		"types": {
+			"patterns": [
+				{
+					"name": "support.type.typeton",
+					"match": "\\b(Int|Float|Bool|String|Char|Void)\\b"
+				},
+				{
+					"name": "support.type.typeton",
+					"match": "([A-Z])([a-z0-9_]+)"
+				}
+			]
+		}
+	},
+	"builtin": {
+		"patterns": [
+			{
+				"name": "support.function.typeton",
+				"match": "\\b([a-z0-9_]+)\\b"
+			}
+		]
+	},
+	"scopeName": "source.typeton"
+}

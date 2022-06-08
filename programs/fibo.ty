@@ -65,7 +65,7 @@ func fib_i = (n: Int) -> Int {
 
 
 func main = () -> {
-    var x: Int
+    var x : Int
     var y: Float
     var z: Int
     var a: Int
