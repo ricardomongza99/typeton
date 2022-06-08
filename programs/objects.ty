@@ -60,15 +60,11 @@ func main() -> {
 
   son = grandpa
 
-  while (son.age < 5000) {
-    son.age += 1
-    dad = new Dog()
-    print(son.age)
-    delete dad
-  }
 
 
-  print(grandpa.age)
+  var x: Int
+
+  x = son.name
   
   
 

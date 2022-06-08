@@ -9,6 +9,7 @@ from src.compiler.code_generator.type import Operand, Operator, FunctionTableEve
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.symbol_table.constant_table.constant_table import ConstantTable
+from src.compiler.symbol_table.function_table.function_table import PRIMITIVE_TYPES
 from src.compiler.validation.type_check import type_check as check_type
 from src.utils.debug import Debug
 from src.utils.observer import Publisher, Event, Subscriber
@@ -134,6 +135,14 @@ class ExpressionActions(Publisher, Subscriber):
         right = self.next_operand()
         left = self.next_operand()
 
+        right_pointer = self.pointer_types.get(right.address)
+        left_pointer = self.pointer_types.get(left.address)
+
+        if right_pointer is not None and type(right_pointer) is not str:
+            right.type_ = right_pointer
+        if left_pointer is not None and type(left_pointer) is not str:
+            left.type_ = left_pointer
+
         type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
 
         if type_match is None:
@@ -141,7 +150,7 @@ class ExpressionActions(Publisher, Subscriber):
                 f'{address_map[left.address]}:'
                 f'{left.type_.value} '
                 f'{operator.type_.value} '
-                f'{address_map[right.address]} '
+                f'{right.type_.value} '
                 f'({left.type_.value} and {right.type_.value} are not compatible)')))
 
         if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
@@ -315,14 +324,23 @@ class ExpressionActions(Publisher, Subscriber):
         left: Operand = self.next_operand()
 
         address_map = Debug.map()
+
+        right_pointer = self.pointer_types.get(right.address)
+        left_pointer = self.pointer_types.get(left.address)
+
+        if right_pointer is not None and type(right_pointer) is not str:
+            right.type_ = right_pointer
+        if left_pointer is not None and type(left_pointer) is not str:
+            left.type_ = left_pointer
+
         type_match = check_type(operator.type_.value, left.type_.value, right.type_.value)
 
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Type Mismatch: cannot perform action: '
-                f'{address_map[left.address]} '
+                f'{left.type_.value} '
                 f'{operator.type_.value} '
-                f'{address_map[right.address]}')))
+                f'{right.type_.value}')))
 
         if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
             # if pointer aritmetric get their type

@@ -81,17 +81,6 @@ _assign_combinations = [
 
     ['Pointer', 'Pointer', 'Pointer'],
 
-    ['Pointer', 'Int', 'Int'],
-    ['Pointer', 'String', 'String'],
-    ['Pointer', 'Float', 'Float'],
-    ['Pointer', 'Float', 'Float'],
-    ['Pointer', 'Int', 'Float'],
-    ['Pointer', 'Bool', 'Bool'],
-    ['Pointer', 'Bool', 'Bool'],
-    ['Pointer', 'Int', 'Int'],
-    ['Pointer', 'Float', 'Float'],
-    ['Pointer', 'String', 'String'],
-    ['Pointer', 'Int', 'Int'],
 
 
 

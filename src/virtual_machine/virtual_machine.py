@@ -233,6 +233,8 @@ class VirtualMachine(Subscriber):
         type_ = self.context_memory[-1].get_type(quad.result_address)
         result = 0
 
+        if left is None or right is None:
+            self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Cannot perform operation on uninitialised values'))
         if quad.operation is OperationType.ADD:
             result = _execute_typed_add(type_, left, right)
         if quad.operation is OperationType.SUBTRACT:

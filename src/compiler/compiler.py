@@ -400,6 +400,7 @@ class Compiler(Publisher, Subscriber):
         resolve_object :
         """
         self._code_generator.object_actions.resolve()
+        self.p_push_operator(')')
 
     def p_other_assing(self, p):
         """
@@ -489,6 +490,7 @@ class Compiler(Publisher, Subscriber):
         push_object :
         """
         self._code_generator.object_actions.set_parse_type(0)
+        self.p_push_operator('(')
 
         variable = self._symbol_table.function_table.get_variable(p[-1])
         if variable.class_id is None:

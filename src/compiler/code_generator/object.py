@@ -64,6 +64,9 @@ class ObjectActions(Publisher):
             Operand(ValueType.POINTER, variable.address_, class_id=variable.class_id, is_class_param=True))
 
         self.count = 0
+        self.pointer_types[variable.address_] = variable.type_
+        if variable.class_id is not None:
+            self.pointer_types[variable.address_] = variable.class_id
 
     def resolve_object_assignment(self):
         self.count += 1
@@ -129,9 +132,6 @@ class ObjectActions(Publisher):
         self.pointer_types[property_pointer] = property_data.type_
         if property_data.class_id is not None:
             self.pointer_types[property_pointer] = property_data.class_id
-
-    def get_object(self):
-        self.resolve()
 
     def allocate_heap(self):
         object: Class = self.class_stack.pop()
