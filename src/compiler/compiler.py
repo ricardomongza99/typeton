@@ -659,7 +659,7 @@ class Compiler(Publisher, Subscriber):
                  | BOOLLIT   add_constant
                  | string
                  | call add_call_operator
-                 | call_array
+                 | call_array 
                  | constant2
                  | constant_object resolve_object
         """
@@ -894,6 +894,8 @@ class Compiler(Publisher, Subscriber):
         """
         push_dimensions :
         """
+
+        self.p_push_operator('(')
         # TODO: Clean this mess
         operand = self._code_generator.peak_operand()
         variable = self._symbol_table.function_table.get_id(operand.address)
@@ -923,6 +925,7 @@ class Compiler(Publisher, Subscriber):
         get_array_pointer :
         """
         self._code_generator.get_array_pointer(self._symbol_table.function_table)
+        self.p_push_operator(')')
 
     # -- ERROR -----------------------
 
