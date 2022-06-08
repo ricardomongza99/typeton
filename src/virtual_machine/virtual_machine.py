@@ -1,20 +1,31 @@
+from enum import Enum
 from operator import le
+import sys
 import timeit
+from turtle import right
 from typing import List, Dict
 
 import jsonpickle
+from src.virtual_machine.heap_memory import Heap, RuntimeActions
 
 from src.compiler.stack_allocator.types import ValueType
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
-from src.virtual_machine.types import ContextMemory, FunctionData, ObjectHeap, pure_address
+from src.utils.observer import Event, Subscriber
+from src.virtual_machine.types import ContextMemory, FunctionData, pure_address
 
 EXPRESSIONS = {OperationType.ADD, OperationType.DIVIDE,
                OperationType.MULTIPLY, OperationType.SUBTRACT}
 
 POINTER_EXPRESSIONS = {
-    OperationType.POINTER_ADD
+    OperationType.POINTER_ADD,
+    OperationType.DELETE_REF
+}
+
+ARRAYS = {
+    OperationType.VERIFY,
+    OperationType.ARRAY_ADD
 }
 
 BOOLEAN_EXPRESSIONS = {
@@ -35,7 +46,8 @@ JUMPS = {
 }
 
 BUILT_IN = {
-    OperationType.PRINT
+    OperationType.PRINT,
+    OperationType.INPUT
 }
 
 FUNCTIONS = {
@@ -66,8 +78,9 @@ def _execute_typed_add(result_type: ValueType, left_value, right_value):
     return int(left_value) + int(right_value)
 
 
-class VirtualMachine:
+class VirtualMachine(Subscriber):
     def __init__(self):
+        super().__init__()
         self._ip = 0  # instruction pointer
         self.operation_count = 0
 
@@ -75,13 +88,19 @@ class VirtualMachine:
         self._quads: Quad = None
         self._function_data: Dict[str, FunctionData] = {}
         self.pending_return = []
-        self.object_heap = None
+        self.object_heap: Heap = None
 
         self._memory = {}
         self.context_memory: List[ContextMemory] = []
         self.context_pending_assigment = []
         self.context_jump_locations = []
         self.global_memory = None
+
+    def handle_event(self, event: Event):
+        if event.type_ == RuntimeActions.STOP_RUNTIME:
+            print()
+            print(f'💀 Runtime Error: {event.payload}')
+            self._stop()
 
     def __init_global_function(self):
         size_data = self._function_data["global"].size_data
@@ -96,7 +115,7 @@ class VirtualMachine:
         self.context_memory.append(
             ContextMemory(self._function_data["main"].size_data, self._constant_table, self.global_memory, self.object_heap))
 
-        self._ip = self._function_data['main'].start_quad
+        self._ip = 0
 
         print('🦭🦭🦭typeton🦭🦭🦭')
 
@@ -120,7 +139,8 @@ class VirtualMachine:
             keys=True
         )
 
-        self.object_heap = ObjectHeap(compiled_program.heap_start)
+        self.object_heap = Heap(compiled_program.heap_start)
+        self.object_heap.add_subscriber(self, {})
 
         # Note: Keys are turned into strings for dictionaries when using JSON decode
         self._constant_table = compiled_program.constant_table
@@ -133,12 +153,15 @@ class VirtualMachine:
     def _execute(self, quad):
         operation = quad.operation
 
-        # quad.display(0)
+        # quad.display(self._ip)
 
         if operation in POINTER_EXPRESSIONS:
             self.__pointer_expression(quad)
         elif operation in EXPRESSIONS:
             self.__execute_expression(quad)
+
+        elif operation in ARRAYS:
+            self.__execute_array_call(quad)
         elif operation in BOOLEAN_EXPRESSIONS:
             self.__execute_boolean_expression(quad)
         elif operation in JUMPS:
@@ -150,34 +173,42 @@ class VirtualMachine:
         elif operation is OperationType.POINTER_ASSIGN:
             self.__execute_pointer_assign(quad)
             self._ip += 1
-        # elif operation is OperationType.POINTER_ASSIGN:
-        #     self.__execute_assing(quad.result_address, quad.left_address)
-        #     self._ip += 1
+
         elif operation is OperationType.ASSIGN:
             self.__execute_assign(quad.result_address,
                                   self._get_value(quad.left_address))
             self._ip += 1
+
+        elif operation is OperationType.END_GLOBAL:
+            self.go_to_main()
         else:
             print(f'Unknown Command {quad.operation}')
             self._ip = len(self._quads) + 1
 
     # -- EXECUTION methods  ----------------------------
 
+    def go_to_main(self):
+        self._ip = self._function_data['main'].start_quad
+
     def _stop(self):
         self._ip = len(self._quads) + 1
+        sys.exit()
 
     def _execute_typed_divide(self, result_type, left_value, right_value):
-        if right_value == 0:
-            print(f'Divide by 0 at {left_value} / 0')
-            return self._stop()
+        if right_value == 0 or left_value == 0:
+            self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Division by zero'))
 
         if result_type is ValueType.INT:
             return int(int(left_value) / int(right_value))
         return float(left_value) / float(right_value)
 
     def __pointer_expression(self, quad):
-        if quad.operation is OperationType.POINTER_ADD:
 
+        if quad.operation is OperationType.DELETE_REF:
+            heap_ref = quad.result_address
+            self.context_memory[-1].release_reference(heap_ref)
+
+        elif quad.operation is OperationType.POINTER_ADD:
             action_left, p_left = pure_address(quad.left_address)
             action_right, p_right = pure_address(quad.right_address)
 
@@ -186,20 +217,15 @@ class VirtualMachine:
             if action_right is not None:
                 p_right = self._get_value(quad.right_address)
 
-            if p_left is None:
-                print(
-                    f'Null Pointer Exception, object param called before intialization {quad.left_address}')
-                return self._stop()
-            if p_right is None:
-                print(
-                    f'Null Pointer Exception, object param called before intialization {quad.right_address}')
-                return self._stop()
+            # print("left:", p_left, "right:", p_right)
 
-            result = _execute_typed_add(
-                ValueType.INT, p_left, p_right)
+            if p_left is None or p_right is None:
+                self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'NULL pointer exception'))
+
+            result = _execute_typed_add(ValueType.INT, p_left, p_right)
+            self.__execute_assign(quad.result_address, result)
 
         self._ip += 1
-        self.__execute_assign(quad.result_address, result)
 
     def __execute_expression(self, quad):
         left = self._get_value(quad.left_address)
@@ -218,6 +244,20 @@ class VirtualMachine:
 
         self._ip += 1
         self.__execute_assign(quad.result_address, result)
+
+    def __execute_array_call(self, quad):
+        left = self._get_value(quad.left_address)
+        result = self._get_value(quad.result_address)
+
+        if quad.operation == OperationType.VERIFY:
+            if not(0 <= left < result):
+                self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Array Index out of range'))
+        elif quad.operation is OperationType.ARRAY_ADD:
+            value = _execute_typed_add(ValueType.INT, quad.left_address, self._get_value(quad.right_address))
+            action, addr = pure_address(quad.result_address)
+            self.context_memory[-1].save_reference(addr, value)
+
+        self._ip += 1
 
     def __execute_boolean_expression(self, quad):
         left = self._get_value(quad.left_address)
@@ -245,6 +285,21 @@ class VirtualMachine:
     def __execute_builtin_function(self, quad):
         if quad.operation is OperationType.PRINT:
             print(self._get_value(quad.result_address))
+        elif quad.operation is OperationType.INPUT:
+            result = input()
+            type_ = self.context_memory[-1].get_type(quad.result_address)
+
+            if type_ is ValueType.INT or type_ is ValueType.FLOAT:
+                if not result.isnumeric():
+                    self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Invalid input'))
+
+                if type_ == ValueType.INT:
+                    result = int(result)
+                elif type_ == ValueType.FLOAT:
+                    result = float(result)
+
+            self.__execute_assign(quad.result_address, result)
+
         self._ip += 1
 
     def __execute_jump(self, quad):
@@ -291,13 +346,19 @@ class VirtualMachine:
             self.context_memory[-1].save(quad.result_address, return_value)
             self._ip += 1
 
+    def __allocate_heap_memory(self, size):
+        return self.object_heap.allocate_reference(size)
+
     def __execute_pointer_assign(self, quad):
-        action_left, p_left = pure_address(quad.left_address)
-        action_res, p_res = pure_address(quad.result_address)
 
-        if action_left is not None:
-            p_left = self._get_value(quad.left_address)
+        if quad.left_address is OperationType.ALLOCATE_HEAP:
+            p_left = self.__allocate_heap_memory(quad.right_address)
+        else:
+            action_left, p_left = pure_address(quad.left_address)
+            if action_left is not None:
+                p_left = self._get_value(quad.left_address)
 
+        action_res, _ = pure_address(quad.result_address)
         if action_res is not None:
             self.__execute_object_parameter_assign(quad.result_address, p_left)
             return
@@ -305,8 +366,7 @@ class VirtualMachine:
         if p_left == -1:
             p_left = None
 
-        self.context_memory[-1].save_reference(
-            quad.result_address, p_left)
+        self.context_memory[-1].save_reference(quad.result_address, p_left)
 
     def __execute_object_parameter_assign(self, address, value):
         self.context_memory[-1].save(address, value)

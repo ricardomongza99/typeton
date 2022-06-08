@@ -132,7 +132,7 @@ def t_STRINGLIT(t):
     # [^"] = Every character except "
     r'\"[^"]*\"'
     t.type = 'STRINGLIT'
-    t.value = t.value  # remove quotes
+    t.value = t.value[1:-1]  # remove quotes
     return t
 
 

@@ -4,6 +4,10 @@ from src.compiler.stack_allocator.types import ValueType
 
 
 class OperationType(Enum):
+    ALLOCATE_HEAP = 'allocateheap'
+    END_GLOBAL = 'endglobal'
+    ARRAY_ADD = 'arrayadd'
+    DELETE_REF = 'deleteref'
     CALL_ASSIGN = 'callassign'
     POINTER_ADD = 'pointeradd'
     PARAM = 'param'
@@ -39,12 +43,23 @@ class OperationType(Enum):
     MASSIGN = '*='
     POINTER_ASSIGN = '&='
     VERIFY = 'verify'
+    INPUT = 'input'
+
+
+class FunctionTableEvents(Enum):
+    ADD_TEMP = 0
 
 
 class Operator:
     def __init__(self, priority: int, type_: OperationType):
         self.priority = priority
         self.type_ = type_
+
+
+class Dimension:
+    def __init__(self, size_address, m_address=None):
+        self.size_address = size_address
+        self.m_address = m_address
 
 
 class Operand:

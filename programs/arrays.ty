@@ -1,0 +1,64 @@
+var arr: Int[20][20]
+
+func find(x: Int) -> Bool {
+    var i: Int
+    var j: Int
+    i = 0
+    j = 0
+
+    while (i < 20) {
+       j = 0
+       while (j < 20) {
+            if (x == arr[i][j]) {
+                return true
+            }
+            j += 1
+       }
+       i += 1
+   }
+   
+    return false
+    
+}
+
+func main() {
+
+   var i: Int
+   var j: Int
+   var found: Bool
+   i = 0
+   j = 0
+
+   while (i < 20) {
+       j = 0
+       while (j < 20) {
+            arr[i][j] = 25
+            j += 1
+       }
+       i += 1
+   }
+
+    i = 0
+    while (i < 20) {
+       j = 0
+       while (j < 20) {
+            print(arr[i][j])
+            j += 1
+       }
+       i += 1
+   }
+
+   found = find(50)
+   print(found)
+
+
+
+
+
+  
+
+  
+
+
+
+}

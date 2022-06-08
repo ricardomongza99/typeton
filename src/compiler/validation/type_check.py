@@ -52,7 +52,10 @@ _comparison_combinations = [
     ['Float', 'Float', 'Bool'],
     ['Int', 'Float', 'Bool'],
     ['Float', 'Int', 'Bool'],
-    ['Return', 'Int', 'Int']
+    ['Pointer', 'Int', 'Bool'],
+    ['Pointer', 'Float', 'Bool'],
+    ['Int', 'Pointer', 'Bool'],
+    ['Float', 'Pointer', 'Bool'],
 
 
 ]

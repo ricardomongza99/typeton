@@ -43,7 +43,8 @@ class VariableTable:
 
         sizes = [dim_data.size for dim_data in dim_data_list]
         size = math.prod(sizes)
-        memory.allocate_space(self.current_variable.type_, layer, size)
+
+        return size
 
     def set_type(self, type_, layer: Layers, memory: StackAllocator, class_id):
         """ Sets current var type """

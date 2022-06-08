@@ -48,12 +48,17 @@ class Segment:
         self.end = 0
         self.resources = {}
 
+    def reset(self):
+        for resource in self.resources.values():
+            resource.reset()
+
 
 def get_segment(address, segments):
     for key in segments:
         segment = segments[key]
         if segment.start <= address <= segment.end:
             return segment
+    return
 
 
 def is_segment(address, segments, type_: Layers):
@@ -78,6 +83,7 @@ def init_types(memory_types: List[MemoryType], is_runtime: bool):
         segment = Segment(type_=layer)
         segment.start = current_start
         for memory_type in memory_types:
+
             new_end = current_start + memory_type.size
             # Only take what we need
             if is_runtime:
@@ -85,6 +91,9 @@ def init_types(memory_types: List[MemoryType], is_runtime: bool):
             else:
                 resource = TypeResource(
                     current_start, new_end, memory_type.type)
+
+            if memory_type.type == ValueType.POINTER and segment.type_ is Layers.CONSTANT:
+                continue
 
             segment.resources[memory_type.type.value] = resource
             current_start = new_end + 1

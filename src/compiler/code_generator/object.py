@@ -1,11 +1,10 @@
 from typing import List
 from unittest import result
 from weakref import ref
-from src.compiler.code_generator.expression import ExpressionActions, ExpressionEvents
-from src.compiler.code_generator.type import Operand, OperationType, Quad
+from src.compiler.code_generator.expression import ExpressionActions
+from src.compiler.code_generator.type import FunctionTableEvents, Operand, OperationType, Quad
 from src.compiler.errors import CompilerError, CompilerEvent
 
-from src.compiler.heap_allocator.index import HeapAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.types import ValueType
@@ -20,10 +19,11 @@ Conditional semantic actions
 
 
 class ObjectActions(Publisher):
-    def __init__(self, quad_list, operand_list, heap_allocator: HeapAllocator, stack_allocator: StackAllocator, pointer_types, classes):
+    def __init__(self, quad_list, operand_list, stack_allocator: StackAllocator, pointer_types, classes):
         super().__init__()
         self.pointer_types = pointer_types
         self.parse_type = 0
+        self.property_parent = None
         self.variable_stack: List[Variable] = []
         self.class_stack = []
         self.object_property_stack = []
@@ -33,7 +33,6 @@ class ObjectActions(Publisher):
         self.operand_list = operand_list
         self.quad_list = quad_list
         self.stack_allocator = stack_allocator
-        self.heap_allocator = heap_allocator
 
     # def push_variable(self, var):
 
@@ -43,16 +42,7 @@ class ObjectActions(Publisher):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{variable.id_} is not a freeable variable')))
 
-        if variable.initialized is False:
-            self.broadcast(
-                Event(
-                    CompilerEvent.STOP_COMPILE,
-                    CompilerError(f'object {variable.id_} has not been initialized')
-                )
-            )
-
-        end = self.heap_allocator.free_reference(variable.reference)
-        q = Quad(OperationType.POINTER_ASSIGN, -1, end, variable.address_)
+        q = Quad(OperationType.DELETE_REF, result_address=variable.address_)
         self.quad_list.append(q)
 
     def set_parse_type(self, parse_type):
@@ -94,7 +84,7 @@ class ObjectActions(Publisher):
 
         property_pointer = self.stack_allocator.allocate_address(
             ValueType.POINTER, Layers.TEMPORARY)
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (ValueType.POINTER, property_pointer, property_data.class_id)))
+        self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (ValueType.POINTER, property_pointer, property_data.class_id)))
 
         if property_data.type_ == ValueType.POINTER:
             if self.count < 2:
@@ -159,14 +149,12 @@ class ObjectActions(Publisher):
                 )
             )
 
-        reference = self.heap_allocator.allocate_reference(variable.size)
         operand: Operand = self.operand_list.pop()
-        var.reference = reference
 
         if var.id_ is None:
             operand.address = f'*{operand.address}'
 
-        quad = Quad(OperationType.POINTER_ASSIGN, left_address=reference,
+        quad = Quad(OperationType.POINTER_ASSIGN, left_address=OperationType.ALLOCATE_HEAP, right_address=variable.size,
                     result_address=operand.address)
 
         self.quad_list.append(quad)

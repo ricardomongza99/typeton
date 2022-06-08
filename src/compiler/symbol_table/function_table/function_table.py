@@ -1,3 +1,4 @@
+from audioop import add
 from enum import Enum
 from typing import Dict
 
@@ -13,6 +14,7 @@ from src.utils.display import make_table, TableOptions
 from src.utils.observer import Subscriber, Event, Publisher
 from src.virtual_machine.types import FunctionData
 from .function import Function
+from ...code_generator.type import FunctionTableEvents
 
 
 class TypeContext(Enum):
@@ -22,7 +24,7 @@ class TypeContext(Enum):
 
 
 PRIMITIVE_TYPES = {ValueType.INT.value, ValueType.FLOAT.value,
-                   ValueType.STRING.value, ValueType.BOOL.value}
+                   ValueType.STRING.value, ValueType.BOOL.value, ValueType.POINTER.value}
 
 
 class FunctionTable(Publisher, Subscriber):
@@ -63,10 +65,10 @@ class FunctionTable(Publisher, Subscriber):
 
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
-        from src.compiler.code_generator.expression import ExpressionEvents
+        from src.compiler.code_generator.expression import ExpressionActions
         from src.compiler.code_generator.array import ArrayEvents
 
-        if event.type_ is ExpressionEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
+        if event.type_ is FunctionTableEvents.ADD_TEMP or event.type_ is ArrayEvents.ADD_TEMP:
             type_, address, class_id = event.payload
             self.__handle_add_temporal(type_, address, class_id)
         elif event.type_ is CompilerEvent.RELEASE_FUNCTION:
@@ -81,7 +83,6 @@ class FunctionTable(Publisher, Subscriber):
         var.address_ = address
         var.type_ = type
         var.class_id = class_id
-
         self.temporal_hash[address] = var
 
     def get_variable_by_address(self, address):
@@ -100,8 +101,12 @@ class FunctionTable(Publisher, Subscriber):
 
     def add(self, id_, quad_start: int):
         """ Add Func to `funcs` dictionary if not existent """
+        prev = self.current_function
+        if prev is not None and prev.id_ == 'global':
+            self.broadcast(Event(CompilerEvent.END_GLOBAL, None))
+            quad_start += 1
+
         if self.functions.get(id_) is None:
-            self.temporal_variables = []
             reference = Function(id_=id_)
             self.functions[id_] = reference
             self.current_function = reference
@@ -109,6 +114,7 @@ class FunctionTable(Publisher, Subscriber):
             # persistent for vm
             self.function_data_table[id_] = FunctionData(id_, quad_start)
             self.function_data_table[id_].type_ = ValueType.VOID
+
             return
 
         error = CompilerError(f'Function {id_} redeclared')
@@ -146,11 +152,12 @@ class FunctionTable(Publisher, Subscriber):
     def allocate_dimensions(self, memory: StackAllocator, constant_table):
         """ Allocates spaces for array (Moves pointer x spaces) """
         layer = Layers.GLOBAL if self.current_function.id_ == 'global' else Layers.LOCAL
-        self.current_function.allocate_dimensions(layer, memory, constant_table)
+        return self.current_function.allocate_dimensions(layer, memory, constant_table)
 
     def set_type(self, type_, memory: StackAllocator):
         """ Sets type for function, parameter or variable """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
+        print(type_, layer)
 
         if self._type_context == TypeContext.FUNCTION:
             self._set_function_type(type_)
@@ -208,7 +215,7 @@ class FunctionTable(Publisher, Subscriber):
                              "Id",
                              "Type",
                              "Quad Start",
-                             "Param Signature", "Int Count", "Float Count", "Bool Count", "String Count"],
+                             "Param Signature", "Int Count", "Float Count", "Bool Count", "String Count", "Pointer Count"],
                          map(
                              lambda fun: [
                                  fun[0],
@@ -223,8 +230,10 @@ class FunctionTable(Publisher, Subscriber):
                                      ValueType.BOOL).total,
                                  fun[1].size_data.get_data(
                                      ValueType.STRING).total,
+                                 fun[1].size_data.get_data(
+                                     ValueType.POINTER).total,
                              ],
-                             self.function_data_table.items()), TableOptions(25, 50)))
+                             self.function_data_table.items()), TableOptions(18, 30)))
 
         if debug:
             for id_, func in self.functions.items():
@@ -233,8 +242,6 @@ class FunctionTable(Publisher, Subscriber):
     def end_function(self):
         """ Releases Function From Directory and Virtual Memory"""
         self.__validate_return()
-        self.local_hash = {}
-        self.temporal_hash = {}
 
         # tell quad generator to generate end_func quad
         self.broadcast(Event(CompilerEvent.GEN_END_FUNC, None))
@@ -244,11 +251,14 @@ class FunctionTable(Publisher, Subscriber):
         for key in self.current_function.variables:
             delete_list.append(self.current_function.variables[key].address_)
 
-        for key in self.temporal_variables:
-            var = self.temporal_variables[key]
+        for key in self.temporal_hash:
+            var = self.temporal_hash[key]
             delete_list.append(var.address_)
 
-        self.broadcast(Event(CompilerEvent.FREE_MEMORY, delete_list))
+        print(self.current_function.id_)
+
+        self.broadcast(Event(CompilerEvent.FREE_MEMORY, None))
+        self.temporal_hash = {}
 
     def current_trace(self):
         return self.current_function.id_
@@ -263,6 +273,8 @@ class FunctionTable(Publisher, Subscriber):
         variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
             return variable_table[id_]
+
+        print(f'Variable {id_} not found')
 
         # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE,

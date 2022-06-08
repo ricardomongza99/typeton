@@ -1,0 +1,45 @@
+var x: Int[10]
+
+func fib_r(n: Int) -> Int {
+  if (n <= 1) {
+      return n
+  }
+  return fib_r(n-1) + fib_r(n-2)
+}
+
+
+func fib_i(n: Int) -> Int {
+    var curr: Int
+    var prev: Int
+    var temp: Int
+    var count: Int
+
+    count = 2
+    curr = 1
+    prev = 1
+
+    if (n < 2) {
+        return n
+    }
+
+    while (count < n) {
+        temp = curr + prev
+        prev = curr
+        curr = temp
+        count += 1
+    }
+
+    return curr
+}
+
+
+
+func main() {
+    var x: Int
+    var y: Int
+    y = fib_r(20)
+    x = fib_i(20)
+
+    print(x)
+    print(y)
+}

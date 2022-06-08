@@ -5,17 +5,13 @@ from typing import List
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.types import ValueType
-from src.compiler.code_generator.type import Operand, Operator
+from src.compiler.code_generator.type import Operand, Operator, FunctionTableEvents
 from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.symbol_table.constant_table.constant_table import ConstantTable
 from src.compiler.validation.type_check import type_check as check_type
 from src.utils.debug import Debug
 from src.utils.observer import Publisher, Event, Subscriber
-
-
-class ExpressionEvents(Enum):
-    ADD_TEMP = 0
 
 
 SHORTHAND = {
@@ -189,8 +185,16 @@ class ExpressionActions(Publisher, Subscriber):
 
         # validate pointer assignment
         elif left.type_ is ValueType.POINTER and right.type_ is not ValueType.POINTER:
-            type_ = self.pointer_types[left.address]
-            if right.type_ != type_:
+            if self.pointer_types[left.address] != right.type_:
+                self.broadcast(
+                    Event(
+                        CompilerEvent.STOP_COMPILE,
+                        CompilerError(
+                            f'({right.type_} cannot be assigned to {self.pointer_types[left.address]})')
+                    )
+                )
+        elif right.type_ is ValueType.POINTER and left.type_ is not ValueType.POINTER:
+            if left.type_ != self.pointer_values[right.type_]:
                 self.broadcast(
                     Event(
                         CompilerEvent.STOP_COMPILE,
@@ -234,7 +238,7 @@ class ExpressionActions(Publisher, Subscriber):
             ValueType(type_match), Layers.TEMPORARY)
         self.broadcast(
             Event(
-                ExpressionEvents.ADD_TEMP,
+                FunctionTableEvents.ADD_TEMP,
                 (type_match, temp_address, None)
             )
         )
@@ -302,7 +306,7 @@ class ExpressionActions(Publisher, Subscriber):
 
         self.broadcast(
             Event(
-                ExpressionEvents.ADD_TEMP, (function_return_type, address, None)
+                FunctionTableEvents.ADD_TEMP, (function_return_type, address, None)
             )
         )
 
@@ -332,12 +336,12 @@ class ExpressionActions(Publisher, Subscriber):
         self.__operand_address_stack.append(Operand(ValueType(type_match), result))
 
         # temps count towards function total size
-        self.broadcast(Event(ExpressionEvents.ADD_TEMP, (type_match, result, None)))
+        self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (type_match, result, None)))
 
         if stack_allocator.is_segment(left.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (left.type_, left.address, None)))
+            self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (left.type_, left.address, None)))
         if stack_allocator.is_segment(right.address, Layers.TEMPORARY):
-            self.broadcast(Event(ExpressionEvents.ADD_TEMP, (right.type_, right.address, None)))
+            self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (right.type_, right.address, None)))
 
         quad = (Quad(
             left_address=left.address,

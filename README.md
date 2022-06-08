@@ -3,7 +3,6 @@ An object oriented language developed by two rockstar engineering students at Te
 
 ## ⭐️ FEATURES
 - Local and global variables
-- Implicit types (detects primitives)
 - Shorthand assign operators (+=, -=, *=, /=)
 - String Interpolation
 - Arrays (with primitives)
@@ -11,7 +10,6 @@ An object oriented language developed by two rockstar engineering students at Te
 - Loops
 - Functions
 - Classes
-- Inheritance (one level)
 - Input/Output
 
 ## 🚗 GETTING STARTED
@@ -30,22 +28,23 @@ func main() {
 }
 ```
 
-**Variables**
+**Variable declaration**
 ```
-var myString: String = "Hello world!"
-var myNumber: Int = 5
-var myDog: Dog = Dog("Draco", 8)
+var myString: String
+var myNumber: Int
+var myDog: Dog
 ```
 
-**Implicit variables** (only for primitive types)
-```
-var myDecimal = 5.23
-```
 
 **Arrays**
 ```
-var items: [Int] = [1, 2, 3, 4, 5]
+var items: Int[10]
+items[0] = 1
+
+var Cube: Int[4][4][4]
+cube[1][2][3] = 10
 ```
+
 
 **Conditionals**
 ```
@@ -85,19 +84,14 @@ func main() {
 ```
 class Animal {
     // Declare properties
-    var name: String
-    var age: Int
-    
-    // Declare methods
-    func sleep() {
-        print("\(name) is sleeping")
-    }
+    name: String
+    age: Int
 }
 ```
 
 **Input**
 ```
-var userAge: Int = input()
+age = input("Enter age: ")
 ```
 
 **Output**
@@ -105,10 +99,6 @@ var userAge: Int = input()
 print(userAge)
 ```
 
-**String Interpolation**
-```
-print("You are \(userAge) years old!")
-```
 
 ## 👨‍💻 CODE EXAMPLES
 
@@ -116,63 +106,35 @@ print("You are \(userAge) years old!")
 **Program 1**: Iterate over an array of integers
 ```
 func main() {
-    var items: [Int] = [1, 2, 3, 4, 5]
-    var i = 0
-
-    while (counter < 10) {
+    var items: Int[5]
+    var i: Int
+    
+    i = 0
+    while (i < 5) {
+        items[i] = i + 10
+        i += 1
+    }
+    
+    i = 0
+    while (i < 5) {
         print(items[i])
         i += 1
     }
 }
 ```
 
-**Program 2**: Class inheritance
+**Program 2**: Input
 ```
-class Animal {
-    var name: String
-    var age: Int
-
-    func sleep() {
-        print("\(name) is sleeping")
-    }
-}
-
-class Dog: Animal {
-    var isBig: Bool
-
-    func bark() {
-        if (isBig) {
-            print("Wooff!")
-        } else {
-            print("wuf wuf")
-        }
-    }
-}
-
-class Cat: Animal {
-    
-    func meow() {
-        print("Meow")
-    }
-}
-
- 
 func main() {
-    var dog1 = Dog("Harold", 12, True)
-    var dog2 = Dog("Pinky", 5, False)
-    var cat = Cat("Tom", 6)
+    var age: Int
+    age = input("What is Jason's age?")
+    print("Jason's age is ")
+    print(age)
 
-    var animals: [Animal] = [dog1, dog2, cat]
-    
-    var existed: String = ""
-    if (dog1.age < dog2.age) {
-        existed = "younger"
-    } else {
-        existed = "older"
-    }
-    
-    print("\(dog1.name) is \(existed) than \(dog2.name)")
-
+    var color: String
+    color = input("What is Jason's favorite color?")
+    print("Jason's favorite color is...")
+    print(color)
 }
 ```
 
@@ -207,7 +169,9 @@ func main() {
 ![Program](/diagram/program.png)
 ![Top level](/diagram/top_level.png)
 ![Params](/diagram/params.png)
+![Type](/diagram/type.png)
 ![Blocks](/diagram/blocks.png)
+![Classes](/diagram/classes.png)
 ![Statements](/diagram/statements.png)
 ![Expressions](/diagram/expressions.png)
 ![Variables](/diagram/variables.png)

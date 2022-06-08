@@ -1,5 +1,7 @@
 # Stores Type Data
 from typing import List
+
+from src.compiler.code_generator.type import FunctionTableEvents
 from src.compiler.stack_allocator.helpers import get_available_address, init_types, Layers, get_resource, get_segment
 from src.compiler.stack_allocator.types import ValueType, DEFAULT_TYPES, MemoryType, TypeResource
 from src.compiler.errors import CompilerError, CompilerEvent
@@ -16,18 +18,19 @@ class StackAllocator(Publisher, Subscriber):
         if event.type_ is CompilerEvent.RELEASE_MEM_IF_POSSIBLE:
             self._release_memory_if_possible(event.payload)
         elif event.type_ is CompilerEvent.FREE_MEMORY:
-            self.release_address_list(event.payload)
+            self.release_local_addresses()
 
     def _release_memory_if_possible(self, address_list):
         for address in address_list:
             if self.is_segment(address, Layers.TEMPORARY):
                 self.release_address(address)
 
-    def release_address_list(self, delete_list):
-        for address in delete_list:
-            self.release_address(address)
+    def release_local_addresses(self):
+        self._segments[Layers.LOCAL.value].reset()
+        self._segments[Layers.TEMPORARY.value].reset()
 
     # Compilation
+
     def allocate_address(self, value_type: ValueType, layer: Layers):
         segment = self._segments[layer.value]
         resource: TypeResource = segment.resources[value_type.value]
@@ -56,7 +59,9 @@ class StackAllocator(Publisher, Subscriber):
             self.broadcast(Event(CompilerEvent.STOP_COMPILE,
                            CompilerError("Too many variables")))
 
-        resource.pointer += (size - 1)
+        for i in range(size):
+            self.broadcast(Event(FunctionTableEvents.ADD_TEMP, (value_type, resource.pointer, None)))
+            resource.pointer += 1
 
     def get_segment(self, address):
 
@@ -71,4 +76,5 @@ class StackAllocator(Publisher, Subscriber):
             return
         segment = self.get_segment(address)
         resource = get_resource(address, segment)
+        resource.pointer = resource.start
         resource.free_addresses_list.put(address)
