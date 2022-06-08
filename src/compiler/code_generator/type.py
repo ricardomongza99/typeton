@@ -19,6 +19,7 @@ class OperationType(Enum):
     EQUAL = '=='
     AND = '&&'
     OR = '||'
+    NOT_EQUAL = '!='
     LESS_THAN = '<'
     GREAT_THAN = '>'
     LESS_EQUAL = '<='

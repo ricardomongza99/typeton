@@ -1,8 +1,19 @@
 func main() -> {
-    var age: Int
-    age = input("What is Jason's age?")
-    print("Jason's age is ")
-    print(age)
+    var start: Int
+    start = input("What is Jason's age?")
+
+    while (start < 100) {
+        start += 1
+        print("jason is")
+        print(start)
+    }
+
+    if (start != 100) {
+        print("value was higher than 100")
+    } else {
+        print("value was lower than 100")
+    }
+
 
     print("")
 

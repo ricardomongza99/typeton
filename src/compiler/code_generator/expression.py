@@ -69,6 +69,7 @@ class ExpressionActions(Publisher, Subscriber):
         elif type_ in {OperationType.GREAT_THAN,
                        OperationType.EQUAL,
                        OperationType.LESS_THAN,
+                       OperationType.NOT_EQUAL,
                        OperationType.LESS_EQUAL,
                        OperationType.GREAT_EQUAL}:
             priority = 2
@@ -294,6 +295,9 @@ class ExpressionActions(Publisher, Subscriber):
     def __execute_function_return(self, type_: ValueType):
         operator = self.next_operator()
         return_expression = self.next_operand()
+
+        if return_expression.type_ is ValueType.POINTER:
+            return_expression.type_ = self.pointer_types[return_expression.address]
 
         if return_expression.type_ is not type_:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(

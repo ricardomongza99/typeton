@@ -36,7 +36,8 @@ BOOLEAN_EXPRESSIONS = {
     OperationType.EQUAL,
     OperationType.LESS_EQUAL,
     OperationType.GREAT_THAN,
-    OperationType.GREAT_EQUAL
+    OperationType.GREAT_EQUAL,
+    OperationType.NOT_EQUAL
 }
 
 JUMPS = {
@@ -280,6 +281,8 @@ class VirtualMachine(Subscriber):
             result = left <= right
         elif quad.operation is OperationType.GREAT_EQUAL:
             result = left >= right
+        elif quad.operation is OperationType.NOT_EQUAL:
+            result = left != right
 
         self._ip += 1
         self.__execute_assign(quad.result_address, result)
