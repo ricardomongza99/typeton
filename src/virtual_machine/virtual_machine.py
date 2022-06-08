@@ -297,8 +297,6 @@ class VirtualMachine(Subscriber):
                     result = int(result)
                 elif type_ == ValueType.FLOAT:
                     result = float(result)
-            else:
-                self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Invalid input type'))
 
             self.__execute_assign(quad.result_address, result)
 
