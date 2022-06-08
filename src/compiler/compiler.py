@@ -170,7 +170,7 @@ class Compiler(Publisher, Subscriber):
 
     def p_function(self, p):
         """
-        function : FUNC ID add_function ASSIGN params ARROW function_return_type init_block end_function
+        function : FUNC ID add_function params ARROW function_return_type init_block end_function
         """
 
     def p_declaration(self, p):
@@ -196,7 +196,10 @@ class Compiler(Publisher, Subscriber):
         """
         add_class_variable :
         """
-        self._symbol_table.class_table.current_class.add_variable(p[-1])
+        valid = self._symbol_table.class_table.current_class.add_variable(p[-1])
+        if not valid:
+            self.handle_event(Event(CompilerEvent.STOP_COMPILE,
+                                    CompilerError(f"Class property {p[-1]} redeclared")))
 
     def p_set_class_object_type(self, p):
         """

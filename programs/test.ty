@@ -1,7 +1,8 @@
-func test = () -> Int {
-    return 2
+func test() -> {
+
 }
 
-func main = () -> {
-    print(test())
+//hello my man
+func main() -> {
+    print("hello world")
 }

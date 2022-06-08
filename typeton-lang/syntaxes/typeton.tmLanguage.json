@@ -6,19 +6,16 @@
 			"include": "#comments"
 		},
 		{
-			"include": "declarations"
-		},
-		{
 			"include": "#reserved"
 		},
 		{
 			"include": "#functions"
 		},
 		{
-			"include": "#keywords"
+			"include": "#types"
 		},
 		{
-			"include": "#types"
+			"include": "#keywords"
 		},
 		{
 			"include": "#variables"
@@ -29,7 +26,25 @@
 			"patterns": [
 				{
 					"name": "storage.type.typeton",
-					"match": "const|var|func|class|new"
+					"match": "const|var|func|class|new|false|true"
+				},
+				{
+					"name": "keyword.control.typeton",
+					"match": "\\b(if|while|return)\\b"
+				},
+				{
+					"name": "constant.numeric.typeton",
+					"match": "\\b([0-9]+)\\b"
+				},
+				{
+					"name": "string.quoted.double",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"match": "\\\\."
+						}
+					]
 				}
 			]
 		},
@@ -60,48 +75,21 @@
 		"functions": {
 			"patterns": [
 				{
-					"name": "entity.name.function.typeton",
-					"match": "([a-zA-Z_0-9]*)\\((.*?)\\)",
-					"captures": {
-						"0": {
-							"name": "variable.parameter.typeton"
-						},
-						"1": {
-							"name": "support.function.typeton"
-						}
-					}
+					"name": "support.function.typeton",
+					"match": "([a-z][a-zA-Z_0-9]+|[a-z])\\("
 				}
 			]
 		},
 		"declaration": {
 			"patterns": [
 				{
-					"name": "entity.name.variable.typeton",
-					"match": "\\b([a-z_0-9]*)\\b"
-				}
-			]
-		},
-		"variables": {
-			"patterns": [
-				{
-					"name": "entity.name.variable.typeton",
-					"match": "([a-z][A-Za-z0-9_]+)"
-				}
-			]
-		},
-		"keywords": {
-			"patterns": [
-				{
-					"name": "keyword.control.typeton",
-					"match": "\\b(if|while|return)\\b"
-				},
-				{
-					"name": "keyword.operator.typeton",
-					"match": "\\b(./*|./-|\/|./+|./&&)\\b"
-				},
-				{
-					"name": "keyword.other.typeton",
-					"match": "\\b(true|false)\\b"
+					"name": "support.function.typeton",
+					"match": "([a-z]*).*?:+.*?([A-Z][a-z]*)+",
+					"captures": {
+						"1": {
+							"name": "entity.name.variable.typeton"
+						}
+					}
 				}
 			]
 		},
@@ -109,22 +97,24 @@
 			"patterns": [
 				{
 					"name": "support.type.typeton",
-					"match": "\\b(Int|Float|Bool|String|Char|Void)\\b"
+					"match": "\\b(Bool|Int|Float|String)\\b"
 				},
 				{
+					"begin": "\\b(class)\\b",
+					"end": "\\{",
 					"name": "support.type.typeton",
-					"match": "([A-Z])([a-z0-9_]+)"
+					"match": "[A-Z][a-zA-Z_0-9]*"
+				}
+			]
+		},
+		"variables": {
+			"patterns": [
+				{
+					"name": "entity.name.variable.typeton",
+					"match": "([a-z][A-Za-z0-9_]+|[a-z0-9_])"
 				}
 			]
 		}
-	},
-	"builtin": {
-		"patterns": [
-			{
-				"name": "support.function.typeton",
-				"match": "\\b([a-z0-9_]+)\\b"
-			}
-		]
 	},
 	"scopeName": "source.typeton"
 }

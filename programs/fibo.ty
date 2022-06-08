@@ -1,4 +1,4 @@
-func fib_r = (n: Int) => Int {
+func fib_r(n: Int) -> Int {
   if (n <= 1) {
       return n
   }
@@ -10,14 +10,14 @@ class Hello {
 }
 
 // test fact
-func factorial_r = (n: Int) -> Int {
+func factorial_r(n: Int) -> Int {
     if (n == 0) {
         return 1
     }
     return n * factorial_r(n - 1)
 }
 
-func factorial_i = (n: Int) -> Int {
+func factorial_i(n: Int) -> Int {
     // show me the way
     print("hello")
     var res: Int
@@ -32,13 +32,13 @@ func factorial_i = (n: Int) -> Int {
 }
 
 
-func duck = () -> Int {
+func duck() -> Int {
     return 2
 }
 
 
 
-func fib_i = (n: Int) -> Int {
+func fib_i(n: Int) -> Int {
     var curr: Int
     var prev: Int
     var temp: Int
@@ -64,7 +64,7 @@ func fib_i = (n: Int) -> Int {
 
 
 
-func main = () -> {
+func main() -> {
     var x : Int
     var y: Float
     var z: Int

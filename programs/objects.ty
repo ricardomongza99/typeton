@@ -15,7 +15,7 @@ var y: Int
 var global_dog: Dog
 
 
-func main() {
+func main() -> {
   var son: Dog
   var dad: Dog
   var grandpa: Dog

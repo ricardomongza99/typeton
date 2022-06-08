@@ -66,12 +66,11 @@ class Class:
 
     def add_variable(self, id_):
         if id_ in self.variables:
-            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                f'Variable {id_} already exists')))
-
+            return False
         self.variables[id_] = ClassVariable(id_, self.offset)
         self.current_variable = self.variables[id_]
         self.offset += 1
+        return True
 
     def set_type(self, type_: ValueType, class_id):
         self.current_variable.type_ = type_
