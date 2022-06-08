@@ -55,6 +55,7 @@ class VariableTable:
         self.current_variable.type_ = enum_value
         self.current_variable.class_id = class_id
         self.current_variable.address_ = address
+        self.current_variable.is_pending_type = False
         self.inverse_hash[address] = self.current_variable
 
         return self.current_variable.id_

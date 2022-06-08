@@ -1,5 +1,6 @@
 from src.compiler.code_generator.expression import Operand, Operator, OperationType, ValueType, Layers, FunctionTableEvents
 from src.compiler.code_generator.type import Quad
+from src.compiler.errors import CompilerError, CompilerEvent
 from src.compiler.stack_allocator.index import StackAllocator
 from src.utils.observer import Publisher, Event
 
@@ -22,6 +23,8 @@ class Builtin_Function_Actions(Publisher):
             self.execute_input(operands, stack_allocator)
 
     def execute_print(self, operator, operands):
+        if len(operands) == 0:
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(f'variable is not initialized')))
         expression: Operand = operands.pop()
 
         quad = Quad(operation=operator.type_.value, result_address=expression.address)

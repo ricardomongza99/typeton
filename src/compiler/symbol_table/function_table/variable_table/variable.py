@@ -21,6 +21,7 @@ class Variable:
         self.dim_data_list: List[DimData] = []    # stays empty if not array
         self.initialized = False
         self.array_type = None
+        self.is_pending_type = True
         self.references = []
         self.dimensions = []    # stays empty if not array
         self.isReturned = None

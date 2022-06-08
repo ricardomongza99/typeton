@@ -102,6 +102,11 @@ precedence = (
 )
 
 
+def t_COMMENT(t):
+    r'\/\/.*'
+    pass
+
+
 def t_BOOLLIT(t):
     r'true|false'
     t.type = "BOOLLIT"

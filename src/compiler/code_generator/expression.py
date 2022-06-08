@@ -287,7 +287,6 @@ class ExpressionActions(Publisher, Subscriber):
         return_expression = self.next_operand()
 
         if return_expression.type_ is not type_:
-            print(f'{return_expression.type_} != {type_}')
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Function return type validation failed: '
                 f'Should be {type_.value}, but is {return_expression.type_.value} instead')))

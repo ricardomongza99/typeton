@@ -162,10 +162,15 @@ class Compiler(Publisher, Subscriber):
         """
         self._symbol_table.class_table.end_class()
 
+    def p_function_return_type(self, p):
+        """
+        function_return_type : primitive
+                             | 
+        """
+
     def p_function(self, p):
         """
-        function : FUNC ID add_function params set_void init_block end_function
-                 | FUNC ID add_function params ARROW primitive init_block end_function
+        function : FUNC ID add_function ASSIGN params ARROW function_return_type init_block end_function
         """
 
     def p_declaration(self, p):
@@ -282,8 +287,15 @@ class Compiler(Publisher, Subscriber):
 
     def p_init_block(self, p):
         """
-        init_block : LCURLY init_block1 RCURLY
+        init_block : LCURLY check_function_type init_block1 RCURLY
         """
+
+    def p_check_function_type(self, p):
+        """
+        check_function_type :
+        """
+        if self._symbol_table.function_table.current_function.is_pending_type():
+            self._symbol_table.function_table.current_function.set_type("Void")
 
     def p_init_block1(self, p):
         """
@@ -349,7 +361,7 @@ class Compiler(Publisher, Subscriber):
         type_ = self._symbol_table.function_table.functions[id_].type_
         if type_ is not ValueType.VOID:
             print(
-                f'Warning, function {id_} returns {type_.value}, but is not unused')
+                f'Warning, function {id_} returns a {type_.value}, but is unused')
 
     def p_while(self, p):
         """
@@ -415,8 +427,6 @@ class Compiler(Publisher, Subscriber):
         push_variable_class :
         """
         operand: Operand = self._code_generator.peak_operand()
-        print(operand.address)
-
         var = self._symbol_table.function_table.get_id(address=operand.address)
 
         if var.class_id is None:
@@ -722,12 +732,6 @@ class Compiler(Publisher, Subscriber):
         self._symbol_table.function_table.add(
             p[-1], self._code_generator.get_next_quad())
 
-    def p_set_void(self, p):
-        """
-        set_void :
-        """
-        self._symbol_table.function_table.current_function.set_type("Void")
-
     def p_validate_return(self, p):
         """
         set_return :
@@ -782,14 +786,9 @@ class Compiler(Publisher, Subscriber):
         """
         set_type :
         """
-        id_ = self._symbol_table.function_table.set_type(
-            p[-1], self._allocator)
-        # if id_ is not None:
-        #    # TODO refactor
-        #     variable = self._symbol_table.function_table.get_variable(id_)
-        #     self._code_generator.push_variable(id_, variable.type_, variable.address_)
-
+        self._symbol_table.function_table.set_type(p[-1], self._allocator)
     # used to check on stack and execute quad operations
+
     def p_execute_priority_0(self, p):
         """
         execute_priority_0 :
@@ -924,7 +923,6 @@ class Compiler(Publisher, Subscriber):
     # -- ERROR -----------------------
 
     def p_error(self, p):
-        # self.display_debug()
 
         error_message = 'Syntax error'
         if p:

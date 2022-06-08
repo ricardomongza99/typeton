@@ -1,0 +1,7 @@
+func test = () -> Int {
+    return 2
+}
+
+func main = () -> {
+    print(test())
+}

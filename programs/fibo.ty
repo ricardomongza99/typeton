@@ -1,20 +1,25 @@
-var x: Int[10]
-
-func fib_r(n: Int) -> Int {
+func fib_r = (n: Int) => Int {
   if (n <= 1) {
       return n
   }
   return fib_r(n-1) + fib_r(n-2)
 }
 
-func factorial_r(n: Int) -> Int {
+class Hello {
+    name: String
+}
+
+// test fact
+func factorial_r = (n: Int) -> Int {
     if (n == 0) {
         return 1
     }
     return n * factorial_r(n - 1)
 }
 
-func factorial_i(n: Int) -> Int {
+func factorial_i = (n: Int) -> Int {
+    // show me the way
+    print("hello")
     var res: Int
     var i: Int
     i = 2
@@ -27,8 +32,13 @@ func factorial_i(n: Int) -> Int {
 }
 
 
+func duck = () -> Int {
+    return 2
+}
 
-func fib_i(n: Int) -> Int {
+
+
+func fib_i = (n: Int) -> Int {
     var curr: Int
     var prev: Int
     var temp: Int
@@ -52,15 +62,11 @@ func fib_i(n: Int) -> Int {
     return curr
 }
 
-func duck()  {
-    
-}
 
 
-
-func main() {
+func main = () -> {
     var x: Int
-    var y: Int
+    var y: Float
     var z: Int
     var a: Int
 
@@ -72,10 +78,8 @@ func main() {
 
     print(z)
     print(a)
+    duck()
 
     print(x)
     print(y)
-   
-
- 
 }

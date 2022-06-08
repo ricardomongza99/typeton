@@ -1,0 +1,9 @@
+func main = () => {
+    return 10
+}
+ 
+
+
+ func main = () => {
+    print("hello" world)
+ }5

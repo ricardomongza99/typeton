@@ -52,16 +52,12 @@ class FunctionTable(Publisher, Subscriber):
 
     @property
     def _type_context(self) -> TypeContext:
-        if self.current_function.is_pending_type():
-            variable = self.current_function.current_variable
-            if variable is None:
-                return
-            if variable.is_param and variable.type_ is None:
+        if self.current_function.is_pending_type() is True:
+            curr_variable = self.current_function.current_variable
+            if curr_variable is not None and curr_variable.is_param and curr_variable.is_pending_type is True:
                 return TypeContext.PARAM
-            else:
-                return TypeContext.FUNCTION
-        else:
-            return TypeContext.VARIABLE
+            return TypeContext.FUNCTION
+        return TypeContext.VARIABLE
 
     def handle_event(self, event: Event):
         """Receive all subscribed events here"""
@@ -162,6 +158,8 @@ class FunctionTable(Publisher, Subscriber):
         elif self._type_context == TypeContext.VARIABLE:
             id_ = self._set_variable_type(type_, layer, memory)
             return id_
+        else:
+            raise Exception("Invalid Type Context")
 
     def _set_function_type(self, type_):
         self.current_function.set_type(type_)
