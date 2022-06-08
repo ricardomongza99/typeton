@@ -14,56 +14,84 @@ var d : Int
 var y: Int
 var global_dog: Dog
 
+func test_array_with_delete() -> {
+  var heapArray: Int[100]
+  heapArray[0] = 1
+  delete heapArray
+}
+
+func test_array_with_memory_leak() -> {
+  var heapArray: Int[100]
+  heapArray[0] = 1
+}
+
 
 func main() -> {
   var son: Dog
   var dad: Dog
   var grandpa: Dog
    
-  son = new Dog()
-  son.name = new Name()
-  son.name.first = "son"
-  son.age = 20
+  // son = new Dog()
+  // son.name = new Name()
+  // son.name.first = "son"
+  // son.age = 20
 
 
-  dad = new Dog()
-  dad.name = new Name()
-  dad.name.first = "dad"
-  dad.age = son.age + 20
+  // dad = new Dog()
+  // dad.name = new Name()
+  // dad.name.first = "dad"
+  // dad.age = son.age + 20
 
 
-  grandpa = new Dog()
-  grandpa.name = new Name()
-  grandpa.name.first = "grandpa"
-  grandpa.age = dad.age + 20
+  // grandpa = new Dog()
+  // grandpa.name = new Name()
+  // grandpa.name.first = "grandpa"
+  // grandpa.age = dad.age + 20
 
 
-  son.parent = dad
-  dad.parent = grandpa
+
+  // son.parent = dad
+  // dad.parent = grandpa
 
 
-  var combinedAges: Int
+  // var combinedAges: Int
 
-  combinedAges = dad.age + son.age + grandpa.age
-  print(combinedAges)
+  // combinedAges = dad.age + son.age + grandpa.age
+  // print(combinedAges)
 
   
-  print(son.name.first)
-  print(dad.name.first)
-  print(grandpa.name.first)
+  // print(son.name.first)
+  // print(dad.name.first)
+  // print(grandpa.name.first)
 
-  print(son.parent.name.first)
+  // print(son.parent.name.first)
 
-  print(son.age)
-  print(dad.age)
-  print(grandpa.age)
+  // print(son.age)
+  // print(dad.age)
+  // print(grandpa.age)
 
-  son = grandpa
+  // son = grandpa
 
-  print(son.name.first)
+  // print(son.name.first)
 
 
   var x: Int
+  var limit: Int
+  x = 0
+
+  print("testing array without memory leak")
+  limit = input("Enter a limit: ")
+  while (x <= limit) {
+    test_array_with_delete()
+    x += 1
+  }
+
+  print("testing array with memory leak")
+  x = 0
+  while (x < limit) {
+    test_array_with_memory_leak()
+    x += 1
+  }
 
   
   

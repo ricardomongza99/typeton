@@ -38,7 +38,7 @@ class ObjectActions(Publisher):
 
     def free_heap_memory(self, variable: Variable):
 
-        if variable.class_id is None:
+        if variable.class_id is None and variable.array_type is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'{variable.id_} is not a freeable variable')))
 
