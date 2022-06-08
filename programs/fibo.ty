@@ -9,9 +9,9 @@ func fib_r(n: Int) -> Int {
 
 func factorial_r(n: Int) -> Int {
     if (n == 0) {
-        return 1;
+        return 1
     }
-    return n * factorial_r(n - 1);
+    return n * factorial_r(n - 1)
 }
 
 func factorial_i(n: Int) -> Int {
@@ -23,7 +23,7 @@ func factorial_i(n: Int) -> Int {
         res *= i
         i += 1
     }
-    return res;
+    return res
 }
 
 
@@ -52,8 +52,8 @@ func fib_i(n: Int) -> Int {
     return curr
 }
 
-func duck() {
-    print("hello")
+func duck()  {
+    
 }
 
 
@@ -75,6 +75,7 @@ func main() {
 
     print(x)
     print(y)
+   
 
-    x = duck()
+ 
 }

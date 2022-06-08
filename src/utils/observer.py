@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from typing import List
+from typing import Dict, List
 
 
 class Event:
@@ -21,7 +21,7 @@ class Publisher:
     """Class that wants to publish messages to subscribers implements this"""
 
     def __init__(self):
-        self.__subscribers: List[(Subscriber, {})] = []
+        self.__subscribers: List[(Subscriber, Dict)] = []
 
     def add_subscriber(self, subscriber: Subscriber, events):
         """enable subscriber to receive messages"""

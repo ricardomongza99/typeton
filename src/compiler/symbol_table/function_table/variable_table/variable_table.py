@@ -66,6 +66,5 @@ class VariableTable:
         return self.inverse_hash[address]
 
     def display(self, id_):
-        print("wtf main")
         print(make_table(id_ + ": Variables", ["ID", "TYPE", "ADDRESS"],
                          map(lambda fun: [fun[0], fun[1].type_.value, fun[1].address_], self.variables.items())))

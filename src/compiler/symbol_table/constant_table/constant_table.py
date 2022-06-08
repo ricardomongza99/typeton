@@ -1,17 +1,20 @@
 from typing import Dict
 
 import jsonpickle
+from src.compiler.errors import CompilerError, CompilerEvent
 
 from src.compiler.stack_allocator.index import StackAllocator
 from src.compiler.stack_allocator.helpers import Layers
 from src.compiler.stack_allocator.types import ValueType
 from src.utils.debug import Debug
 from src.utils.display import make_table
+from src.utils.observer import Event, Publisher
 from .constant import Constant
 
 
-class ConstantTable:
+class ConstantTable(Publisher):
     def __init__(self):
+        super().__init__()
         self.constants: Dict[str, Constant] = {}
         self.inverse_hash: Dict[int, any] = {}
 
@@ -28,9 +31,8 @@ class ConstantTable:
         elif type(value) is str:
             type_ = ValueType.STRING
         else:
-            print(value, 'doesnt exit')
-            # TODO error handling
-            return
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Unsupported type {type(value)}')))
 
         address = memory.allocate_address(type_, Layers.CONSTANT)
 
@@ -43,14 +45,13 @@ class ConstantTable:
 
     def get_from_address(self, address):
         if self.inverse_hash.get(address) is None:
-            # TODO error handling
-            return
+            self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                f'Address {address} does not exist')))
 
         return self.inverse_hash[address]
 
     def get_from_value(self, value):
         if self.constants.get(value) is None:
-            # TODO error handling
             return
 
         return self.constants[value]

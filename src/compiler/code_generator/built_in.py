@@ -29,7 +29,6 @@ class Builtin_Function_Actions(Publisher):
 
     def execute_input(self, operands, stack_allocator: StackAllocator):
         operand: Operand = operands[-1]
-        print(operand.address)
 
         temp_address = stack_allocator.allocate_address(operand.type_, Layers.TEMPORARY)
         quad = Quad(operation=OperationType.INPUT, result_address=temp_address)
@@ -44,4 +43,3 @@ class Builtin_Function_Actions(Publisher):
                 (operand.type_, temp_address, None)
             )
         )
-

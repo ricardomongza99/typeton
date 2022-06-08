@@ -26,11 +26,9 @@ class ArrayActions(Publisher):
         self._dimensions_stack: List[Dimension] = []
 
     def push_dimensions(self, dimensions):
-        print("push dimensions")
         self._dimensions_stack.extend(dimensions)
 
     def initialize_array(self, size, variable: Variable):
-        print("initialize array")
         """ Generates quad that initializes array """
         self.variable_type = variable.array_type
 
@@ -44,7 +42,6 @@ class ArrayActions(Publisher):
         self._quad_list.append(quad)
 
     def verify_dimensions(self):
-        print("verify dimensions")
         """ Generates verify quad """
         if not self._operand_stack:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
@@ -65,7 +62,6 @@ class ArrayActions(Publisher):
 
     def calculate_dimension(self, stack_allocator: StackAllocator):
         """ Creates quad that multiplies index by m """
-        print("calculate dimension")
 
         if not self._operand_stack:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError("Operand stack empty")))
@@ -89,7 +85,6 @@ class ArrayActions(Publisher):
         self._operand_stack.append(Operand(type_=ValueType.INT, address=result_address))
 
     def get_array_pointer(self, stack_allocator: StackAllocator, funcion_table):
-        print("get array pointer")
         # Error handling: missing indexes for array
         self._dimensions_stack.pop()
         # if self._dimensions_stack:
@@ -100,7 +95,6 @@ class ArrayActions(Publisher):
         self._generate_base_sum_quad(stack_allocator, funcion_table)
 
     def _generate_sum_quads(self, stack_allocator: StackAllocator):
-        print("generate sum quads")
         """ Generates sum quads for calculations indexes * ms """""
         while True:
             if len(self._operand_stack) <= 1:
@@ -144,7 +138,6 @@ class ArrayActions(Publisher):
         self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, pointer_address, None)))
 
         self._pointer_types[pointer_address] = self.variable_type
-        print('left_operand.type_', left_operand.type_)
 
         quad = Quad(
             operation=OperationType.POINTER_ADD,

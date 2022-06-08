@@ -137,7 +137,6 @@ class ContextMemory(Publisher):
         offset = address - type_data.start
         if segment.type_ is Layers.TEMPORARY:
             offset += self.size_data.get_data(type_data.type_).local
-            # print(offset)
 
         return offset
 

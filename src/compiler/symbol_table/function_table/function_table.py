@@ -142,9 +142,6 @@ class FunctionTable(Publisher, Subscriber):
             return
         self.local_hash[var.address_] = var
 
-    def end_class(self):
-        print('')
-
     def add_dimension(self, size):
         """ Adds dimension to current array """
         self.current_function.add_dimension(size)
@@ -157,7 +154,6 @@ class FunctionTable(Publisher, Subscriber):
     def set_type(self, type_, memory: StackAllocator):
         """ Sets type for function, parameter or variable """
         layer = Layers.GLOBAL if self.current_function.id_ == "global" else Layers.LOCAL
-        print(type_, layer)
 
         if self._type_context == TypeContext.FUNCTION:
             self._set_function_type(type_)
@@ -255,8 +251,6 @@ class FunctionTable(Publisher, Subscriber):
             var = self.temporal_hash[key]
             delete_list.append(var.address_)
 
-        print(self.current_function.id_)
-
         self.broadcast(Event(CompilerEvent.FREE_MEMORY, None))
         self.temporal_hash = {}
 
@@ -273,8 +267,6 @@ class FunctionTable(Publisher, Subscriber):
         variable_table = self.functions["global"].variables
         if variable_table.get(id_) is not None:
             return variable_table[id_]
-
-        print(f'Variable {id_} not found')
 
         # Could not find
         self.broadcast(Event(CompilerEvent.STOP_COMPILE,

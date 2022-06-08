@@ -6,9 +6,8 @@ from .function_table.variable_table import VariableTable
 from .global_table import GlobalTable
 
 
-class SymbolTable(Publisher):
+class SymbolTable:
     def __init__(self):
-        super().__init__()
         self.class_table = ClassTable()
 
         self.function_table = FunctionTable(self.class_table)

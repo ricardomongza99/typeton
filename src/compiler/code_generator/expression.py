@@ -53,7 +53,6 @@ class ExpressionActions(Publisher, Subscriber):
         if last_operator is not None and last_operator.priority == priority:
             if priority == 0:
                 if last_operator.type_ in SHORTHAND:
-                    print("short_hand")
                     return self.execute_shorthand_assign(stack_allocator)
                 return self.__execute_assign()
             return self.__execute_arithmetic(stack_allocator)
@@ -146,8 +145,6 @@ class ExpressionActions(Publisher, Subscriber):
                 f'({left.type_.value} and {right.type_.value} are not compatible)')))
 
         if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
-            print(left.class_id, left.address, right.class_id, right.address, "class_id")
-
             left_class = self.pointer_types.get(left.address) if left.class_id is None else left.class_id
             right_class = self.pointer_types.get(right.address) if right.class_id is None else right.class_id
 
@@ -174,7 +171,6 @@ class ExpressionActions(Publisher, Subscriber):
                 else:
                     right.address = f'&{right.address}'
 
-                print("classes are equal")
                 quad = Quad(
                     left_address=right.address,
                     right_address=None,
@@ -291,6 +287,7 @@ class ExpressionActions(Publisher, Subscriber):
         return_expression = self.next_operand()
 
         if return_expression.type_ is not type_:
+            print(f'{return_expression.type_} != {type_}')
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Function return type validation failed: '
                 f'Should be {type_.value}, but is {return_expression.type_.value} instead')))

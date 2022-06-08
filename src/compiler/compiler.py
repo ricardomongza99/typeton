@@ -58,16 +58,15 @@ class Compiler(Publisher, Subscriber):
         self.add_subscriber(self._code_generator.function_actions, {})
         self.add_subscriber(self._symbol_table.function_table, {})
 
-        # subscribe compiler to error messages
         self._allocator.add_subscriber(self._symbol_table.function_table, {})
-        self._allocator.add_subscriber(self, {CompilerEvent.STOP_COMPILE})
 
-        self._code_generator.expression_actions.add_subscriber(
-            self, {CompilerEvent.STOP_COMPILE})
-        self._symbol_table.function_table.add_subscriber(
-            self, {CompilerEvent.STOP_COMPILE})
-        self._code_generator.object_actions.add_subscriber(
-            self, {CompilerEvent.STOP_COMPILE})
+        # subscribe compiler to error messages
+        self._allocator.add_subscriber(self, {})
+        self._code_generator.expression_actions.add_subscriber(self, {})
+        self._symbol_table.class_table.add_subscriber(self, {})
+        self._symbol_table.constant_table.add_subscriber(self, {})
+        self._symbol_table.function_table.add_subscriber(self, {})
+        self._code_generator.object_actions.add_subscriber(self, {})
 
         self.syntax_error = None
 
@@ -434,8 +433,6 @@ class Compiler(Publisher, Subscriber):
         """
         class_data = self._symbol_table.class_table.get_class(p[-1])
         if class_data is None:
-            print(f'Class {p[-1]} does not exist')
-            print('Error, class does not exist')
             self.handle_event(
                 Event(CompileError, f'Class {p[-1]} does not exist'))
 
@@ -547,7 +544,6 @@ class Compiler(Publisher, Subscriber):
             self._symbol_table.function_table.current_function_call_id_].parameter_signature)
 
         if param_count + 1 != signature_len and (signature_len != 0 and param_count == 0):
-            print(param_count, signature_len)
             self.handle_event(Event(CompilerEvent.STOP_COMPILE, CompilerError(
                 f'Function Call Parameter Mistmatch {param_count} != {signature_len}')))
 
@@ -769,7 +765,6 @@ class Compiler(Publisher, Subscriber):
         """
         add_dimension :
         """
-        print(p[-2])
         self._symbol_table.constant_table.add(p[-2], self._allocator)
         self._symbol_table.function_table.add_dimension(p[-2])
 
@@ -787,7 +782,6 @@ class Compiler(Publisher, Subscriber):
         """
         set_type :
         """
-        print(p[-1])
         id_ = self._symbol_table.function_table.set_type(
             p[-1], self._allocator)
         # if id_ is not None:

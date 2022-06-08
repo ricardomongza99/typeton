@@ -33,6 +33,15 @@ class StackAllocator(Publisher, Subscriber):
 
     def allocate_address(self, value_type: ValueType, layer: Layers):
         segment = self._segments[layer.value]
+
+        if value_type is ValueType.VOID:
+            self.broadcast(
+                Event(CompilerEvent.STOP_COMPILE,
+                      CompilerError(
+                          f'Cannot assign type {value_type.value} to a variable')
+                      )
+
+            )
         resource: TypeResource = segment.resources[value_type.value]
         # Refactor method get_available_address
         new_address, error = get_available_address(resource)
