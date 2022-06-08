@@ -289,10 +289,16 @@ class VirtualMachine(Subscriber):
             result = input()
             type_ = self.context_memory[-1].get_type(quad.result_address)
 
-            if type_ == ValueType.INT:
-                result = int(result)
-            elif type_ == ValueType.FLOAT:
-                result = float(result)
+            if type_ is ValueType.INT or type_ is ValueType.FLOAT:
+                if not result.isnumeric():
+                    self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Invalid input'))
+
+                if type_ == ValueType.INT:
+                    result = int(result)
+                elif type_ == ValueType.FLOAT:
+                    result = float(result)
+            else:
+                self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Invalid input type'))
 
             self.__execute_assign(quad.result_address, result)
 
