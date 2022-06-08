@@ -13,7 +13,7 @@ from src.compiler.code_generator.type import Quad, OperationType
 from src.compiler.output import OutputFile
 from src.compiler.symbol_table.constant_table import ConstantTable
 from src.utils.observer import Event, Subscriber
-from src.virtual_machine.types import ContextMemory, FunctionData, pure_address
+from src.virtual_machine.types import ContextMemory, FunctionData, PointerAction, pure_address
 
 EXPRESSIONS = {OperationType.ADD, OperationType.DIVIDE,
                OperationType.MULTIPLY, OperationType.SUBTRACT}
@@ -358,7 +358,11 @@ class VirtualMachine(Subscriber):
         else:
             action_left, p_left = pure_address(quad.left_address)
             if action_left is not None:
-                p_left = self._get_value(quad.left_address)
+                if action_left is PointerAction.REFERENCE:
+                    # check that pointer to be assigned is actually initialized
+                    if self._get_value(f'*{p_left}') is None:
+                        self.handle_event(Event(RuntimeActions.STOP_RUNTIME, 'Cannot assign to uninitialised value'))
+                    p_left = self._get_value(quad.left_address)
 
         action_res, _ = pure_address(quad.result_address)
         if action_res is not None:

@@ -58,13 +58,13 @@ func main() -> {
   print(dad.age)
   print(grandpa.age)
 
-  son = grandpa
+  son = grandpa.age
 
+  print(son.name.first)
 
 
   var x: Int
 
-  x = son.name
   
   
 
