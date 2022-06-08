@@ -1,0 +1,52 @@
+func multiply_mat(var M1: Int
+
+func main() -> {
+
+    var M1: Int[2][3]
+    M1[0][0] = 1
+    M1[0][1] = 2
+    M1[0][2] = 3
+    M1[1][0] = 4
+    M1[1][1] = 5
+    M1[1][2] = 6
+
+    var M2: Int[3][2]
+    M2[0][0] = 7
+    M2[0][1] = 8
+    M2[1][0] = 9
+    M2[1][1] = 10
+    M2[2][0] = 11
+    M2[2][1] = 12
+
+    var result: Int[2][2]
+    var temp: Int
+    var i: Int
+    var j: Int
+    var k: Int
+
+
+    i = 0
+    while (i < 2) {
+
+        j = 0
+        while(j < 2) {
+            temp = 0
+            k = 0
+            while(k < 3) {
+                temp += M1[i][k] * M2[k][j]
+
+                k += 1
+            }
+            result[i][j] = temp
+
+            j += 1
+        }
+
+        i += 1
+    }
+
+    print(result[0][0])
+    print(result[0][1])
+    print(result[1][0])
+    print(result[1][1])
+}
