@@ -26,7 +26,7 @@
 			"patterns": [
 				{
 					"name": "storage.type.typeton",
-					"match": "const|var|func|class|new|false|true"
+					"match": "const|var|func|class|new|false|true|delete"
 				},
 				{
 					"name": "keyword.control.typeton",

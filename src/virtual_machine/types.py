@@ -145,7 +145,9 @@ class ContextMemory(Publisher):
 
     def release_reference(self, address):
         """Release reference to object"""
-        self.object_heap.set_value(address, None)
+        # print('starting release of memory ')
+        self.object_heap.release_heap_memory(self.get(f'&{address}'))
+        # print('finished release of memory ')
 
     def save_reference(self, address, value):
         """Save value to pointer"""

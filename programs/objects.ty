@@ -60,7 +60,15 @@ func main() -> {
 
   son = grandpa
 
-  print(son.age)
+  while (son.age < 5000) {
+    son.age += 1
+    dad = new Dog()
+    print(son.age)
+    delete dad
+  }
+
+
+  print(grandpa.age)
   
   
 

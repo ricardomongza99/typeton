@@ -1,5 +1,6 @@
 from enum import Enum
 from functools import cmp_to_key
+from re import S
 
 from src.config.definitions import HEAP_RANGE_SIZE
 from src.utils.observer import Event, Publisher
@@ -57,6 +58,24 @@ class Heap(Publisher):
     def is_heap_address(self, address):
         return self.start <= address <= self.end
 
+    def release_heap_memory(self, heap_address, level=0):
+        """Release the heap memory at the given address"""
+        end = self.end_map[heap_address] - self.start
+        start = heap_address - self.start
+
+        curr = start
+        while (curr <= end):
+            value = self.memory[curr]
+            if type(value) is int and self.is_heap_address(value):
+                # print('found object at level', level)
+                self.release_heap_memory(value, level+1)
+            elif value is not None:
+                # print('freeing', value)
+                self.memory[curr] = None
+            curr += 1
+
+        self.free_reference(heap_address)
+
     def allocate_reference(self, size):
         """Take the biggest range possible, break it up if needed"""
         if len(self.ranges) == 0:
@@ -107,7 +126,7 @@ class Heap(Publisher):
         self.ranges = result
 
     def free_reference(self, reference):
-        print('freeing references', reference)
+        # print('freeing reference', reference)
         """Adds range to be able to use it again"""
 
         end = self.end_map[reference]
