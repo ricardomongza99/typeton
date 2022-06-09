@@ -1,6 +1,5 @@
 from enum import Enum
 from functools import cmp_to_key
-from re import S
 
 from src.config.definitions import HEAP_RANGE_SIZE
 from src.utils.observer import Event, Publisher
@@ -61,6 +60,9 @@ class Heap(Publisher):
         return self.start <= address <= self.end
 
     def release_heap_memory(self, heap_address, level=0):
+        if heap_address is None:
+            self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'NULL Pointer Exception: Trying to free uninitialized address'))
+
         """Release the heap memory at the given address"""
         end = self.end_map[heap_address] - self.start
         start = heap_address - self.start

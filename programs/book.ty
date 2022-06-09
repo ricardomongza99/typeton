@@ -1,0 +1,33 @@
+class Book {
+    name: String
+    author: String
+    sequel: Book
+}
+
+func main() -> {
+
+    var book: Book
+    var book3: Book
+
+    book = new Book()
+    book.name = "Harry Potter"
+    book.author = "J.K. Rowling"
+
+    var book2: Book
+
+    book2 = new Book()
+    book2.name = "Harry Potter 2"
+
+    book.sequel = book2
+
+    print("Book name")
+    print(book.name)
+
+    print("Book sequel")
+    print(book.sequel.name)
+
+
+    delete book3
+
+    delete book2
+}
