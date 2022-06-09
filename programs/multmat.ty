@@ -8,23 +8,26 @@ func multMat() -> {
     var j: Int
     var k: Int
 
+    // Iterate over rows
     i = 0
     while (i < 2) {
 
+        // Iterate over columns
         j = 0
         while(j < 2) {
+
+            // Get sum of multiplications horizontal M1 and vertical M2
             temp = 0
             k = 0
             while(k < 3) {
                 temp += M1[i][k] * M2[k][j]
-
                 k += 1
             }
-            result[i][j] = temp
 
+            // Assign to result matrix
+            result[i][j] = temp
             j += 1
         }
-
         i += 1
     }
 }
@@ -33,8 +36,11 @@ func displayResult() -> {
     var i: Int
     var j: Int
 
+    // Iterate over rows
     i = 0
     while (i < 2) {
+
+        // Iterate over columns
         j = 0
         while(j < 2) {
             print(result[i][j])
@@ -47,7 +53,7 @@ func displayResult() -> {
 
 
 func main() -> {
-
+    // Fill matrix M1
     M1[0][0] = 1
     M1[0][1] = 2
     M1[0][2] = 3
@@ -55,6 +61,7 @@ func main() -> {
     M1[1][1] = 5
     M1[1][2] = 6
 
+    // Fill matrix M2
     M2[0][0] = 7
     M2[0][1] = 8
     M2[1][0] = 9
