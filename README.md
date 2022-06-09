@@ -4,7 +4,6 @@ An object oriented language developed by two rockstar engineering students at Te
 ## ⭐️ FEATURES
 - Local and global variables
 - Shorthand assign operators (+=, -=, *=, /=)
-- String Interpolation
 - Arrays (with primitives)
 - Conditionals
 - Loops
@@ -23,7 +22,7 @@ To Execute Specific Files: ```python3 -m src.{directory}.{fileName}```
 ---
 **Start**
 ```
-func main() {
+func main() -> {
     // Program starts here
 }
 ```
@@ -59,11 +58,10 @@ if ( 4 + 1 < 5 && true) {
 
 **Loops**
 ```
-var counter = 4
-
-while (counter < 10) {
-    print(counter)
-    counter += 1
+var i = 0
+while (i < 10) {
+    print(i)
+    i += 1
 }
 ```
 
