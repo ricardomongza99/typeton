@@ -31,19 +31,12 @@ def _add(operators, combinations):
 _arithmetic_symbols = ['+', '-', '*', '/', '+=', '-=', '*=', '/=']
 _arithmetic_combinations = [
     ['Int', 'Int', 'Int'],
-    ['Int', 'Pointer', 'Int'],
-    ['Pointer', 'Int', 'Int'],
-
     ['Float', 'Float', 'Float'],
-    ['Float', 'Pointer', 'Float'],
-    ['Pointer', 'Float', 'Float'],
+
     ['Int', 'Float', 'Float'],
     ['Float', 'Int', 'Float'],
 
-
     ['Pointer', 'Pointer', 'Pointer'],
-
-    # ['String', 'String', 'String'],
 ]
 
 _comparison_symbols = ['==', '!=', '<', '<=', '>', '>=']
@@ -52,10 +45,6 @@ _comparison_combinations = [
     ['Float', 'Float', 'Bool'],
     ['Int', 'Float', 'Bool'],
     ['Float', 'Int', 'Bool'],
-    ['Pointer', 'Int', 'Bool'],
-    ['Pointer', 'Float', 'Bool'],
-    ['Int', 'Pointer', 'Bool'],
-    ['Float', 'Pointer', 'Bool'],
 
 
 ]
@@ -70,15 +59,11 @@ _assign_combinations = [
     ['Int', 'Int', 'Int'],
     ['String', 'String', 'String'],
     ['Float', 'Float', 'Float'],
-    ['Int', 'Float', 'Float'],
-    ['Float', 'Int', 'Float'],
     ['Bool', 'Bool', 'Bool'],
     ['Return', 'Bool', 'Bool'],
     ['Return', 'Int', 'Int'],
     ['Return', 'Float', 'Float'],
     ['Return', 'String', 'String'],
-    ['Int', 'Int', 'Int'],
-
     ['Pointer', 'Pointer', 'Pointer'],
 
 

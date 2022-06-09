@@ -6,94 +6,86 @@ class Name {
 
 class Dog {
     parent: Dog
-    name: Name
+    name: String
     age: Int
 }
 
-var d : Int
-var y: Int
-var global_dog: Dog
+// var d : Int
+// var y: Int
+// var global_dog: Dog
 
-func test_array_with_delete() -> {
-  var heapArray: Int[100]
-  heapArray[0] = 1
-  delete heapArray
-}
+// func test_array_with_delete() -> {
+//   var heapArray: Int[100]
+//   heapArray[0] = 1
+//   delete heapArray
+// }
 
-func test_array_with_memory_leak() -> {
-  var heapArray: Int[100]
-  heapArray[0] = 1
-}
+// func test_array_with_memory_leak() -> {
+//   var heapArray: Int[100]
+//   heapArray[0] = 1
+// }
 
 
 func main() -> {
   var son: Dog
   var dad: Dog
   var grandpa: Dog
-   
-  // son = new Dog()
-  // son.name = new Name()
-  // son.name.first = "son"
-  // son.age = 20
+
+  son = new Dog()
+  var name: Name
+  name = new Name()
+  son.name = "Son"
+  son.age = 500
+
+  grandpa = new Dog()
+  grandpa.name = "grandpa"
+  grandpa.age = 5000
+
+  dad = new Dog()
+  dad.age = 1000
+  dad.name = "Dad"
 
 
-  // dad = new Dog()
-  // dad.name = new Name()
-  // dad.name.first = "dad"
-  // dad.age = son.age + 20
-
-
-  // grandpa = new Dog()
-  // grandpa.name = new Name()
-  // grandpa.name.first = "grandpa"
-  // grandpa.age = dad.age + 20
-
-
-
-  // son.parent = dad
-  // dad.parent = grandpa
-
-
-  // var combinedAges: Int
-
-  // combinedAges = dad.age + son.age + grandpa.age
-  // print(combinedAges)
+  son.parent = dad
+  dad.parent = grandpa
 
   
-  // print(son.name.first)
-  // print(dad.name.first)
-  // print(grandpa.name.first)
 
-  // print(son.parent.name.first)
+  print(son.age) //should be son age(500)
+  print(son.parent.age) //should be dad age(1000)
+  print(son.parent.parent.age) //should be grandpa age(5000)
 
-  // print(son.age)
-  // print(dad.age)
-  // print(grandpa.age)
+  // parent now points back to son dad->son
+  dad.parent = son
 
-  // son = grandpa
+  // son->dad->son
+  print(dad.parent.age) //should be son age(500)
 
-  // print(son.name.first)
+  // son->dad->son->dad
+  print(son.parent.parent.parent.age) //should be dad age (1000)
+  son.parent.parent.parent.name = "Still dad"
+
+  print(son.parent.name) //Still Dad
+
+  print(son.parent.parent.name) //Son
+  print(dad.parent.name) //Son
 
 
-  var x: Int
-  var limit: Int
-  x = 0
+  // type validation done by compiler
+  // son.parent = "hello"
+  // son.name = 20
+  // son.age = "hello"
+  // dad.parent = "hello"
+  son.age = 100
 
-  print("testing array without memory leak")
-  limit = input("Enter a limit: ")
-  while (x <= limit) {
-    test_array_with_delete()
-    x += 1
-  }
 
-  print("testing array with memory leak")
-  x = 0
-  while (x < limit) {
-    test_array_with_memory_leak()
-    x += 1
-  }
+  // this shouldn't run (Dog != Name)
+  // son = name
 
-  
-  
+  // this shouldn't run either (Dog != Name)
+  son.parent = grandpa
+
+
+  // print(son.name)
 
 }

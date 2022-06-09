@@ -91,9 +91,9 @@ class Compiler(Publisher, Subscriber):
                               CompilerError("Main function is required")))
 
         if debug:
-            self._display_tables()
+            # self._display_tables()
             self._display_quads()
-            self._symbol_table.class_table.display()
+            # self._symbol_table.class_table.display()
 
         return self._make_json()
 

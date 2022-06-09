@@ -1,4 +1,5 @@
 from enum import Enum
+from operator import le
 from re import L
 from typing import List
 
@@ -21,6 +22,10 @@ SHORTHAND = {
     OperationType.MASSIGN,
     OperationType.PASSIGN
 }
+
+
+PRIMITIVES = {ValueType.INT, ValueType.FLOAT,
+              ValueType.STRING, ValueType.BOOL}
 
 
 class ExpressionActions(Publisher, Subscriber):
@@ -148,66 +153,82 @@ class ExpressionActions(Publisher, Subscriber):
 
         if type_match is None:
             self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
-                f'{address_map[left.address]}:'
                 f'{left.type_.value} '
-                f'{operator.type_.value} '
+                f'!= '
                 f'{right.type_.value} '
                 f'({left.type_.value} and {right.type_.value} are not compatible)')))
 
-        if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
-            left_class = self.pointer_types.get(left.address) if left.class_id is None else left.class_id
-            right_class = self.pointer_types.get(right.address) if right.class_id is None else right.class_id
+        # checks
+        # Boolean Expressions for Object Checks ---------------------------------------------------------------------------------------
 
-            if left_class != right_class:
-                self.broadcast(
-                    Event(
-                        CompilerEvent.STOP_COMPILE,
-                        CompilerError(f'({left.class_id} cannot be assigned to pointer of type {right.class_id})'))
-                )
+        # left and right are pure objects
+        left_is_class = left.class_id is not None and not left.is_class_param
+        right_is_class = right.class_id is not None and not right.is_class_param
 
-            else:
-                if left.is_class_param and right.is_class_param:
-                    # if assigning a class param to another class param
-                    left.address = f'*{left.address}'
-                    right.address = f'&{right.address}'
-                elif not left.is_class_param and not right.is_class_param:
-                    # if assigning a class param to a non class param
-                    left.address = f'&{left.address}'
-                    right.address = f'&{right.address}'
-                elif left.is_class_param and not right.is_class_param:
-                    # if assigning a class param to a non class param
-                    left.address = f'*{left.address}'
-                    right.address = f'&{right.address}'
-                else:
-                    right.address = f'&{right.address}'
+        # left is primitive param
+        left_prim_param = left.class_id is None and left.is_class_param and left.type_ in PRIMITIVES
 
-                quad = Quad(
-                    left_address=right.address,
-                    right_address=None,
-                    operation=OperationType.POINTER_ASSIGN,
-                    result_address=left.address)
-                self.quad_list.append(quad)
-                return
+        # right is primitive or primitive param
+        right_prim = right.type_ in PRIMITIVES
+        right_prim_param = right.class_id is None and right.is_class_param and right_prim
 
-        # validate pointer assignment
-        elif left.type_ is ValueType.POINTER and right.type_ is not ValueType.POINTER:
-            if self.pointer_types[left.address] != right.type_:
-                self.broadcast(
-                    Event(
-                        CompilerEvent.STOP_COMPILE,
-                        CompilerError(
-                            f'({right.type_} cannot be assigned to {self.pointer_types[left.address]})')
-                    )
-                )
-        elif right.type_ is ValueType.POINTER and left.type_ is not ValueType.POINTER:
-            if left.type_ != self.pointer_values[right.type_]:
-                self.broadcast(
-                    Event(
-                        CompilerEvent.STOP_COMPILE,
-                        CompilerError(
-                            f'({left.type_} cannot be assigned to {self.pointer_types[right.address]})')
-                    )
-                )
+        # left and right params are both type object
+        left_obj_param = left.class_id is not None and left.is_class_param
+        right_obj_param = right.class_id is not None and right.is_class_param
+
+        # Object Assignment Possibilities ---------------------------------------------------------------------------------------------
+
+        # possible obj mismatch expression
+        pure_err = (left_is_class and right_is_class)
+        obj_param_err = (left_obj_param and right_prim_param)
+        param_pure_err = left_obj_param and right_is_class
+
+        possible_error = pure_err or obj_param_err or param_pure_err
+
+        if possible_error:
+            if left.class_id != right.class_id:
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                    f'{left.class_id} '
+                    f'!= '
+                    f'{right.class_id} '
+                )))
+
+        # obj = otherObj
+        if left_is_class and right_is_class:
+
+            left.address = f'&{left.address}'
+            right.address = f'&{right.address}'
+
+        # obj.param(primitive) = primitive
+        elif left_prim_param and right_prim:
+            # print('both are primitives', 'get value right and set into *left')
+            left.address = f'*{left.address}'
+
+        # obj.param(obj) = obj.param(obj)
+        elif left_obj_param and right_obj_param:
+
+            print("store right ref into left value")
+            left.address = f'*{left.address}'
+            right.address = f'*{right.address}'
+
+        # obj.param(obj) = otherObj
+        elif left_obj_param and right_is_class:
+            # print('since param set the ref of right obj inside left *value')
+            left.address = f'*{left.address}'
+            right.address = f'&{right.address}'
+
+        # obj.param(primitive) = obj.param(primitive)
+        elif left_prim_param and right_prim_param:
+            if left.type_ != right.type_:
+                self.broadcast(Event(CompilerEvent.STOP_COMPILE, CompilerError(
+                    f'{left.type_} '
+                    f'!= '
+                    f'{right.type_} '
+                )))
+            left.address = f'*{left.address}'
+            right.address = f'*{right.address}'
+
+        # ----------------------------------------------------------------------------------------------------------------------
 
         quad = Quad(
             left_address=right.address,

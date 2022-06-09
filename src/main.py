@@ -13,7 +13,7 @@ def main():
     file.close()
 
     compiler = Compiler()
-    json_data = compiler.compile(data, debug=False)
+    json_data = compiler.compile(data, debug=True)
 
     virtual_machine = VirtualMachine()
     virtual_machine.run(json_data)
