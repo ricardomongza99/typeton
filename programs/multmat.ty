@@ -1,9 +1,6 @@
-
 var M1: Int[2][3]
 var M2: Int[3][2]
 var result: Int[2][2]
-
-
 
 func multMat() -> {
     var temp: Int
@@ -52,8 +49,6 @@ func displayResult() -> {
         i += 1
     }
 }
-
-
 
 func main() -> {
     // Fill matrix M1

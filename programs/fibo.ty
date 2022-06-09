@@ -1,8 +1,32 @@
+var arr: Int[100]
+
+
 func fib_r(n: Int) -> Int {
   if (n <= 1) {
       return n
   }
   return fib_r(n - 1) + fib_r(n - 2)
+}
+
+
+func find(n: Int) -> Bool {
+    var i: Int
+    i = 0
+
+    while(i < 100) {
+        arr[i] = i
+        i += 1
+    }
+    i = 0
+    while (i < 100) {
+        if (arr[i] == n) {
+            return true
+        }
+        i += 1
+    }
+
+    return false
+   
 }
 
 func fibo_array(n: Int) -> Int {
@@ -101,4 +125,7 @@ func main() -> {
     print(dynamic_p_array_fibo)
     print("faster iterative fibo")
     print(faster_iterative_fibo)
+
+    print(find(20))
+    print(find(101))
 }

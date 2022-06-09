@@ -246,6 +246,14 @@ class ExpressionActions(Publisher, Subscriber):
         expression = self.next_operand()
         assignment = self.next_operand()
 
+        right_pointer = self.pointer_types.get(expression.address)
+        left_pointer = self.pointer_types.get(assignment.address)
+
+        if right_pointer is not None and type(right_pointer) is not str:
+            expression.type_ = right_pointer
+        if left_pointer is not None and type(left_pointer) is not str:
+            assignment.type_ = left_pointer
+
         type_match = check_type(
             operator.type_.value,
             assignment.type_.value,
@@ -348,8 +356,6 @@ class ExpressionActions(Publisher, Subscriber):
         right: Operand = self.next_operand()
         left: Operand = self.next_operand()
 
-        address_map = Debug.map()
-
         right_pointer = self.pointer_types.get(right.address)
         left_pointer = self.pointer_types.get(left.address)
 
@@ -366,10 +372,6 @@ class ExpressionActions(Publisher, Subscriber):
                 f'{left.type_.value} '
                 f'{operator.type_.value} '
                 f'{right.type_.value}')))
-
-        if left.type_ is ValueType.POINTER and right.type_ is ValueType.POINTER:
-            # if pointer aritmetric get their type
-            type_match = self.pointer_types.get(left.address) or self.pointer_types.get(right.address)
 
         result = stack_allocator.allocate_address(ValueType(type_match), Layers.TEMPORARY)
         self.__operand_address_stack.append(Operand(ValueType(type_match), result))
@@ -389,10 +391,6 @@ class ExpressionActions(Publisher, Subscriber):
             result_address=result))
 
         self.quad_list.append(quad)
-
-        # Release unused addresses
-        # self.broadcast(Event(CompilerEvent.RELEASE_MEM_IF_POSSIBLE,
-        #                      [left.address, right.address]))
 
     def __peek_operators(self):
         if len(self.__operator_stack) - 1 < self.parenthesis_start[-1]:

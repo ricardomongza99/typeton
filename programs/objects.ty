@@ -3,28 +3,11 @@ class Name {
     last: String
 }
 
-
 class Dog {
     parent: Dog
     name: String
     age: Int
 }
-
-// var d : Int
-// var y: Int
-// var global_dog: Dog
-
-// func test_array_with_delete() -> {
-//   var heapArray: Int[100]
-//   heapArray[0] = 1
-//   delete heapArray
-// }
-
-// func test_array_with_memory_leak() -> {
-//   var heapArray: Int[100]
-//   heapArray[0] = 1
-// }
-
 
 func main() -> {
   var son: Dog
@@ -49,8 +32,6 @@ func main() -> {
   son.parent = dad
   dad.parent = grandpa
 
-  
-
   print(son.age) //should be son age(500)
   print(son.parent.age) //should be dad age(1000)
   print(son.parent.parent.age) //should be grandpa age(5000)
@@ -70,22 +51,10 @@ func main() -> {
   print(son.parent.parent.name) //Son
   print(dad.parent.name) //Son
 
-
-  // type validation done by compiler
-  // son.parent = "hello"
-  // son.name = 20
-  // son.age = "hello"
-  // dad.parent = "hello"
   son.age = 100
-
 
   // this shouldn't run (Dog != Name)
   // son = name
 
-  // this shouldn't run either (Dog != Name)
-  son.parent = grandpa
-
-
-  // print(son.name)
 
 }

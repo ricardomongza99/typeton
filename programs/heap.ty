@@ -1,0 +1,67 @@
+class Dog {
+    parent: Dog
+    name: String
+    age: Int
+}
+
+func memory_leak() -> {
+    var arr: Int[100]
+}
+
+func without_memory_leak() -> {
+    var arr: Int[100]
+    delete arr
+}
+
+func main() -> {
+    var arr: Int[100]
+    var dog: Dog
+    dog = new Dog()
+    dog.age = 0
+
+    while (dog.age < 100) {
+        arr[dog.age] = 2 * dog.age
+        dog.age += 1
+    }
+
+
+    dog.name = "paco"
+    dog.parent = new Dog()
+    dog.parent.name = "paco's parent"
+    dog.parent.parent = new Dog()
+    dog.parent.parent.name = "paco's parent's parent"
+    dog.parent.parent.parent = new Dog()
+    dog.parent.parent.parent.name = "paco's parent's parent's parent"
+    dog.parent.parent.parent.parent = new Dog()
+    dog.parent.parent.parent.parent.name = "paco's parent's parent's parent's parent"
+    dog.parent.parent.parent.parent.parent = new Dog()
+    dog.parent.parent.parent.parent.parent.name = "paco's parent's parent's parent's parent's parent"
+    dog.parent.parent.parent.parent.parent.parent = new Dog()
+    dog.parent.parent.parent.parent.parent.parent.name = "paco's parent's parent's parent's parent's parent's parent"
+
+    print(dog.name)
+    print(dog.parent.name)
+    print(dog.parent.parent.name)
+    print(dog.parent.parent.parent.name)
+    print(dog.parent.parent.parent.parent.name)
+    print(dog.parent.parent.parent.parent.parent.name)
+    print(dog.parent.parent.parent.parent.parent.parent.name)
+ 
+
+    var i: Int
+    i = 0
+    while (i < 100) {
+        print(arr[i])
+        i += 1
+    }
+ 
+
+
+
+
+ 
+  // this shouldn't run (Dog != Name)
+  // son = name
+
+
+}

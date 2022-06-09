@@ -1,7 +1,10 @@
 
 
+from ctypes import POINTER
 from enum import Enum
-from typing import List
+from turtle import left
+from typing import ClassVar, List
+from src.compiler.code_generator.expression import PRIMITIVES
 from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension
 from src.compiler.symbol_table.function_table.variable_table.variable import Variable
 from src.utils.observer import Subscriber, Event, Publisher
@@ -95,6 +98,7 @@ class ArrayActions(Publisher):
         self._generate_base_sum_quad(stack_allocator, funcion_table)
 
     def _generate_sum_quads(self, stack_allocator: StackAllocator):
+        print("wtf")
         """ Generates sum quads for calculations indexes * ms """""
         while True:
             if len(self._operand_stack) <= 1:
@@ -113,7 +117,7 @@ class ArrayActions(Publisher):
             self.broadcast(Event(ArrayEvents.ADD_TEMP, (ValueType.POINTER, result_address, None)))
 
             quad = Quad(
-                operation=OperationType.ADD,
+                operation=OperationType.POINTER_ADD,
                 left_address=f'&{left_operand.address}',
                 right_address=f'&{right_operand.address}',
                 result_address=f'&{result_address}'
@@ -139,10 +143,15 @@ class ArrayActions(Publisher):
 
         self._pointer_types[pointer_address] = self.variable_type
 
+        if self._quad_list[-2].operation == OperationType.POINTER_ADD and type(self._quad_list[-2].right_address) is int:
+            left_operand.address = f'*{left_operand.address}'
+        else:
+            left_operand.address = f'&{left_operand.address}'
+
         quad = Quad(
             operation=OperationType.POINTER_ADD,
             left_address=f'&{right_operand.address}',
-            right_address=f'&{left_operand.address}',
+            right_address=left_operand.address,
             result_address=f'&{pointer_address}'
         )
         self._quad_list.append(quad)
