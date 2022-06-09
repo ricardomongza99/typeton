@@ -1,12 +1,9 @@
-from inspect import isclass
-from multiprocessing import Event
-from re import I
 from typing import Dict
 from src.compiler.errors import CompilerError, CompilerEvent
 
 from src.compiler.stack_allocator.types import ValueType
 from src.utils.display import make_table, TableOptions
-from src.utils.observer import Publisher
+from src.utils.observer import Event, Publisher
 
 
 class ClassVariable:

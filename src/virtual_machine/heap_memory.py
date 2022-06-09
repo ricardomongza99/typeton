@@ -53,6 +53,8 @@ class Heap(Publisher):
         return value
 
     def set_value(self, heap_address, value):
+        if len(self.memory) <= heap_address - self.start:
+            self.broadcast(Event(RuntimeActions.STOP_RUNTIME, 'Value does not exist'))
         self.memory[heap_address - self.start] = value
 
     def is_heap_address(self, address):

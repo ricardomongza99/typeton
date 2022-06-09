@@ -98,7 +98,6 @@ class ArrayActions(Publisher):
         self._generate_base_sum_quad(stack_allocator, funcion_table)
 
     def _generate_sum_quads(self, stack_allocator: StackAllocator):
-        print("wtf")
         """ Generates sum quads for calculations indexes * ms """""
         while True:
             if len(self._operand_stack) <= 1:
