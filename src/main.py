@@ -3,7 +3,7 @@ from src.virtual_machine import VirtualMachine
 import os
 from src.config.definitions import PROGRAMS_DIR
 
-FILENAME = 'objects.ty'
+FILENAME = 'fibo.ty'
 
 
 def main():
@@ -17,8 +17,6 @@ def main():
 
     virtual_machine = VirtualMachine()
     virtual_machine.run(json_data)
-
-    print('Done')
 
 
 if __name__ == '__main__':

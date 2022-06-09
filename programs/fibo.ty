@@ -6,25 +6,27 @@ func fib_r(n: Int) -> Int {
 }
 
 func fibo_array(n: Int) -> Int {
+    if (n > 100) {
+        print("n is too big")
+        return -1
+    }
 
-  if (n > 100) {
-      print("n is too big")
-      return -1
-  }
+    var arr: Int[101]
+    var i: Int
+    var result: Int
 
-  var arr: Int[101]
-  var i: Int
+    i = 2
+    arr[0] = 0
+    arr[1] = 1
 
-  i = 2
-  arr[0] = 0
-  arr[1] = 1
+    while (i <= n) {
+            arr[i] = arr[i - 1] + arr[i - 2]
+            i += 1
+    }
 
-  while (i <= n) {
-        arr[i] = arr[i - 1] + arr[i - 2]
-        i += 1
-  }
-
-  return arr[n]
+    result = arr[n]
+    // release array from heap before returning
+    return result
 
 }
 // test fact
@@ -37,7 +39,6 @@ func factorial_r(n: Int) -> Int {
 
 func factorial_i(n: Int) -> Int {
     // show me the way
-    print("hello")
     var res: Int
     var i: Int
     i = 2
@@ -49,14 +50,8 @@ func factorial_i(n: Int) -> Int {
     return res
 }
 
-
-func duck() -> Int {
-    return 2
-}
-
-
-
 func fib_i(n: Int) -> Int {
+    print("iterative fibo (with temp var)")
     var curr: Int
     var prev: Int
     var temp: Int
@@ -81,24 +76,29 @@ func fib_i(n: Int) -> Int {
 }
 
 func main() -> {
-    var x : Int
-    var y: Float
-    var z: Int
-    var a: Int
-    var f: Int
+    // test fib
+    var recursive_factorial : Int
+    var interative_factorial: Int
+    var dynamic_p_array_fibo: Int
+    var faster_iterative_fibo: Int
+    var recursive_fibo: Int
 
-    //z = factorial_r(10)
-    //a = factorial_i(10)
+    recursive_factorial = factorial_r(10)
+    interative_factorial = factorial_i(10)
 
-    // y = fib_r(20)
-    f = fibo_array(20)
-    x = fib_i(20)
+    recursive_fibo = fib_r(20)
+    dynamic_p_array_fibo = fibo_array(20)
+    faster_iterative_fibo = fib_i(20)
 
-    // print(z)
-    // print(f)
-    // print(a)
-    // duck()
+    print("recursive factorial")
+    print(recursive_factorial)
+    print("iterative factorial")
+    print(interative_factorial)
 
-    print(x)
-    print(f)
+    print("recursive fibo")
+    print(recursive_fibo)
+    print("dynamic p array fibo")
+    print(dynamic_p_array_fibo)
+    print("faster iterative fibo")
+    print(faster_iterative_fibo)
 }

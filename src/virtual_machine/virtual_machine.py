@@ -118,7 +118,8 @@ class VirtualMachine(Subscriber):
 
         self._ip = 0
 
-        print('🦭🦭🦭typeton🦭🦭🦭')
+        print('--- Start execution -------------------------')
+        print(f'\n\n')
 
         start = timeit.default_timer()
         while self._ip < len(self._quads):
@@ -126,9 +127,11 @@ class VirtualMachine(Subscriber):
             self._execute(quad)
             self.operation_count += 1
         stop = timeit.default_timer()
-        print('🦭🦭🦭🦭🦭🦭🦭🦭🦭')
         operations = "{:,}".format(self.operation_count)
         time = '{:.2f}'.format(stop)
+        print(f'\n\n')
+        print("--- End execution ---------------------------")
+        print()
         print(f'{operations} operations in {time} seconds')
 
     # -- LOAD DATA methods ----------------------------
