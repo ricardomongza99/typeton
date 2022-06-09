@@ -1,33 +1,9 @@
-func main() -> {
+var A: Int[10]
 
-    var A: Int[10]
-    A[0] = 3
-    A[1] = 4
-    A[2] = 10
-    A[3] = 8
-    A[4] = 2
-    A[5] = 6
-    A[6] = 9
-    A[7] = 1
-    A[8] = 5
-    A[9] = 7
-
+func sort() -> {
     var i: Int
     var j: Int
     var temp: Int
-
-    // Display unsorted
-    print("Unsorted")
-
-    i = 0
-    while(i < 10) {
-        print(A[i])
-        i += 1
-    }
-    print("")
-
-
-    // Bubble sort
 
     // Loop to access each array element
     i = 0
@@ -49,15 +25,37 @@ func main() -> {
 
         i += 1
     }
+}
 
-    // Display sorted
-    print("Sorted")
+
+func display(title: String) -> {
+    var i: Int
+
+    print(title)
 
     i = 0
     while(i < 10) {
         print(A[i])
         i += 1
     }
+    print("")
+}
+
+func main() -> {
+
+    A[0] = 3
+    A[1] = 4
+    A[2] = 10
+    A[3] = 8
+    A[4] = 2
+    A[5] = 6
+    A[6] = 9
+    A[7] = 1
+    A[8] = 5
+    A[9] = 7
 
 
+    display("Unsorted array")
+    sort()
+    display("Sorted array")
 }
