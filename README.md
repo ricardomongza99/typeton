@@ -13,11 +13,14 @@ An object oriented language developed by two rockstar engineering students at Te
 
 ## 🚗 GETTING STARTED
 
-To install dependencies simply run  ```pip install .```
+To install dependencies run  ```pip install .```
 
 To run the compiler simply execute ```python3 -m src.main```
 
-To Execute Specific Files: ```python3 -m src.{directory}.{fileName}```
+To run custom programs, make sure it is inside the programs folder and run ```python3 -m src.main #program_name.ty```
+
+Add ```-debug``` flag at the end to display extra information such as quads, function data and symbol tables
+
 
 ---
 **Start**
