@@ -2,7 +2,6 @@
 
 from ctypes import POINTER
 from enum import Enum
-from turtle import left
 from typing import ClassVar, List
 from src.compiler.code_generator.expression import PRIMITIVES
 from src.compiler.code_generator.type import Quad, OperationType, Operand, Dimension

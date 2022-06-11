@@ -2,7 +2,6 @@ from enum import Enum
 from operator import le
 import sys
 import timeit
-from turtle import right
 from typing import List, Dict
 
 import jsonpickle
