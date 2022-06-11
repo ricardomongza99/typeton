@@ -76,7 +76,7 @@ func sum(num1: Int, num2: Int) -> Int {
     return num1 + num2
 }
 
-func main() {
+func main() -> {
     var sum = sum(5, 2)
 }
 ```
@@ -156,15 +156,14 @@ func main() {
     - [x] Sequential blocks (ASSIGN, INPUT, ETC.)
     - [x] Conditional blocks (IF, ELSE, WHILE, WHILE)
     - [x] Functions
-    - [ ] Arrays
-    - [ ] Classes
-    - [ ] Objects
+    - [x] Arrays
+    - [x] Classes
 - [x] 🖥 Virtual Machine
     - [x] Memory for execution (Global memory, temporal memory, execution stack)
     - [x] Arithmetic expressions execution
     - [x] Sequential blocks execution
     - [x] Conditional blocks execution
-- [ ] 🏁 Documentation review
+- [x] 🏁 Documentation review
 
 ## 🔍 SYNTAX DIAGRAM
 ![Program](/diagram/program.png)
