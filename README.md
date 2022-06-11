@@ -17,7 +17,7 @@ To install dependencies run  ```pip install .```
 
 To run the compiler simply execute ```python3 -m src.main```
 
-To run custom programs, make sure it is inside the programs folder and run ```python3 -m src.main #program_name.ty```
+To run custom programs, make sure the program is inside the programs folder and run ```python3 -m src.main #program_name```
 
 Add ```-debug``` flag at the end to display extra information such as quads, function data and symbol tables
 
