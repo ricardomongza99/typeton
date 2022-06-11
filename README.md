@@ -88,6 +88,15 @@ class Animal {
     name: String
     age: Int
 }
+
+func main() -> {
+    var dog: Animal
+    dog = new Dog()
+    dog.name = "Albert"
+    dog.age = 18
+    
+    print(dog.name)
+}
 ```
 
 **Input**
